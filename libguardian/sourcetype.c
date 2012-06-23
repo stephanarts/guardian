@@ -44,6 +44,7 @@
 #include <pcre.h>
 
 #include "memory.h"
+#include "error.h"
 #include "source.h"
 #include "sourceengine.h"
 #include "sourcetype.h"

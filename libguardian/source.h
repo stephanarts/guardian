@@ -39,7 +39,8 @@ typedef struct _GuardianSource GuardianSource;
 GuardianSource *
 guardian_source_new (
         char *type,
-        char *path );
+        char *path,
+        GuardianError **error );
 
 const char *
 guardian_source_get_path (

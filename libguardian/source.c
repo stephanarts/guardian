@@ -47,6 +47,7 @@
 
 #include <stdarg.h>
 
+#include "error.h"
 #include "source.h"
 #include "sourceengine.h"
 #include "sourcetype.h"
@@ -63,27 +64,37 @@ struct _GuardianSource
 GuardianSource *
 guardian_source_new (
         char *type,
-        char *path )
+        char *path,
+        GuardianError **error )
 {
     GuardianSource *source;
     GuardianSourcetype *source_type;
 
     if ( type == NULL )
     {
-        guardian_log_critical ("SourceType 'NULL' unknown");
+        if (*error)
+        {
+            *error = guardian_error_new ("SourceType 'NULL' unknown");
+        }
         return NULL;
     }
 
     if ( path == NULL )
     {
-        guardian_log_critical ("Can not create Source for 'NULL' path");
+        if (*error)
+        {
+            *error = guardian_error_new ("Can not create Source for 'NULL' path");
+        }
         return NULL;
     }
 
     source_type  = guardian_sourcetype_lookup ( type );
     if ( source_type == NULL )
     {
-        guardian_log_warning ("SourceType '%s' unknown, can not create source object for '%s'", type, path);
+        if (*error)
+        {
+            *error = guardian_error_new ("SourceType '%s' unknown, can not create source object for '%s'", type, path);
+        }
         return NULL;
     }
 

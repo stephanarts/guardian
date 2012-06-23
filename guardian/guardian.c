@@ -191,18 +191,25 @@ main (int argc, char **argv)
     if ( plugin == NULL )
     {
         guardian_log_warning ( "%s", guardian_error_get_msg (error));
+        guardian_error_free (error);
+        error = NULL;
     }
     else
     {
         guardian_plugin_register_types ( plugin );
     }
 
-    source = guardian_source_new ("syslog", "/var/log/auth.log");
-
-if(1 == 0)
-{
-    guardian_source_update ( source );
-}
+    source = guardian_source_new ("syslog", "/var/log/auth.log", &error);
+    if ( source == NULL )
+    {
+        guardian_log_warning ( "%s", guardian_error_get_msg (error));
+        guardian_error_free (error);
+        error = NULL;
+    }
+    else
+    {
+        guardian_source_update ( source );
+    }
 
     exit (0);
 }

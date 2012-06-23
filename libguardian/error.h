@@ -43,5 +43,8 @@ guardian_error_new (
 const char *
 guardian_error_get_msg (
         GuardianError *);
+void
+guardian_error_free (
+        GuardianError *error);
 
 #endif
