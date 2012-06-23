@@ -54,6 +54,7 @@ main (int argc, char **argv)
 {
     GuardianPlugin *plugin;
     char *plugin_path = malloc (200);
+    GuardianError *error = NULL;
 
     char buffer[BUFFER_SIZE];
 
@@ -69,13 +70,17 @@ main (int argc, char **argv)
 
     fprintf(stderr, "Loading plugin: %s\n", plugin_path);
 
-    plugin = guardian_plugin_load ( plugin_path );
+    plugin = guardian_plugin_load ( plugin_path, &error );
     if (plugin)
+    {
         fprintf(stderr, "Plugin %s Loaded\n", argv[1]);
+        guardian_plugin_register_types ( plugin );
+    }
+    else
+    {
+        fprintf(stderr, guardian_error_get_msg (error));
+        exit(1);
+    }
 
-    guardian_plugin_register_types ( plugin );
-
-    guardian_plugin_register_types
-
-    return 77;
+    exit(0);
 }

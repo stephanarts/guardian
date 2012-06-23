@@ -31,39 +31,17 @@
 #error "Only <libguardian/libguardian.h> can be included directly, this file may disappear or change contents"
 #endif
 
-#ifndef __GUARDIAN_LOG_H__
-#define __GUARDIAN_LOG_H__
+#ifndef __GUARDIAN_ERROR_H__
+#define __GUARDIAN_ERROR_H__
 
-#define GUARDIAN_LOG_WARNING   4
-#define GUARDIAN_LOG_NOTICE    5
-#define GUARDIAN_LOG_INFO      6
-#define GUARDIAN_LOG_DEBUG     7
+typedef struct _GuardianError GuardianError;
 
-void
-guardian_log_init ( int );
+GuardianError *
+guardian_error_new (
+        char *format, ...);
 
-void
-guardian_log_mask ( int );
-
-void
-guardian_log_alert ( const char *format, ...);
-
-void
-guardian_log_critical ( const char *format, ...);
-
-void
-guardian_log_error ( const char *format, ...);
-
-void
-guardian_log_warning ( const char *format, ...);
-
-void
-guardian_log_notice ( const char *format, ...);
-
-void
-guardian_log_info ( const char *format, ...);
-
-void
-guardian_log_debug ( const char *format, ...);
+const char *
+guardian_error_get_msg (
+        GuardianError *);
 
 #endif

@@ -1,6 +1,7 @@
 EXTRA_DIST = defs $(TESTS)
 
 TESTS = \
+    missing-plugin.test \
     syslog.test
 
 check_PROGRAMS = plugin-loader

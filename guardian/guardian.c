@@ -112,6 +112,9 @@ main (int argc, char **argv)
     int c = 0;
     int verbosity = 0;
     int log_level = 0;
+    GuardianError *error = NULL;
+
+    char *plugin_path = "/usr/local/lib/guardian/syslog.so";
 
     GuardianPlugin *plugin;
     GuardianSource *source;
@@ -184,21 +187,22 @@ main (int argc, char **argv)
         }
     }
 
-    guardian_log_debug("Initialised logging");
-
-    plugin = guardian_plugin_load ("/usr/local/lib/guardian/syslog.so");
-
-    guardian_plugin_register_types ( plugin );
+    plugin = guardian_plugin_load ( plugin_path, &error );
+    if ( plugin == NULL )
+    {
+        guardian_log_warning ( "%s", guardian_error_get_msg (error));
+    }
+    else
+    {
+        guardian_plugin_register_types ( plugin );
+    }
 
     source = guardian_source_new ("syslog", "/var/log/auth.log");
 
+if(1 == 0)
+{
     guardian_source_update ( source );
-
-    printf("............\n");
-
-    sleep (10);
-    guardian_source_update ( source );
-
+}
 
     exit (0);
 }

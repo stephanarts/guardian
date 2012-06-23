@@ -43,6 +43,9 @@
 #include <dlfcn.h>
 #endif
 
+#include <errno.h>
+
+#include "error.h"
 #include "plugin.h"
 
 void
@@ -66,12 +69,15 @@ guardian_plugin_extract_fields (
 }
 
 GuardianPlugin *
-guardian_plugin_load ( char *path )
+guardian_plugin_load ( char *path, GuardianError **error )
 {
     void *handle = NULL;
     GuardianPlugin *plugin;
+    int error_sv;
+    char error_msg[200];
 
     handle = dlopen (path, RTLD_NOW );
+    
 
     if ( handle )
     {
@@ -81,7 +87,18 @@ guardian_plugin_load ( char *path )
         handle = NULL;
         return plugin;
     }
-    printf("failed to load plugin");
+    if ( error )
+    {
+        error_sv = errno;
+        if ( strerror_r (error_sv, error_msg, 200) == 0)
+        {
+            *error = guardian_error_new ("Can not load plugin: %s: '%s'", path, error_msg);
+        }
+        else
+        {
+            *error = guardian_error_new ("Can not load plugin: %s", path);
+        }
+    }
 
     return NULL;
 }

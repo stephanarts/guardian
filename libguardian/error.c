@@ -27,43 +27,52 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined (LIBGUARDIAN_INSIDE_LIBGUARDIAN_H) && !defined(LIBGUARDIAN_COMPILATION)
-#error "Only <libguardian/libguardian.h> can be included directly, this file may disappear or change contents"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
 #endif
 
-#ifndef __GUARDIAN_LOG_H__
-#define __GUARDIAN_LOG_H__
-
-#define GUARDIAN_LOG_WARNING   4
-#define GUARDIAN_LOG_NOTICE    5
-#define GUARDIAN_LOG_INFO      6
-#define GUARDIAN_LOG_DEBUG     7
-
-void
-guardian_log_init ( int );
-
-void
-guardian_log_mask ( int );
-
-void
-guardian_log_alert ( const char *format, ...);
-
-void
-guardian_log_critical ( const char *format, ...);
-
-void
-guardian_log_error ( const char *format, ...);
-
-void
-guardian_log_warning ( const char *format, ...);
-
-void
-guardian_log_notice ( const char *format, ...);
-
-void
-guardian_log_info ( const char *format, ...);
-
-void
-guardian_log_debug ( const char *format, ...);
-
+#ifdef HAVE_SYS_SYSLOG_H
+#include <sys/syslog.h>
 #endif
+
+#include <stdarg.h>
+
+#include "error.h"
+
+struct _GuardianError
+{
+    char *msg;
+};
+
+GuardianError *
+guardian_error_new (
+        char *format, ... )
+{
+    GuardianError *error = (GuardianError *)malloc(sizeof(GuardianError));
+    error->msg = (char *)malloc(1024);
+
+    va_list arg;
+
+    va_start (arg, format);
+    vsnprintf (error->msg, 1024, format, arg);
+    va_end (arg);
+
+    return error;
+}
+
+void
+guardian_error_free (
+        GuardianError *error)
+{
+    if (error->msg)
+        free (error->msg);
+
+    free (error);
+}
+
+const char *
+guardian_error_get_msg (
+        GuardianError *error)
+{
+    return error->msg;
+}

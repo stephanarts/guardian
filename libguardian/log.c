@@ -68,7 +68,7 @@ guardian_log_mask ( int mask )
 }
 
 void
-guardian_log_alert ( char *format, ... )
+guardian_log_alert ( const char *format, ... )
 {
     va_list arg;
 
@@ -80,7 +80,7 @@ guardian_log_alert ( char *format, ... )
 }
 
 void
-guardian_log_critical ( char *format, ... )
+guardian_log_critical ( const char *format, ... )
 {
     va_list arg;
 
@@ -92,7 +92,7 @@ guardian_log_critical ( char *format, ... )
 }
 
 void
-guardian_log_error ( char *format, ... )
+guardian_log_error ( const char *format, ... )
 {
     va_list arg;
 
@@ -104,7 +104,7 @@ guardian_log_error ( char *format, ... )
 }
 
 void
-guardian_log_warning ( char *format, ... )
+guardian_log_warning ( const char *format, ... )
 {
     va_list arg;
 
@@ -116,7 +116,7 @@ guardian_log_warning ( char *format, ... )
 }
 
 void
-guardian_log_notice ( char *format, ... )
+guardian_log_notice ( const char *format, ... )
 {
     va_list arg;
 
@@ -128,7 +128,7 @@ guardian_log_notice ( char *format, ... )
 }
 
 void
-guardian_log_info ( char *format, ... )
+guardian_log_info ( const char *format, ... )
 {
     va_list arg;
 
@@ -140,7 +140,7 @@ guardian_log_info ( char *format, ... )
 }
 
 void
-guardian_log_debug ( char *format, ... )
+guardian_log_debug ( const char *format, ... )
 {
     va_list arg;
 
