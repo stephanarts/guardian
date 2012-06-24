@@ -132,13 +132,25 @@ _plugin_engine_update_source (
     /*
      * Logs are rotated... so st_stat can be smaller then source->st_stat
      *
+     * TODO...
      */
     if (buffer.st_size > st_size)
     {
+
+#if 0
         /*
-         * Move the file position indicator to the last known end of the file.
+         * Nice for performance improvement... but it does not help if you want to
+         * prevent tampering with the log-files.
          */
-        fseek (f, st_size, SEEK_SET);
+        if ( st_size > 0 )
+        {
+            /*
+             * Move the file position indicator to the last known end of the file.
+             */
+            fseek (f, st_size, SEEK_SET);
+
+        }
+#endif
 
         /*
          * Fill the remaining part of the buffer (complete buffer on first try)
