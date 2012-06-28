@@ -139,11 +139,11 @@ AC_CHECK_HEADER(getopt.h,
     [ AC_MSG_ERROR([Can't find header <getopt.h>]) ]
 )
 
-PKG_CHECK_MODULES([PCRE], [libpcre >= 8.30])
+PKG_CHECK_MODULES([PCRE], [libpcre >= 8.0])
 AC_SUBST(PCRE_LIBS)
 AC_SUBST(PCRE_CFLAGS)
 
-PKG_CHECK_MODULES([OPENSSL], [openssl >= 1.0.1])
+PKG_CHECK_MODULES([OPENSSL], [openssl >= 0.9.8])
 AC_SUBST(OPENSSL_LIBS)
 AC_SUBST(OPENSSL_CFLAGS)
 
