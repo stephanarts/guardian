@@ -1,5 +1,6 @@
-SUBDIRS = plugins
+SUBDIRS = libguardian plugins
 
-EXTRA_DIST = defs $(TESTS)
-
-TESTS = 
+#
+#EXTRA_DIST = defs $(TESTS)
+#
+#TESTS = 

@@ -31,4 +31,7 @@ po/POTFILES
 po/stamp-it
 po/*.gmo
 po/guardian.pot
+tests/libguardian/libguardian-helper
+tests/libguardian/*.log
 tests/plugins/plugin-loader
+tests/plugins/*.log
