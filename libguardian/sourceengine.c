@@ -43,8 +43,6 @@
 #include <sys/syslog.h>
 #endif
 
-#include <sys/stat.h>
-
 #include <stdarg.h>
 
 #include "error.h"

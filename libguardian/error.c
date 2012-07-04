@@ -35,6 +35,8 @@
 #include <sys/syslog.h>
 #endif
 
+#include <stdlib.h>
+
 #include <stdarg.h>
 
 #include "error.h"

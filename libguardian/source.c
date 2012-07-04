@@ -43,7 +43,9 @@
 #include <sys/syslog.h>
 #endif
 
+#if 0
 #include <sys/stat.h>
+#endif
 
 #include <stdarg.h>
 

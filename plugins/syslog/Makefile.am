@@ -12,3 +12,6 @@ syslog_la_LDFLAGS =   \
     -avoid-version       \
     -module              \
     $(PLATFORM_LDFLAGS)
+
+INCLUDES = \
+    -I$(top_srcdir)

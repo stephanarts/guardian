@@ -24,6 +24,7 @@ libguardian_include_HEADERS = \
     assert.h \
     log.h \
     time.h \
+    types.h \
     error.h \
     sourceengine.h \
     sourcetype.h \
@@ -44,3 +45,6 @@ libguardian_1_0_la_LDFLAGS =              \
 
 libguardian_1_0_la_LIBADD = \
     -ldl
+
+INCLUDES = \
+    -I$(top_srcdir)
