@@ -30,12 +30,18 @@
 #ifndef __GUARDIAN_FIELD_H__
 #define __GUARDIAN_FIELD_H__
 
+typedef struct _GuardianFieldEntry GuardianFieldEntry;
+
+typedef int (*GUFieldSortFunc) (
+        GuardianFieldEntry *,
+        GuardianFieldEntry *);
+
 typedef struct _GuardianField GuardianField;
 
 void
 guardian_field_register (
         char *name,
-        char *expression,
-        GuardianSourcetype *type );
+        GuardianSourcetype *type,
+        GUFieldSortFunc func );
 
 #endif

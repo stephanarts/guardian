@@ -33,6 +33,7 @@
 #define LIBGUARDIAN_INSIDE_LIBGUARDIAN_H
 
 #include <libguardian/log.h>
+#include <libguardian/time.h>
 #include <libguardian/error.h>
 #include <libguardian/types.h>
 #include <libguardian/assert.h>
@@ -40,6 +41,8 @@
 #include <libguardian/source.h>
 #include <libguardian/sourceengine.h>
 #include <libguardian/sourcetype.h>
+#include <libguardian/field.h>
+#include <libguardian/entry.h>
 #include <libguardian/plugin.h>
 
 #endif /* __LIBGUARDIAN_H__ */

@@ -187,6 +187,8 @@ main (int argc, char **argv)
         }
     }
 
+    guardian_set_timezone_gmt_offset ( 120 );
+
     plugin = guardian_plugin_load ( plugin_path, &error );
     if ( plugin == NULL )
     {

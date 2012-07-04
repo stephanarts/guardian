@@ -40,16 +40,23 @@
 #include <pcre.h>
 
 #include "memory.h"
+#include "error.h"
+#include "source.h"
+#include "sourceengine.h"
 #include "sourcetype.h"
 #include "field.h"
 
-struct _GuardianField
+struct _GuardianFieldEntry
 {
     char *name;
 };
 
+struct _GuardianField
+{
+    char *name;
+}; 
 void
 guardian_field_register (
         char *name,
-        char *expression,
-        GuardianSourcetype *type );
+        GuardianSourcetype *type,
+        GUFieldSortFunc func );

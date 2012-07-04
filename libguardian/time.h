@@ -27,21 +27,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined (LIBGUARDIAN_INSIDE_LIBGUARDIAN_H) && !defined(LIBGUARDIAN_COMPILATION)
-#error "Only <libguardian/libguardian.h> can be included directly, this file may disappear or change contents"
+#ifndef __GUARDIAN_TIME_H__
+#define __GUARDIAN_TIME_H__
+
+int
+guardian_get_timezone_gmt_offset (
+        int *offset_mins);
+
+int
+guardian_set_timezone_gmt_offset (int offset_mins);
+
 #endif
-
-#ifndef __GUARDIAN_ENTRY_H__
-#define __GUARDIAN_ENTRY_H__
-
-typedef struct _GuardianEntry GuardianEntry;
-
-struct _GuardianEntry
-{
-    char hash[20];
-    char data[4096];
-};
-
-
-
-#endif /* __GUARDIAN_ENTRY_H__ */

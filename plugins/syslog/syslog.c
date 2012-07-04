@@ -40,6 +40,8 @@
 #endif
 
 
+#include <pcre.h>
+
 #include <errno.h>
 
 #include <sys/stat.h>
@@ -50,7 +52,12 @@
 
 #define DATA_BUFFER_SIZE 1024
 
+/*** DATE ***/
 #define DATE_REGEX "(Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[ ]+([0-9]+)[ ]+([0-9]+)[:]([0-9]+)[:]([0-9]+)"
+
+static pcre *pcre_date_context = NULL;
+
+static unsigned int min_offset = 0;
 
 GuardianSourcetype *syslog_type = NULL;
 
@@ -62,12 +69,32 @@ _plugin_engine_update_source (
         GuardianSourceEngine *engine,
         GuardianSource       *source );
 
+static int
+_plugin_extract_timestamp (
+        size_t len,
+        const char *entry,
+        char **timestamp);
+
 GuardianPlugin *
 guardian_plugin_init ()
 {
+    const char *errors = NULL;
+    int err_offset;
     GuardianPlugin *plugin = guardian_new (sizeof (GuardianPlugin), 1);
 
     plugin->register_types = _plugin_register_types;
+
+    pcre_date_context = pcre_compile (
+            DATE_REGEX,
+            PCRE_FIRSTLINE |
+            PCRE_MULTILINE |
+            PCRE_NEWLINE_ANYCRLF |
+            PCRE_UTF8,
+            &errors,
+            &err_offset,
+            NULL);
+
+    guardian_get_timezone_gmt_offset (&min_offset);
 
     return plugin;
 }
@@ -113,6 +140,7 @@ _plugin_engine_update_source (
     size_t s_offset;
 
     const char *entry;
+    char *timestamp = NULL;
 
     size_t offset;
     size_t len;
@@ -137,10 +165,9 @@ _plugin_engine_update_source (
     if (buffer.st_size > st_size)
     {
 
-#if 0
         /*
-         * Nice for performance improvement... but it does not help if you want to
-         * prevent tampering with the log-files.
+         * Nice for performance improvement... but it does not help 
+         * if you want to prevent tampering with the log-files.
          */
         if ( st_size > 0 )
         {
@@ -150,7 +177,6 @@ _plugin_engine_update_source (
             fseek (f, st_size, SEEK_SET);
 
         }
-#endif
 
         /*
          * Fill the remaining part of the buffer (complete buffer on first try)
@@ -200,7 +226,11 @@ _plugin_engine_update_source (
                 ptr++;
             }
 
-            printf("%s\n", entry);
+            _plugin_extract_timestamp (len, entry, &timestamp);
+            printf("%s\n", timestamp);
+
+            free (timestamp);
+            timestamp = NULL;
         }
 
         s_offset = 0;
@@ -221,7 +251,11 @@ _plugin_engine_update_source (
 
             s_offset+=len+offset+1;
             
-            printf("%s\n", entry);
+            _plugin_extract_timestamp (len, entry, &timestamp);
+            printf("%s\n", timestamp);
+
+            free (timestamp);
+            timestamp = NULL;
         }
     }
 
@@ -233,4 +267,178 @@ _plugin_engine_update_source (
 
     fclose (f);
 
+}
+
+static int
+_plugin_extract_timestamp ( size_t len, const char *entry, char **timestamp)
+{
+    int         offsets[18];
+    int         ret;
+    int         month_id = 0;
+    int         day_id = 0;
+    int         hour_id = 0;
+    int         minute_id = 0;
+    int         second_id = 0;
+    const char *str;
+
+    ret = pcre_exec (
+            pcre_date_context,
+            NULL,
+            entry,
+            len,
+            0,
+            PCRE_NOTEMPTY,
+            offsets,
+            18);
+    if ( ret >= 0 )
+    {
+        if ( timestamp != NULL )
+        {
+            if ( *timestamp != NULL )
+            {
+                /*
+                 * Timestamp pointer is not uninitialised.
+                 */
+                guardian_log_critical ("Timestamp pointer not initialised");
+                return 1;
+            }
+            pcre_get_substring (
+                entry,
+                offsets,
+                ret,
+                1,
+                &str);
+
+            if (0 == strcmp (str, "Jan"))
+            {
+                month_id = 1;
+            }
+            if (0 == strcmp (str, "Feb"))
+            {
+                month_id = 2;
+            }
+            if (0 == strcmp (str, "Mar"))
+            {
+                month_id = 3;
+            }
+            if (0 == strcmp (str, "Apr"))
+            {
+                month_id = 4;
+            }
+            if (0 == strcmp (str, "May"))
+            {
+                month_id = 5;
+            }
+            if (0 == strcmp (str, "Jun"))
+            {
+                month_id = 6;
+            }
+            if (0 == strcmp (str, "Jul"))
+            {
+                month_id = 7;
+            }
+            if (0 == strcmp (str, "Aug"))
+            {
+                month_id = 8;
+            }
+            if (0 == strcmp (str, "Sep"))
+            {
+                month_id = 9;
+            }
+            if (0 == strcmp (str, "Okt"))
+            {
+                month_id = 10;
+            }
+            if (0 == strcmp (str, "Nov"))
+            {
+                month_id = 11;
+            }
+            if (0 == strcmp (str, "Dec"))
+            {
+                month_id = 12;
+            }
+            if (month_id > 0)
+            {
+
+                pcre_get_substring (
+                    entry,
+                    offsets,
+                    ret,
+                    2,
+                    &str);
+                day_id = strtol (str, NULL, 10);
+
+                pcre_get_substring (
+                    entry,
+                    offsets,
+                    ret,
+                    3,
+                    &str);
+                hour_id = strtol (str, NULL, 10);
+
+                pcre_get_substring (
+                    entry,
+                    offsets,
+                    ret,
+                    4,
+                    &str);
+                minute_id = strtol (str, NULL, 10);
+
+                pcre_get_substring (
+                    entry,
+                    offsets,
+                    ret,
+                    5,
+                    &str);
+                second_id = strtol (str, NULL, 10);
+
+                *timestamp = (char *)malloc (21);
+                if (min_offset == 0)
+                {
+                    snprintf (*timestamp, 21,
+                            "XXXX%.2d%.2dT%.2d%.2d%.2dZ",
+                            month_id, 
+                            day_id,
+                            hour_id,
+                            minute_id,
+                            second_id);
+                }
+                else
+                {
+                    if (min_offset > 0)
+                    {
+                        snprintf (*timestamp, 21,
+                                "XXXX%.2d%.2dT%.2d%.2d%.2d+%.2d%.2d",
+                                month_id, 
+                                day_id,
+                                hour_id,
+                                minute_id,
+                                second_id,
+                                min_offset/60,
+                                min_offset%60);
+                    }
+                    else
+                    {
+                        snprintf (*timestamp, 21,
+                                "XXXX%.2d%.2dT%.2d%.2d%.2d-%.2d%.2d",
+                                month_id, 
+                                day_id,
+                                hour_id,
+                                minute_id,
+                                second_id,
+                                min_offset/60,
+                                min_offset%60);
+                    }
+                }
+            }
+            else
+            {
+                /*
+                 * ERROR: Unknown month, this should be already caught by the
+                 * regular expression.
+                 */
+                return 1;
+            }
+        }
+    }
 }

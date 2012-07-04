@@ -8,11 +8,14 @@ libguardian_includedir = \
 libguardian_1_0_la_SOURCES = \
     memory.c \
     assert.c \
+    time.c \
     log.c \
     error.c \
     source.c \
     sourceengine.c \
     sourcetype.c \
+    entry.c \
+    field.c \
     plugin.c \
     libguardian.c
 
@@ -20,10 +23,13 @@ libguardian_include_HEADERS = \
     memory.h \
     assert.h \
     log.h \
+    time.h \
     error.h \
     sourceengine.h \
     sourcetype.h \
     source.h \
+    entry.h \
+    field.h \
     plugin.h \
     libguardian.h
 

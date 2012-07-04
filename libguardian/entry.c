@@ -37,4 +37,5 @@
 
 #include <stdarg.h>
 
+#include "error.h"
 #include "entry.h"
