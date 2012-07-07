@@ -30,6 +30,8 @@
 #ifndef __GUARDIAN_TIME_H__
 #define __GUARDIAN_TIME_H__
 
+#define ISO_TIMESTAMP_MAX_LEN 21
+
 int
 guardian_get_timezone_gmt_offset (
         int *offset_mins);
