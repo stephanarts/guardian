@@ -12,9 +12,8 @@ m4_define([libguardian_version_api], [1.0])
 m4_define([guardian_version_major], [0])
 m4_define([guardian_version_minor], [0])
 m4_define([guardian_version_micro], [1])
-m4_define([guardian_version_build], [r@REVISION@])
 m4_define([guardian_version_tag], [git]) # Leave empty for releases
-m4_define([guardian_version], [guardian_version_major().guardian_version_minor().guardian_version_micro()ifelse(guardian_version_tag(), [], [], [guardian_version_tag()-guardian_version_build()])])
+m4_define([guardian_version], [guardian_version_major().guardian_version_minor().guardian_version_micro()ifelse(guardian_version_tag(), [], [], [-guardian_version_tag()])])
 
 dnl *******************************************
 dnl *** Debugging support for DEV snapshots ***
