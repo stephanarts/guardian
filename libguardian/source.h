@@ -50,6 +50,16 @@ size_t
 guardian_source_get_size (
         GuardianSource *source );
 
+int
+guardian_source_get_hash (
+        GuardianSource *source,
+        const char **hash );
+
+int
+guardian_source_set_hash (
+        GuardianSource *source,
+        const char *hash );
+
 void
 guardian_source_set_size (
         GuardianSource *source,

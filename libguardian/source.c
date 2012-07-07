@@ -60,6 +60,7 @@ struct _GuardianSource
     char *path;
 
     off_t st_size;  /* Size in bytes */
+    char  hash[20];
 };
 
 
@@ -138,4 +139,27 @@ guardian_source_update (
     GuardianSourceEngine *engine = guardian_sourcetype_get_engine (source->source_type);
 
     engine->update_source ( engine, source );
+}
+
+int
+guardian_source_get_hash (
+        GuardianSource *source,
+        const char **hash )
+{
+    *hash = source->hash;
+
+    return 0;
+}
+
+int
+guardian_source_set_hash (
+        GuardianSource *source,
+        const char *hash )
+{
+    if (hash == NULL)
+    {
+        return 1;
+    }
+    memcpy (source->hash, hash, 20);
+    return 0;
 }

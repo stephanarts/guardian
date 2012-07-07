@@ -39,6 +39,7 @@
 #include <stdio.h>
 #endif
 
+#include <openssl/sha.h>
 
 #include <pcre.h>
 
@@ -73,7 +74,7 @@ static int
 _plugin_extract_timestamp (
         size_t len,
         const char *entry,
-        char **timestamp);
+        char *timestamp);
 
 GuardianPlugin *
 guardian_plugin_init ()
@@ -129,8 +130,14 @@ _plugin_engine_update_source (
     int fd;
     struct stat buffer;
 
+    SHA_CTX context;
+    char file_hash[20];
+    int i;
+
     const char *path = guardian_source_get_path (source);
-    size_t st_size = guardian_source_get_size (source);
+    size_t st_size   = guardian_source_get_size (source);
+    const char *hash;
+    guardian_source_get_hash (source, &hash);
 
     char data_buffer[DATA_BUFFER_SIZE];
     char *str_ptr = &data_buffer[0];
@@ -139,8 +146,10 @@ _plugin_engine_update_source (
     size_t _size;
     size_t s_offset;
 
+    GuardianEntry *g_entry = NULL;
+
     const char *entry;
-    char *timestamp = NULL;
+    char timestamp[ISO_TIMESTAMP_MAX_LEN];
 
     size_t offset;
     size_t len;
@@ -178,11 +187,14 @@ _plugin_engine_update_source (
 
         }
 
+        SHA1_Init (&context);
+
         /*
          * Fill the remaining part of the buffer (complete buffer on first try)
          */
         while ((_size = fread (str_ptr, 1, end_ptr-str_ptr, f)) > 0)
         {
+            SHA1_Update (&context, str_ptr, _size);
             /*
              * If the read number of bytes is smaller then the complete buffer,
              * adjust the size indicator and break out of this loop (we do not
@@ -226,13 +238,19 @@ _plugin_engine_update_source (
                 ptr++;
             }
 
-            _plugin_extract_timestamp (len, entry, &timestamp);
-            printf("%s\n", timestamp);
+            g_entry = guardian_entry_new (len, entry, source, NULL);
 
-            free (timestamp);
-            timestamp = NULL;
+            _plugin_extract_timestamp (len, entry, timestamp);
+            //printf("%s\n", timestamp);
         }
 
+        SHA1_Final ((char *)file_hash, &context);
+
+        for (i = 0; i < 20; ++i)
+        {
+            printf("%.2x", (unsigned char)file_hash[i]);
+        }
+        
         s_offset = 0;
 
         while (s_offset < _size)
@@ -250,12 +268,11 @@ _plugin_engine_update_source (
                 ptr++;
 
             s_offset+=len+offset+1;
-            
-            _plugin_extract_timestamp (len, entry, &timestamp);
-            printf("%s\n", timestamp);
 
-            free (timestamp);
-            timestamp = NULL;
+            g_entry = guardian_entry_new (len, entry, source, NULL);
+            
+            _plugin_extract_timestamp (len, entry, timestamp);
+            //printf("%s\n", timestamp);
         }
     }
 
@@ -263,6 +280,7 @@ _plugin_engine_update_source (
      * Set the current size of the file.
      */
     guardian_source_set_size ( source, buffer.st_size);
+    guardian_source_set_hash ( source, NULL );
 
 
     fclose (f);
@@ -270,7 +288,7 @@ _plugin_engine_update_source (
 }
 
 static int
-_plugin_extract_timestamp ( size_t len, const char *entry, char **timestamp)
+_plugin_extract_timestamp ( size_t len, const char *entry, char *timestamp)
 {
     int         offsets[18];
     int         ret;
@@ -294,14 +312,6 @@ _plugin_extract_timestamp ( size_t len, const char *entry, char **timestamp)
     {
         if ( timestamp != NULL )
         {
-            if ( *timestamp != NULL )
-            {
-                /*
-                 * Timestamp pointer is not uninitialised.
-                 */
-                guardian_log_critical ("Timestamp pointer not initialised");
-                return 1;
-            }
             pcre_get_substring (
                 entry,
                 offsets,
@@ -392,10 +402,9 @@ _plugin_extract_timestamp ( size_t len, const char *entry, char **timestamp)
                     &str);
                 second_id = strtol (str, NULL, 10);
 
-                *timestamp = (char *)malloc (21);
                 if (min_offset == 0)
                 {
-                    snprintf (*timestamp, 21,
+                    snprintf (timestamp, ISO_TIMESTAMP_MAX_LEN,
                             "XXXX%.2d%.2dT%.2d%.2d%.2dZ",
                             month_id, 
                             day_id,
@@ -407,7 +416,7 @@ _plugin_extract_timestamp ( size_t len, const char *entry, char **timestamp)
                 {
                     if (min_offset > 0)
                     {
-                        snprintf (*timestamp, 21,
+                        snprintf (timestamp, ISO_TIMESTAMP_MAX_LEN,
                                 "XXXX%.2d%.2dT%.2d%.2d%.2d+%.2d%.2d",
                                 month_id, 
                                 day_id,
@@ -419,7 +428,7 @@ _plugin_extract_timestamp ( size_t len, const char *entry, char **timestamp)
                     }
                     else
                     {
-                        snprintf (*timestamp, 21,
+                        snprintf (timestamp, ISO_TIMESTAMP_MAX_LEN,
                                 "XXXX%.2d%.2dT%.2d%.2d%.2d-%.2d%.2d",
                                 month_id, 
                                 day_id,
