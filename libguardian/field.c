@@ -42,21 +42,48 @@
 #include "memory.h"
 #include "error.h"
 #include "source.h"
+#include "entry.h"
 #include "sourceengine.h"
 #include "sourcetype.h"
 #include "field.h"
 
+static size_t          n_fields;
+static GuardianField **fields;
+
 struct _GuardianFieldEntry
 {
-    char *name;
+    GuardianEntry *entry;
+    int            len;
+    char          *data;
 };
 
 struct _GuardianField
 {
     char *name;
+    GuardianSourcetype *type;
+    GUFieldSortFunc sort_func;
 }; 
+
 void
 guardian_field_register (
         char *name,
         GuardianSourcetype *type,
-        GUFieldSortFunc func );
+        GUFieldSortFunc func )
+{
+    int i;
+    GuardianField **_fields = (GuardianField **)(malloc (sizeof(GuardianField *)*n_fields+1));
+    GuardianField *field = (GuardianField *)malloc (sizeof(GuardianField));
+    field->name = name;
+    field->type = type;
+    field->sort_func = func;
+
+    for (i = 0; i < n_fields; ++i)
+    {
+        _fields[i] = fields[i];
+    }
+
+    _fields[n_fields] = field;
+
+    free (fields);
+    fields = _fields;
+}
