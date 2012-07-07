@@ -36,12 +36,12 @@
 
 typedef struct _GuardianEntry GuardianEntry;
 
-struct _GuardianEntry
-{
-    char hash[20];
-    char data[4096];
-};
 
-
+GuardianEntry *
+guardian_entry_new (
+        size_t          len,
+        const char     *data,
+        GuardianSource *source,
+        GuardianError **error);
 
 #endif /* __GUARDIAN_ENTRY_H__ */

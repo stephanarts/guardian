@@ -35,7 +35,49 @@
 #include <sys/syslog.h>
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 #include <stdarg.h>
 
+#include <arpa/inet.h>
+
+#include <openssl/sha.h>
+
+
 #include "error.h"
+#include "source.h"
 #include "entry.h"
+
+struct _GuardianEntry
+{
+    char            hash[20];
+    size_t          len;
+    char           *data;
+    GuardianSource *source;
+};
+
+GuardianEntry *
+guardian_entry_new (
+        size_t          len,
+        const char     *data,
+        GuardianSource *source,
+        GuardianError **error)
+{
+    GuardianEntry *entry = (GuardianEntry *)malloc (sizeof (GuardianEntry));
+    SHA_CTX context;
+    size_t n = htonl(len);
+
+    SHA1_Init (&context);
+    SHA1_Update (&context, &n, sizeof(size_t));
+    SHA1_Update (&context, data, len);
+    SHA1_Final (entry->hash, &context);
+
+    entry->len = len;
+    entry->data = (char *)malloc(len);
+    strncpy (entry->data, data, len);
+
+    entry->source = source;
+
+    return entry;
+}
