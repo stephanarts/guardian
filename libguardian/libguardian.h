@@ -41,8 +41,8 @@
 #include <libguardian/source.h>
 #include <libguardian/sourceengine.h>
 #include <libguardian/sourcetype.h>
-#include <libguardian/field.h>
 #include <libguardian/entry.h>
+#include <libguardian/field.h>
 #include <libguardian/plugin.h>
 
 #endif /* __LIBGUARDIAN_H__ */

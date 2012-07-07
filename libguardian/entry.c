@@ -52,7 +52,7 @@
 struct _GuardianEntry
 {
     /**
-     * SHA1 hash of the length field (in Network byte order),
+     * SHA1 hash of the length field ((4 bytes) in Network byte order),
      * and the entry-data.
      */
     char            hash[20];   

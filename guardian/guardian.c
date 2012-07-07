@@ -201,7 +201,7 @@ main (int argc, char **argv)
         guardian_plugin_register_types ( plugin );
     }
 
-    source = guardian_source_new ("syslog", "/var/log/auth.log", &error);
+    source = guardian_source_new ("syslog", "/var/log/everything.log", &error);
     if ( source == NULL )
     {
         guardian_log_warning ( "%s", guardian_error_get_msg (error));

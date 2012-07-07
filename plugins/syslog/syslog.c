@@ -41,6 +41,8 @@
 
 #include <openssl/sha.h>
 
+#include <string.h>
+
 #include <pcre.h>
 
 #include <errno.h>
@@ -61,6 +63,7 @@ static pcre *pcre_date_context = NULL;
 static unsigned int min_offset = 0;
 
 GuardianSourcetype *syslog_type = NULL;
+GuardianField      *timestamp_field = NULL;
 
 static void
 _plugin_register_types ( GuardianPlugin *plugin );
@@ -115,6 +118,11 @@ _plugin_register_types ( GuardianPlugin *plugin )
                 "syslog",
                 "^(.*)$",
                 engine );
+
+        timestamp_field = guardian_field_register (
+                "_timestamp",
+                syslog_type,
+                NULL );
     }
     return;
 }
@@ -241,7 +249,19 @@ _plugin_engine_update_source (
             g_entry = guardian_entry_new (len, entry, source, NULL);
 
             _plugin_extract_timestamp (len, entry, timestamp);
-            //printf("%s\n", timestamp);
+
+            /*
+             * TODO: Calculate the correct year, and overwrite it in the timestamp.
+             *
+             * Using memcpy, because strncpy assumes '\0' bytes
+             */
+            memcpy (timestamp, "2012", 4);
+
+            guardian_field_add_entry (
+                    timestamp_field,
+                    g_entry,
+                    ISO_TIMESTAMP_MAX_LEN,
+                    timestamp );
         }
 
         SHA1_Final ((char *)file_hash, &context);
@@ -272,7 +292,19 @@ _plugin_engine_update_source (
             g_entry = guardian_entry_new (len, entry, source, NULL);
             
             _plugin_extract_timestamp (len, entry, timestamp);
-            //printf("%s\n", timestamp);
+
+            /*
+             * TODO: Calculate the correct year, and overwrite it in the timestamp.
+             *
+             * Using memcpy, because strncpy assumes '\0' bytes
+             */
+            memcpy (timestamp, "2012", 4);
+
+            guardian_field_add_entry (
+                    timestamp_field,
+                    g_entry,
+                    ISO_TIMESTAMP_MAX_LEN,
+                    timestamp );
         }
     }
 

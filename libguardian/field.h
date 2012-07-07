@@ -32,16 +32,22 @@
 
 typedef struct _GuardianFieldEntry GuardianFieldEntry;
 
-typedef int (*GUFieldSortFunc) (
-        GuardianFieldEntry *,
-        GuardianFieldEntry *);
-
 typedef struct _GuardianField GuardianField;
 
-void
+GuardianField *
 guardian_field_register (
         char *name,
         GuardianSourcetype *type,
-        GUFieldSortFunc func );
+        comparison_fn_t comp_func );
+
+GuardianField *
+guardian_field_lookup ( const char *name );
+
+void
+guardian_field_add_entry (
+        GuardianField *field,
+        GuardianEntry *entry,
+        size_t         len,
+        char          *data );
 
 #endif

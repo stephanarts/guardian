@@ -59,23 +59,32 @@ struct _GuardianFieldEntry
 
 struct _GuardianField
 {
-    char *name;
-    GuardianSourcetype *type;
-    GUFieldSortFunc sort_func;
+    char                *name;
+    GuardianSourcetype  *type;
+    comparison_fn_t      comp_func;
+
+    GuardianFieldEntry **base;
+    size_t               nmemb;
 }; 
 
-void
+static int
+_guardian_field_compare_name ( const GuardianField *a, const GuardianField *b )
+{
+    return strcmp (a->name, b->name);
+}
+
+GuardianField *
 guardian_field_register (
         char *name,
         GuardianSourcetype *type,
-        GUFieldSortFunc func )
+        comparison_fn_t comp_func )
 {
     int i;
     GuardianField **_fields = (GuardianField **)(malloc (sizeof(GuardianField *)*n_fields+1));
     GuardianField *field = (GuardianField *)malloc (sizeof(GuardianField));
     field->name = name;
     field->type = type;
-    field->sort_func = func;
+    field->comp_func = comp_func;
 
     for (i = 0; i < n_fields; ++i)
     {
@@ -86,4 +95,72 @@ guardian_field_register (
 
     free (fields);
     fields = _fields;
+    n_fields++;
+
+    qsort (fields, n_fields, sizeof (GuardianField *), (comparison_fn_t) _guardian_field_compare_name);
+
+    return field;
+}
+
+GuardianField *
+guardian_field_lookup ( const char *name )
+{
+    int i_max = n_fields - 1;
+    int i_min = 0;
+    int i_mid;
+    int r;
+    GuardianField *ptr;
+
+    while (i_max >= i_min )
+    {
+        i_mid = (i_min + i_max) / 2;
+
+        r = strcmp (fields[i_mid]->name, name);
+
+        if (r > 0)
+        {
+            i_max = i_mid - 1;
+            continue;
+        }
+        if (r < 0)
+        {
+            i_min = i_mid + 1;
+            continue;
+        }
+        if (r == 0)
+        {
+            return fields[i_mid];
+        }
+    }
+
+    return NULL;
+}
+
+void
+guardian_field_add_entry (
+        GuardianField *field,
+        GuardianEntry *entry,
+        size_t         len,
+        char          *data )
+{
+    GuardianFieldEntry **entries = (GuardianFieldEntry **) malloc (sizeof (GuardianFieldEntry *) * (field->nmemb + 1));
+    GuardianFieldEntry *f_entry = (GuardianFieldEntry *)malloc (sizeof (GuardianFieldEntry));
+    int i = 0;
+
+    f_entry->entry = entry;
+    f_entry->len = len;
+    f_entry->data = (char *)malloc(len*sizeof(char));
+    strncpy (f_entry->data, data, len);
+
+    for (; i < field->nmemb; ++i)
+    {
+        entries[i] = field->base[i];
+    }
+    entries[i] = entry;
+
+    free (field->base);
+    field->base = entries;
+    field->nmemb++;
+
+    printf("%d: %.20s\n", field->nmemb, data);
 }
