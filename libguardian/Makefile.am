@@ -44,6 +44,8 @@ libguardian_1_0_la_LDFLAGS =              \
     $(PLATFORM_LDFLAGS)
 
 libguardian_1_0_la_LIBADD = \
+    $(OPENSSL_LIBS) \
+    $(PCRE_LIBS) \
     -ldl
 
 INCLUDES = \

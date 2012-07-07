@@ -56,10 +56,26 @@
 
 struct _GuardianSource
 {
+    /**
+     * The SourceType (eg. syslog),
+     *
+     */
     GuardianSourcetype *source_type;
+
+    /**
+     * The source path (eg. /var/log/messages)
+     */
     char *path;
 
+    /**
+     * The size of the source-object last time it was opened.
+     */
     off_t st_size;  /* Size in bytes */
+
+    /**
+     * The SHA1 hash of the source-data up until st_size.
+     * Used to identify tampering and logfile-rotation.
+     */
     char  hash[20];
 };
 

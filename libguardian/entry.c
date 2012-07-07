@@ -51,9 +51,19 @@
 
 struct _GuardianEntry
 {
-    char            hash[20];
+    /**
+     * SHA1 hash of the length field (in Network byte order),
+     * and the entry-data.
+     */
+    char            hash[20];   
+
+    /** Length of the data-field    */
     size_t          len;
+
+    /** The entry data              */
     char           *data;
+
+    /** The related Source object   */
     GuardianSource *source;
 };
 

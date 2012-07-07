@@ -167,6 +167,8 @@ plugins/syslog/Makefile
 tests/Makefile
 tests/libguardian/Makefile
 tests/plugins/Makefile
+docs/Makefile
+docs/libguardian/Makefile
 ])
 
 echo "----------------------------------------"

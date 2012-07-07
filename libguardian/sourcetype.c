@@ -54,12 +54,26 @@
 
 struct _GuardianSourcetype
 {
+    /**
+     * The SourceType name, a unique identifier. (eg, syslog)
+     */
     char  *name;
 
+    /**
+     * The expression used to identify a single entry from the source.
+     * (eg. ^(.*)$ for a single line entry, 
+     * ^(.*\n.*)$ for a double-line entry.
+     */
     char  *expression;
 
+    /**
+     * PCRE context used to parse retrieve the entries.
+     */
     pcre  *pcre_context;
 
+    /**
+     * SourceEngine used for managing the sources of this type.
+     */
     GuardianSourceEngine *engine;
 };
 
