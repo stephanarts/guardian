@@ -217,51 +217,58 @@ _plugin_engine_update_source (
             /*
              * Get the first entry from the buffer.
              */
-            guardian_sourcetype_get_entry (
+            if ( guardian_sourcetype_get_entry (
                     syslog_type,
                     data_buffer,
                     DATA_BUFFER_SIZE,
                     0,
                     &entry,
                     &offset,
-                    &len);
-
-            /*
-             * Jump the pointer over the new-line characters
-             */
-            ptr = &data_buffer[len+offset+1];
-            while (*ptr == '\n' || *ptr == '\r')
-                ptr++;
-
-            /*
-             * Shift the buffer to the left, so we can 'fill' the end
-             * at the next read.
-             */
-            str_ptr = &data_buffer[0];
-
-            while (ptr < end_ptr)
+                    &len,
+                    NULL ) == 0 )
             {
-                *str_ptr = *ptr;
-                str_ptr++;
-                ptr++;
+
+                /*
+                 * Jump the pointer over the new-line characters
+                 */
+                ptr = &data_buffer[len+offset+1];
+                while (*ptr == '\n' || *ptr == '\r')
+                    ptr++;
+
+                /*
+                 * Shift the buffer to the left, so we can 'fill' the end
+                 * at the next read.
+                 */
+                str_ptr = &data_buffer[0];
+
+                while (ptr < end_ptr)
+                {
+                    *str_ptr = *ptr;
+                    str_ptr++;
+                    ptr++;
+                }
+
+                g_entry = guardian_entry_new (len, entry, source, NULL);
+
+                _plugin_extract_timestamp (len, entry, timestamp);
+
+                /*
+                 * TODO: Calculate the correct year, and overwrite it in the timestamp.
+                 *
+                 * Using memcpy, because strncpy assumes '\0' bytes
+                 */
+                memcpy (timestamp, "2012", 4);
+
+                guardian_field_add_entry (
+                        timestamp_field,
+                        g_entry,
+                        ISO_TIMESTAMP_MAX_LEN,
+                        timestamp );
             }
-
-            g_entry = guardian_entry_new (len, entry, source, NULL);
-
-            _plugin_extract_timestamp (len, entry, timestamp);
-
-            /*
-             * TODO: Calculate the correct year, and overwrite it in the timestamp.
-             *
-             * Using memcpy, because strncpy assumes '\0' bytes
-             */
-            memcpy (timestamp, "2012", 4);
-
-            guardian_field_add_entry (
-                    timestamp_field,
-                    g_entry,
-                    ISO_TIMESTAMP_MAX_LEN,
-                    timestamp );
+            else
+            {
+                break;
+            }
         }
 
         SHA1_Final ((char *)file_hash, &context);
@@ -275,36 +282,43 @@ _plugin_engine_update_source (
 
         while (s_offset < _size)
         {
-            guardian_sourcetype_get_entry (
+            if ( guardian_sourcetype_get_entry (
                     syslog_type,
                     &data_buffer[s_offset],
                     _size-s_offset,
                     0,
                     &entry,
                     &offset,
-                    &len);
-            ptr = &data_buffer[len+offset+1];
-            while (*ptr == '\n' || *ptr == '\r')
-                ptr++;
+                    &len,
+                    NULL ) == 0 )
+            {
+                ptr = &data_buffer[len+offset+1];
+                while (*ptr == '\n' || *ptr == '\r')
+                    ptr++;
 
-            s_offset+=len+offset+1;
+                s_offset+=len+offset+1;
 
-            g_entry = guardian_entry_new (len, entry, source, NULL);
-            
-            _plugin_extract_timestamp (len, entry, timestamp);
+                g_entry = guardian_entry_new (len, entry, source, NULL);
+                
+                _plugin_extract_timestamp (len, entry, timestamp);
 
-            /*
-             * TODO: Calculate the correct year, and overwrite it in the timestamp.
-             *
-             * Using memcpy, because strncpy assumes '\0' bytes
-             */
-            memcpy (timestamp, "2012", 4);
+                /*
+                 * TODO: Calculate the correct year, and overwrite it in the timestamp.
+                 *
+                 * Using memcpy, because strncpy assumes '\0' bytes
+                 */
+                memcpy (timestamp, "2012", 4);
 
-            guardian_field_add_entry (
-                    timestamp_field,
-                    g_entry,
-                    ISO_TIMESTAMP_MAX_LEN,
-                    timestamp );
+                guardian_field_add_entry (
+                        timestamp_field,
+                        g_entry,
+                        ISO_TIMESTAMP_MAX_LEN,
+                        timestamp );
+            }
+            else
+            {
+                break;
+            }
         }
     }
 

@@ -55,6 +55,7 @@ guardian_sourcetype_get_entry (
         size_t start_offset,
         const char **entry,
         size_t *entry_offset,
-        size_t *entry_len );
+        size_t *entry_len,
+        GuardianError **error );
 
 #endif

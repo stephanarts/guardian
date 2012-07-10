@@ -191,10 +191,12 @@ guardian_sourcetype_get_entry (
         size_t start_offset,
         const char **entry,
         size_t *entry_offset,
-        size_t *entry_len )
+        size_t *entry_len,
+        GuardianError **error )
 {
     int offsets[OFFSET_SIZE];
     int ret;
+    char *err_str;
 
     ret = pcre_exec (
             source_type->pcre_context,
@@ -216,10 +218,21 @@ guardian_sourcetype_get_entry (
                 entry);
         *entry_offset = offsets[0];
         *entry_len = offsets[1];
-        return 1;
+        return 0;
     }
 
-    return 0;
+    if ( error != NULL )
+    {
+        switch (ret)
+        {
+            default:
+                err_str = "UNKNOWN PCRE Parse error";
+        }
+
+        *error = guardian_error_new (err_str);
+    }
+
+    return 1;
 }
 
 GuardianSourceEngine *
