@@ -108,8 +108,7 @@ guardian_sourcetype_register (
             expression,
             PCRE_FIRSTLINE |
             PCRE_MULTILINE |
-            PCRE_NEWLINE_ANYCRLF |
-            PCRE_UTF8,
+            PCRE_NEWLINE_ANYCRLF,
             &errors,
             &err_offset,
             NULL);
