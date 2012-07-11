@@ -164,6 +164,7 @@ libguardian/Makefile
 guardian/Makefile
 plugins/Makefile
 plugins/syslog/Makefile
+plugins/httpd/Makefile
 tests/Makefile
 tests/libguardian/Makefile
 tests/plugins/Makefile

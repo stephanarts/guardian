@@ -1,1 +1,1 @@
-SUBDIRS=syslog
+SUBDIRS=syslog httpd

@@ -2,6 +2,7 @@ EXTRA_DIST = $(TESTS)
 
 TESTS = \
     missing-plugin.test \
+    httpd.test \
     syslog.test
 
 check_PROGRAMS = plugin-loader

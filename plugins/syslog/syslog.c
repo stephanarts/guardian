@@ -56,7 +56,7 @@
 #define DATA_BUFFER_SIZE 1024
 
 /*** DATE ***/
-#define DATE_REGEX "(Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[ ]+([0-9]+)[ ]+([0-9]+)[:]([0-9]+)[:]([0-9]+)"
+#define DATE_REGEX "(Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[ ]+([1-9]+)[ ]+([0-9]+)[:]([0-9]+)[:]([0-9]+)"
 
 static pcre *pcre_date_context = NULL;
 
