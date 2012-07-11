@@ -37,7 +37,6 @@ typedef struct _GuardianField GuardianField;
 GuardianField *
 guardian_field_register (
         char *name,
-        GuardianSourcetype *type,
         comparison_fn_t comp_func );
 
 GuardianField *

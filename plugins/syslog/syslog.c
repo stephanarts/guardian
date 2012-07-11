@@ -124,10 +124,9 @@ _plugin_register_types ( GuardianPlugin *plugin )
                 "^(.*)$",
                 engine );
 
-        timestamp_field = guardian_field_register (
-                "_timestamp",
-                syslog_type,
-                _timestamp_compare_func );
+        timestamp_field = guardian_field_lookup (
+                "_timestamp");
+
     }
     return;
 }

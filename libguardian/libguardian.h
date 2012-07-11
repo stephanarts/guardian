@@ -45,4 +45,7 @@
 #include <libguardian/field.h>
 #include <libguardian/plugin.h>
 
+void
+libguardian_init (void);
+
 #endif /* __LIBGUARDIAN_H__ */

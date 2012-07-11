@@ -60,7 +60,6 @@ struct _GuardianFieldEntry
 struct _GuardianField
 {
     char                *name;
-    GuardianSourcetype  *type;
     comparison_fn_t      comp_func;
 
     GuardianFieldEntry **base;
@@ -76,14 +75,12 @@ _guardian_field_compare_name ( const GuardianField *a, const GuardianField *b )
 GuardianField *
 guardian_field_register (
         char *name,
-        GuardianSourcetype *type,
         comparison_fn_t comp_func )
 {
     int i;
     GuardianField **_fields = (GuardianField **)(malloc (sizeof(GuardianField *)*n_fields+1));
     GuardianField *field = (GuardianField *)malloc (sizeof(GuardianField));
     field->name = name;
-    field->type = type;
     field->comp_func = comp_func;
 
     for (i = 0; i < n_fields; ++i)
