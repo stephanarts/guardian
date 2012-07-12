@@ -115,6 +115,7 @@ main (int argc, char **argv)
     GuardianError *error = NULL;
 
     char *plugin_path = "/usr/local/lib/guardian/syslog.so";
+    char *http_plugin_path = "/usr/local/lib/guardian/httpd.so";
 
     GuardianPlugin *plugin;
     GuardianSource *source;
@@ -192,6 +193,18 @@ main (int argc, char **argv)
     guardian_set_timezone_gmt_offset ( 120 );
 
     plugin = guardian_plugin_load ( plugin_path, &error );
+    if ( plugin == NULL )
+    {
+        guardian_log_warning ( "%s", guardian_error_get_msg (error));
+        guardian_error_free (error);
+        error = NULL;
+    }
+    else
+    {
+        guardian_plugin_register_types ( plugin );
+    }
+
+    plugin = guardian_plugin_load ( http_plugin_path, &error );
     if ( plugin == NULL )
     {
         guardian_log_warning ( "%s", guardian_error_get_msg (error));
