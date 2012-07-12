@@ -138,13 +138,14 @@ guardian_sourcetype_register (
         }
         _source_types[i] = type;
 
-        for (; i < _n_guardian_source_types; ++i)
+        for (; i < _n_guardian_source_types+1; ++i)
         {
             _source_types[i+1] = _guardian_source_types[i];
         }
 
         free (_guardian_source_types);
         _guardian_source_types = _source_types;
+        _n_guardian_source_types++;
     }
 
     return type;
