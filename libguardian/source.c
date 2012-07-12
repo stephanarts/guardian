@@ -91,7 +91,7 @@ guardian_source_new (
 
     if ( type == NULL )
     {
-        if (*error)
+        if (error)
         {
             *error = guardian_error_new ("SourceType 'NULL' unknown");
         }
@@ -100,7 +100,7 @@ guardian_source_new (
 
     if ( path == NULL )
     {
-        if (*error)
+        if (error)
         {
             *error = guardian_error_new ("Can not create Source for 'NULL' path");
         }
@@ -110,7 +110,7 @@ guardian_source_new (
     source_type  = guardian_sourcetype_lookup ( type );
     if ( source_type == NULL )
     {
-        if (*error)
+        if (error)
         {
             *error = guardian_error_new ("SourceType '%s' unknown, can not create source object for '%s'", type, path);
         }
