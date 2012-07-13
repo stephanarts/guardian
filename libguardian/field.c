@@ -158,6 +158,4 @@ guardian_field_add_entry (
     free (field->base);
     field->base = entries;
     field->nmemb++;
-
-    printf("%d: %.20s\n", field->nmemb, data);
 }

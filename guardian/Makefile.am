@@ -16,7 +16,8 @@ guardian_LDFLAGS = \
 guardian_CFLAGS = \
     $(PCRE_CFLAGS) \
     $(OPENSSL_CFLAGS) \
-    -Wall -Werror -Wextra
+    -DSYSCONFDIR=\"$(sysconfdir)\" \
+    -Wall
 
 guardian_DEPENDENCIES = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la

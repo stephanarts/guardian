@@ -30,4 +30,20 @@
 #ifndef __GUARDIAN_SETTINGS_H__
 #define __GUARDIAN_SETTINGS_H__
 
+typedef struct _GuardianSettings GuardianSettings;
+
+GuardianSettings *
+guardian_settings_load (
+        const char *path,
+        GuardianError **error);
+
+const char *
+guardian_settings_get (
+        GuardianSettings *,
+        const char *key );
+
+void
+guardian_settings_free (
+        GuardianSettings *);
+
 #endif

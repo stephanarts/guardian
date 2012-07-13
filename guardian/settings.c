@@ -27,3 +27,43 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#include <libguardian/libguardian.h>
+
+#include "settings.h"
+
+struct _GuardianSettings
+{
+    char *path;
+};
+
+GuardianSettings *
+guardian_settings_load (
+        const char     *path,
+        GuardianError **error)
+{
+    return NULL;
+}
+
+const char *
+guardian_settings_get (
+        GuardianSettings *settings,
+        const char       *key )
+{
+    return NULL;
+}
+
+void
+guardian_settings_free (
+        GuardianSettings *settings)
+{
+
+}
+

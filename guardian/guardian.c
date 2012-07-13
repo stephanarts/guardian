@@ -58,6 +58,7 @@
 
 #include "assert.h"
 #include "util.h"
+#include "settings.h"
 
 enum {
     OPTION_VERSION = 0,
@@ -116,6 +117,8 @@ main (int argc, char **argv)
 
     char *plugin_path = "/usr/local/lib/guardian/syslog.so";
     char *http_plugin_path = "/usr/local/lib/guardian/httpd.so";
+
+    GuardianSettings *settings = NULL;
 
     GuardianPlugin *plugin;
     GuardianSource *source;
@@ -188,7 +191,20 @@ main (int argc, char **argv)
         }
     }
 
+    /**
+     * Initialise guardian library
+     */
     libguardian_init ();
+
+
+    /**
+     * Load settings from file
+     */
+
+    settings = guardian_settings_load (SYSCONFDIR"/guardian.conf", NULL);
+
+    guardian_settings_get (settings, "key");
+    
 
     guardian_set_timezone_gmt_offset ( 120 );
 

@@ -289,6 +289,7 @@ _plugin_engine_update_source (
         {
             printf("%.2x", (unsigned char)file_hash[i]);
         }
+        printf("\n");
         
         s_offset = 0;
 
