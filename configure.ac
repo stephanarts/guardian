@@ -64,6 +64,7 @@ dnl **************************************
 LIBGUARDIAN_VERINFO=libguardian_verinfo()
 AC_SUBST([LIBGUARDIAN_VERINFO])
 
+
 dnl **************************
 dnl *** Substitute version ***
 dnl **************************
@@ -85,7 +86,6 @@ dnl ***************************************
 AC_HEADER_STDC
 AC_CHECK_LIBM
 AC_SUBST(LIBM)
-
 
 dnl *** Check for stdio.h
 dnl ***************************
@@ -157,11 +157,22 @@ AC_ARG_ENABLE(assert,
 	]
 )
 
+conftemp="${sysconfdir}"
+eval conftemp=${conftemp}
+eval conftemp=\"${conftemp}\"
+SYSCONFDIR=${conftemp}
+
+AC_DEFINE_UNQUOTED(SYSCONFDIR, "${conftemp}",
+                        [Default sysconf path])
+
+AC_SUBST(SYSCONFDIR)
+
 AC_OUTPUT([
 Makefile
 po/Makefile.in
 libguardian/Makefile
 guardian/Makefile
+data/Makefile
 plugins/Makefile
 plugins/syslog/Makefile
 plugins/httpd/Makefile
@@ -169,6 +180,8 @@ tests/Makefile
 tests/libguardian/Makefile
 tests/plugins/Makefile
 docs/Makefile
+docs/man/Makefile
+docs/man/guardian.conf.5
 docs/libguardian/Makefile
 ])
 

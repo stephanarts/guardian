@@ -1,1 +1,1 @@
-SUBDIRS = libguardian
+SUBDIRS = libguardian man

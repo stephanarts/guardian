@@ -1,0 +1,16 @@
+.\" Guardian configuration man-page
+.TH GUARDIAN_CONF 5 "JULI 2012"
+.SH NAME
+guardian.conf \- Guardian configuration file
+.SH SYNOPSIS
+guardian.conf
+.SH DESCRIPTION
+Configuration-file for Guardian.
+.SH OPTIONS
+.TP 5
+timezone_utc_offset
+Configure the timezone_offset to UTC, override whatever the system tells us.
+.TP 5
+timezone_dst
+Is the system correcting for Daylight-savings time?
+
