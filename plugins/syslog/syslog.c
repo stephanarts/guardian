@@ -55,8 +55,13 @@
 
 #define DATA_BUFFER_SIZE 1024
 
-/*** DATE ***/
-#define DATE_REGEX "(Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[ ]+([1-9]+)[ ]+([0-9]+)[:]([0-9]+)[:]([0-9]+)"
+/*** FIELD MATCHING REGULAR EXPRESSIONS ***/
+
+/** TIMESTAMP regular expression */
+#define TIMESTAMP_REGEX "(Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[ ]+([1-9]+)[ ]+([0-9]+)[:]([0-9]+)[:]([0-9]+)"
+
+/** SYSLOG_TAG regular expression */
+#define SYSLOG_TAG_REGEX ""
 
 static pcre *pcre_date_context = NULL;
 
@@ -64,6 +69,7 @@ static unsigned int min_offset = 0;
 
 GuardianSourcetype *syslog_type = NULL;
 GuardianField      *timestamp_field = NULL;
+GuardianField      *syslog_tag_field = NULL;
 
 static void
 _plugin_register_types ( GuardianPlugin *plugin );
@@ -79,6 +85,11 @@ _plugin_extract_timestamp (
         const char *entry,
         char *timestamp);
 
+static int
+_syslog_tag_compare_func (
+        const void *a,
+        const void *b );
+
 GuardianPlugin *
 guardian_plugin_init ()
 {
@@ -89,7 +100,7 @@ guardian_plugin_init ()
     plugin->register_types = _plugin_register_types;
 
     pcre_date_context = pcre_compile (
-            DATE_REGEX,
+            TIMESTAMP_REGEX,
             PCRE_FIRSTLINE |
             PCRE_MULTILINE |
             PCRE_NEWLINE_ANYCRLF |
@@ -121,6 +132,10 @@ _plugin_register_types ( GuardianPlugin *plugin )
 
         timestamp_field = guardian_field_lookup (
                 "__timestamp");
+
+        syslog_tag_field = guardian_field_register (
+                "_syslog_tag",
+                _syslog_tag_compare_func );
 
     }
     return;
@@ -550,4 +565,12 @@ _plugin_extract_timestamp ( size_t len, const char *entry, char *timestamp)
             }
         }
     }
+}
+
+static int
+_syslog_tag_compare_func (
+        const void *a,
+        const void *b )
+{
+    return strcmp (a, b);
 }
