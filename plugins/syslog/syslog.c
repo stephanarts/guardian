@@ -152,7 +152,11 @@ _plugin_engine_update_source (
 
     SHA_CTX context;
     char file_hash[20];
-    int i;
+
+    int i = 0;
+    SHA_CTX cache_context;
+    char cache_file_hash[20];
+    const char *cache_hash;
 
     const char *path = guardian_source_get_path (source);
     size_t st_size   = guardian_source_get_size (source);
@@ -191,9 +195,63 @@ _plugin_engine_update_source (
      *
      * TODO...
      */
-    if (buffer.st_size > st_size)
+    if (buffer.st_size > st_size || 1 == 1)
     {
 
+        SHA1_Init (&context);
+
+        /*
+         * If we have already read from this file before,
+         * verify it's contents.
+         */
+        if (st_size > 0)
+        {
+            SHA1_Init (&cache_context);
+
+            while (i < st_size)
+            {
+                if (i+DATA_BUFFER_SIZE < st_size)
+                {
+                    _size = fread (data_buffer, 1, DATA_BUFFER_SIZE, f);
+                }
+                else
+                {
+                    _size = fread (data_buffer, 1, st_size - i, f);
+                }
+                /*
+                 * Add to the 'cache' context for verification.
+                 */
+                SHA1_Update (&cache_context, data_buffer, _size);
+
+                /*
+                 * Add to the new context, for calculating the new hash on success.
+                 */
+                SHA1_Update (&context, data_buffer, _size);
+                i += _size;
+            }
+
+            SHA1_Final ((char *)cache_file_hash, &cache_context);
+
+            guardian_source_get_hash (
+                    source,
+                    &cache_hash );
+
+            /**
+             * Compare if the hash is the same. If it is not the same,
+             * we are dealing with a different file, or the log-file is
+             * compromised.
+             */
+            if (memcmp (cache_hash, cache_file_hash, 20) == 0)
+            {
+                printf("OK\n");
+            }
+            else
+            {
+                printf("FAIL\n");
+            }
+        }
+
+#if 0
         /*
          * Nice for performance improvement... but it does not help 
          * if you want to prevent tampering with the log-files.
@@ -206,8 +264,7 @@ _plugin_engine_update_source (
             fseek (f, st_size, SEEK_SET);
 
         }
-
-        SHA1_Init (&context);
+#endif
 
         /*
          * Fill the remaining part of the buffer (complete buffer on first try)
@@ -283,14 +340,11 @@ _plugin_engine_update_source (
             }
         }
 
+        /*
+         * Calculate the file_hash
+         */
         SHA1_Final ((char *)file_hash, &context);
 
-        for (i = 0; i < 20; ++i)
-        {
-            printf("%.2x", (unsigned char)file_hash[i]);
-        }
-        printf("\n");
-        
         s_offset = 0;
 
         while (s_offset < _size)
@@ -339,7 +393,7 @@ _plugin_engine_update_source (
      * Set the current size of the file.
      */
     guardian_source_set_size ( source, buffer.st_size);
-    guardian_source_set_hash ( source, NULL );
+    guardian_source_set_hash ( source, file_hash);
 
 
     fclose (f);

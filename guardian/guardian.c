@@ -242,6 +242,7 @@ main (int argc, char **argv)
     else
     {
         guardian_source_update ( source );
+        guardian_source_update ( source );
     }
 
     exit (0);
