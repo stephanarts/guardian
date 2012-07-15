@@ -157,16 +157,6 @@ AC_ARG_ENABLE(assert,
 	]
 )
 
-conftemp="${sysconfdir}"
-eval conftemp=${conftemp}
-eval conftemp=\"${conftemp}\"
-SYSCONFDIR=${conftemp}
-
-AC_DEFINE_UNQUOTED(SYSCONFDIR, "${conftemp}",
-                        [Default sysconf path])
-
-AC_SUBST(SYSCONFDIR)
-
 AC_OUTPUT([
 Makefile
 po/Makefile.in
