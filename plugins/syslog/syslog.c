@@ -68,11 +68,6 @@ GuardianField      *timestamp_field = NULL;
 static void
 _plugin_register_types ( GuardianPlugin *plugin );
 
-static int
-_timestamp_compare_func (
-        const void *a,
-        const void *b );
-
 static void
 _plugin_engine_update_source (
         GuardianSourceEngine *engine,
@@ -125,18 +120,10 @@ _plugin_register_types ( GuardianPlugin *plugin )
                 engine );
 
         timestamp_field = guardian_field_lookup (
-                "_timestamp");
+                "__timestamp");
 
     }
     return;
-}
-
-static int
-_timestamp_compare_func (
-        const void *a,
-        const void *b )
-{
-    return strcmp (a, b);
 }
 
 static void

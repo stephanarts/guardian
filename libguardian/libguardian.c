@@ -16,7 +16,7 @@ void
 libguardian_init ( void )
 {
     guardian_field_register (
-            "_timestamp",
+            "__timestamp",
             _timestamp_compare_func );
             
 }
