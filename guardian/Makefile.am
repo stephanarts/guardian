@@ -17,6 +17,7 @@ guardian_CFLAGS = \
     $(PCRE_CFLAGS) \
     $(OPENSSL_CFLAGS) \
     -DSYSCONFDIR=\"$(sysconfdir)\" \
+    -DPLUGINDIR=\"$(libdir)/guardian\" \
     -Wall
 
 guardian_DEPENDENCIES = \

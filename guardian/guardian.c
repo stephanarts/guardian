@@ -49,6 +49,8 @@
 #include <sys/types.h>
 #include <sys/un.h>
 
+#include <dirent.h>
+
 #include <unistd.h>
 #include <string.h>
 
@@ -101,11 +103,13 @@ show_usage ()
     return;
 }
 
-char *test_buffer = "Jan 10 11:11:11 aslk;djfa;slkjdf\nJan 11 12:12:12 ;lkjdfsa;lkjfdasdfa";
-
-/********
- * main *
- ********/
+/**
+ * main
+ * @argc: Number of elements in argv
+ * @argv: Array of command-line options provided to the application
+ *
+ * @returns: Exit-code
+ */
 int
 main (int argc, char **argv)
 {
@@ -115,8 +119,11 @@ main (int argc, char **argv)
     int log_level = 0;
     GuardianError *error = NULL;
 
-    char *plugin_path = "/usr/local/lib/guardian/syslog.so";
-    char *http_plugin_path = "/usr/local/lib/guardian/httpd.so";
+    DIR *plugin_dir = NULL;
+    struct dirent *dirp;
+    int i = 0;
+
+    char plugin_path[1024];
 
     GuardianSettings *settings = NULL;
 
@@ -205,31 +212,51 @@ main (int argc, char **argv)
 
     guardian_settings_get (settings, "key");
     
-
     guardian_set_timezone_gmt_offset ( 120 );
 
-    plugin = guardian_plugin_load ( plugin_path, &error );
-    if ( plugin == NULL )
+    /**
+     * Load all plugins from PLUGINDIR
+     */
+    plugin_dir = opendir (PLUGINDIR);   
+    if (plugin_dir != NULL)
     {
-        guardian_log_warning ( "%s", guardian_error_get_msg (error));
-        guardian_error_free (error);
-        error = NULL;
-    }
-    else
-    {
-        guardian_plugin_register_types ( plugin );
-    }
-
-    plugin = guardian_plugin_load ( http_plugin_path, &error );
-    if ( plugin == NULL )
-    {
-        guardian_log_warning ( "%s", guardian_error_get_msg (error));
-        guardian_error_free (error);
-        error = NULL;
-    }
-    else
-    {
-        guardian_plugin_register_types ( plugin );
+        while ((dirp = readdir (plugin_dir)) != NULL)
+        {
+            i = snprintf (plugin_path, 1024, "%s/%s", PLUGINDIR, dirp->d_name);
+            if (i < 0)
+            {
+                /* An error occurred */
+            }
+            else
+            {
+                if (i > 1023)
+                {
+                    /* Error, prevented buffer overflow... path too long */
+                    guardian_log_warning ( "%s", "Can not load plugin, plugin-path exceeds 1024 bytes");
+                }
+                else
+                {
+                    /**
+                     * Only load .so files, the rest can't be a plugin.
+                     */
+                    if (strcmp (&plugin_path[i-3], ".so") == 0)
+                    {
+                        plugin = guardian_plugin_load ( plugin_path, &error );
+                        if ( plugin == NULL )
+                        {
+                            guardian_log_warning ( "%s", guardian_error_get_msg (error));
+                            guardian_error_free (error);
+                            error = NULL;
+                        }
+                        else
+                        {
+                            printf("Load plugin: %s\n", plugin_path);
+                            guardian_plugin_register_types ( plugin );
+                        }
+                    }
+                }
+            }
+        }
     }
 
     source = guardian_source_new ("syslog", "/var/log/everything.log", &error);
