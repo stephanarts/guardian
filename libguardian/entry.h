@@ -41,7 +41,6 @@ GuardianEntry *
 guardian_entry_new (
         size_t          len,
         const char     *data,
-        GuardianSource *source,
         GuardianError **error);
 
 #endif /* __GUARDIAN_ENTRY_H__ */

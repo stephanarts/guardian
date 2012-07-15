@@ -46,6 +46,7 @@
 #include <stdarg.h>
 
 #include "error.h"
+#include "entry.h"
 #include "source.h"
 #include "sourceengine.h"
 

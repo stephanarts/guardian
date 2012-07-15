@@ -38,10 +38,10 @@
 #include <libguardian/types.h>
 #include <libguardian/assert.h>
 #include <libguardian/memory.h>
+#include <libguardian/entry.h>
 #include <libguardian/source.h>
 #include <libguardian/sourceengine.h>
 #include <libguardian/sourcetype.h>
-#include <libguardian/entry.h>
 #include <libguardian/field.h>
 #include <libguardian/plugin.h>
 

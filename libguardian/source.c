@@ -50,6 +50,7 @@
 #include <stdarg.h>
 
 #include "error.h"
+#include "entry.h"
 #include "source.h"
 #include "sourceengine.h"
 #include "sourcetype.h"
@@ -178,4 +179,12 @@ guardian_source_set_hash (
     }
     memcpy (source->hash, hash, 20);
     return 0;
+}
+
+void
+guardian_source_push_entry (
+        GuardianSource *source,
+        GuardianEntry  *entry )
+{
+
 }

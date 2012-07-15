@@ -319,7 +319,9 @@ _plugin_engine_update_source (
                     ptr++;
                 }
 
-                g_entry = guardian_entry_new (len, entry, source, NULL);
+                g_entry = guardian_entry_new (len, entry, NULL);
+
+                guardian_source_push_entry ( source, g_entry );
 
                 _plugin_extract_timestamp (len, entry, timestamp);
 
@@ -367,7 +369,9 @@ _plugin_engine_update_source (
 
                 s_offset+=len+offset+1;
 
-                g_entry = guardian_entry_new (len, entry, source, NULL);
+                g_entry = guardian_entry_new (len, entry, NULL);
+
+                guardian_source_push_entry ( source, g_entry );
                 
                 _plugin_extract_timestamp (len, entry, timestamp);
 

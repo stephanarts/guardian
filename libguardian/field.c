@@ -41,8 +41,8 @@
 
 #include "memory.h"
 #include "error.h"
-#include "source.h"
 #include "entry.h"
+#include "source.h"
 #include "sourceengine.h"
 #include "sourcetype.h"
 #include "field.h"

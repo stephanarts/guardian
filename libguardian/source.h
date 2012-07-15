@@ -69,4 +69,9 @@ void
 guardian_source_update (
         GuardianSource *source );
 
+void
+guardian_source_push_entry (
+        GuardianSource *source,
+        GuardianEntry  *entry );
+
 #endif /* __GUARDIAN_ENTRY_H__ */

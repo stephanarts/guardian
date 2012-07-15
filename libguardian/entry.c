@@ -46,7 +46,6 @@
 
 
 #include "error.h"
-#include "source.h"
 #include "entry.h"
 
 struct _GuardianEntry
@@ -62,16 +61,12 @@ struct _GuardianEntry
 
     /** The entry data              */
     char           *data;
-
-    /** The related Source object   */
-    GuardianSource *source;
 };
 
 GuardianEntry *
 guardian_entry_new (
         size_t          len,
         const char     *data,
-        GuardianSource *source,
         GuardianError **error)
 {
     GuardianEntry *entry = (GuardianEntry *)malloc (sizeof (GuardianEntry));
@@ -86,8 +81,6 @@ guardian_entry_new (
     entry->len = len;
     entry->data = (char *)malloc(len);
     strncpy (entry->data, data, len);
-
-    entry->source = source;
 
     return entry;
 }
