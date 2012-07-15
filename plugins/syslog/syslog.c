@@ -326,7 +326,7 @@ _plugin_engine_update_source (
                 /*
                  * TODO: Calculate the correct year, and overwrite it in the timestamp.
                  *
-                 * Using memcpy, because strncpy assumes '\0' bytes
+                 * Using memcpy, because strncpy gives meaning to '\0' bytes
                  */
                 memcpy (timestamp, "2012", 4);
 
@@ -374,7 +374,7 @@ _plugin_engine_update_source (
                 /*
                  * TODO: Calculate the correct year, and overwrite it in the timestamp.
                  *
-                 * Using memcpy, because strncpy assumes '\0' bytes
+                 * Using memcpy, because strncpy gives meaning to '\0' bytes
                  */
                 memcpy (timestamp, "2012", 4);
 
