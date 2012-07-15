@@ -75,28 +75,69 @@ guardian_plugin_load ( char *path, GuardianError **error )
     GuardianPlugin *plugin;
     int error_sv;
     char error_msg[200];
+    char *ld_error = NULL;
+
+    GuardianPlugin *(*_plugin_init)(void);
 
     handle = dlopen (path, RTLD_NOW );
-    
+    error_sv = errno;
 
     if ( handle )
     {
-        plugin = ((GuardianPlugin *(*)())dlsym (handle, "guardian_plugin_init"))();
-        plugin->handle = handle;
+        /**
+         * Clear error string (if any)
+         */
+        dlerror();
 
-        handle = NULL;
-        return plugin;
+        /**
+         * Retrieve the init function, do not call it yet
+         */
+        _plugin_init = ((GuardianPlugin *(*)())dlsym (handle, "guardian_plugin_init"));
+
+        /**
+         * Find out if anything goes wrong
+         */
+        ld_error = dlerror();
+        if (ld_error == NULL)
+        {
+            /**
+             * Call the initialisor, and create the plugin-object
+             */
+            plugin = _plugin_init();
+            if ( plugin != NULL )
+            {
+                plugin->handle = handle;
+                handle = NULL;
+                return plugin;
+            }
+        }
+        
     }
     if ( error )
     {
-        error_sv = errno;
-        if ( strerror_r (error_sv, error_msg, 200) == 0)
+        /**
+         * If something went wrong during the symbol-lookup proces.
+         */
+        if (ld_error != NULL)
         {
-            *error = guardian_error_new ("Can not load plugin: %s: '%s'", path, error_msg);
+            *error = guardian_error_new ("Can not load plugin: '%s'", ld_error);
         }
         else
         {
-            *error = guardian_error_new ("Can not load plugin: %s", path);
+            /**
+             * If something went wrong during the dlopen() process
+             */
+            if ( strerror_r (error_sv, error_msg, 200) == 0)
+            {
+                *error = guardian_error_new ("Can not load plugin: '%s: %s'", path, error_msg);
+            }
+            else
+            {
+                /**
+                 * If something else went wrong...
+                 */
+                *error = guardian_error_new ("Can not load plugin: '%s'", path);
+            }
         }
     }
 
