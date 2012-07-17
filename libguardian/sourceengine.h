@@ -38,7 +38,7 @@ typedef struct _GuardianSourceEngine GuardianSourceEngine;
 
 struct _GuardianSourceEngine
 {
-    void (*update_source) (GuardianSourceEngine *, GuardianSource *);
+    int (*update_source) (GuardianSourceEngine *, GuardianSource *);
 };
 
 GuardianSourceEngine *

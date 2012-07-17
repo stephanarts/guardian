@@ -74,7 +74,7 @@ GuardianField      *syslog_tag_field = NULL;
 static void
 _plugin_register_types ( GuardianPlugin *plugin );
 
-static void
+static int
 _plugin_engine_update_source (
         GuardianSourceEngine *engine,
         GuardianSource       *source );
@@ -141,7 +141,7 @@ _plugin_register_types ( GuardianPlugin *plugin )
     return;
 }
 
-static void
+static int 
 _plugin_engine_update_source (
         GuardianSourceEngine *engine,
         GuardianSource       *source )
@@ -180,12 +180,14 @@ _plugin_engine_update_source (
     size_t offset;
     size_t len;
 
+    int    n_new_entries = 0;
+
     f = fopen (path, "r");
     if (f == NULL)
     {
         error_sv = errno;
         guardian_log_warning ("Can not open file: %s:'%s'", path, strerror (error_sv));
-        return;
+        return -1;
     }
 
     fd = fileno (f);
@@ -321,6 +323,8 @@ _plugin_engine_update_source (
 
                 g_entry = guardian_entry_new (len, entry, NULL);
 
+                n_new_entries++;
+
                 guardian_source_push_entry ( source, g_entry );
 
                 _plugin_extract_timestamp (len, entry, timestamp);
@@ -371,6 +375,8 @@ _plugin_engine_update_source (
 
                 g_entry = guardian_entry_new (len, entry, NULL);
 
+                n_new_entries++;
+
                 guardian_source_push_entry ( source, g_entry );
                 
                 _plugin_extract_timestamp (len, entry, timestamp);
@@ -404,6 +410,7 @@ _plugin_engine_update_source (
 
     fclose (f);
 
+    return n_new_entries;
 }
 
 static int
@@ -569,6 +576,8 @@ _plugin_extract_timestamp ( size_t len, const char *entry, char *timestamp)
             }
         }
     }
+
+    return 0;
 }
 
 static int

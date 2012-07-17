@@ -65,7 +65,7 @@ guardian_source_set_size (
         GuardianSource *source,
         size_t s );
 
-void
+int
 guardian_source_update (
         GuardianSource *source );
 

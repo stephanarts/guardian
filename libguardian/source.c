@@ -149,13 +149,13 @@ guardian_source_set_size (
     source->st_size = s;
 }
 
-void
+int
 guardian_source_update (
         GuardianSource *source )
 {
     GuardianSourceEngine *engine = guardian_sourcetype_get_engine (source->source_type);
 
-    engine->update_source ( engine, source );
+    return engine->update_source ( engine, source );
 }
 
 int
