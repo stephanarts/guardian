@@ -38,6 +38,10 @@ typedef struct _GuardianSourceEngine GuardianSourceEngine;
 
 struct _GuardianSourceEngine
 {
+    /**
+     * Backend function implemented by source plugins,
+     * used for updating the source-definition.
+     */
     int (*update_source) (GuardianSourceEngine *, GuardianSource *);
 };
 
