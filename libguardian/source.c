@@ -78,6 +78,9 @@ struct _GuardianSource
      * Used to identify tampering and logfile-rotation.
      */
     char  hash[20];
+
+    size_t          n_entries;
+    GuardianEntry **entries;
 };
 
 
@@ -186,5 +189,9 @@ guardian_source_push_entry (
         GuardianSource *source,
         GuardianEntry  *entry )
 {
+    realloc (source->entries, (sizeof (GuardianEntry *) * source->n_entries+1));
+
+    source->entries[source->n_entries] = entry;
+    source->n_entries++;
 
 }
