@@ -51,6 +51,8 @@
 
 #include <dirent.h>
 
+#include <pthread.h>
+
 #include <unistd.h>
 #include <string.h>
 
@@ -129,6 +131,7 @@ main (int argc, char **argv)
 
     GuardianPlugin *plugin;
     GuardianSource *source;
+    pthread_mutex_t source_mutex;
 
     while (1)
     {
@@ -260,6 +263,8 @@ main (int argc, char **argv)
     }
 
     source = guardian_source_new ("syslog", "/var/log/everything.log", &error);
+    pthread_mutex_init (&source_mutex, NULL);
+
     if ( source == NULL )
     {
         guardian_log_warning ( "%s", guardian_error_get_msg (error));
@@ -268,9 +273,14 @@ main (int argc, char **argv)
     }
     else
     {
+        pthread_mutex_lock (&source_mutex);
         guardian_source_update ( source );
         guardian_source_update ( source );
+        pthread_mutex_unlock (&source_mutex);
     }
 
-    exit (0);
+
+    pthread_mutex_destroy (&source_mutex);
+
+    pthread_exit (NULL);
 }
