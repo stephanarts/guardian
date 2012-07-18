@@ -149,11 +149,16 @@ guardian_field_add_entry (
     f_entry->data = (char *)malloc(len*sizeof(char));
     strncpy (f_entry->data, data, len);
 
-    for (; i < field->nmemb; ++i)
+    for (; i < field->nmemb && field->comp_func (f_entry, field->base[i]) < 0; ++i)
     {
         entries[i] = field->base[i];
     }
     entries[i] = entry;
+
+    for (; i < field->nmemb; ++i)
+    {
+        entries[i+1] = field->base[i];
+    }
 
     free (field->base);
     field->base = entries;
