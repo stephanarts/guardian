@@ -248,12 +248,12 @@ _plugin_engine_update_source (
             if (memcmp (cache_hash, cache_file_hash, 20) == 0)
             {
                 /* DEBUG */
-                printf("OK\n");
+                printf("OK: Hash matches\n");
             }
             else
             {
                 /* DEBUG */
-                printf("FAIL\n");
+                printf("FAIL: Hash does not match\n");
             }
         }
 
