@@ -18,7 +18,7 @@ guardian_CFLAGS = \
     $(OPENSSL_CFLAGS) \
     -DSYSCONFDIR=\"$(sysconfdir)\" \
     -DPLUGINDIR=\"$(libdir)/guardian\" \
-    -Wall
+    -pthread -Wall
 
 guardian_DEPENDENCIES = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la
