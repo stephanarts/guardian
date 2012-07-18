@@ -125,6 +125,7 @@ dnl ***************************
 AC_CHECK_HEADER(pthread.h,
     [ AC_DEFINE([HAVE_PTHREAD_H], [1],
                 [Define to 1 if you have the <pthread.h> header file])
+      AX_PTHREAD()
     ],
     [ AC_MSG_ERROR([Can't find the <sys/select.h> header file]) ]
 )

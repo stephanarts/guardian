@@ -8,7 +8,8 @@ guardian_SOURCES = \
 guardian_LDADD = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la \
     $(PCRE_LIBS) \
-    $(OPENSSL_LIBS)
+    $(OPENSSL_LIBS) \
+    $(PTHREAD_LIBS)
 
 guardian_LDFLAGS = \
     $(PLATFORM_LDFLAGS)
@@ -16,9 +17,10 @@ guardian_LDFLAGS = \
 guardian_CFLAGS = \
     $(PCRE_CFLAGS) \
     $(OPENSSL_CFLAGS) \
+    $(PTHREAD_CFLAGS) \
     -DSYSCONFDIR=\"$(sysconfdir)\" \
     -DPLUGINDIR=\"$(libdir)/guardian\" \
-    -pthread -Wall
+    -Wall
 
 guardian_DEPENDENCIES = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la
