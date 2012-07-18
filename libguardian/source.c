@@ -189,7 +189,14 @@ guardian_source_push_entry (
         GuardianSource *source,
         GuardianEntry  *entry )
 {
-    realloc (source->entries, (sizeof (GuardianEntry *) * source->n_entries+1));
+    if (source->entries)
+    {
+        source->entries = realloc (source->entries, (sizeof (GuardianEntry *) * (source->n_entries+1)));
+    }
+    else
+    {
+        source->entries = (GuardianEntry **)malloc (sizeof (GuardianEntry *));
+    }
 
     source->entries[source->n_entries] = entry;
     source->n_entries++;
