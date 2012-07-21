@@ -163,8 +163,15 @@ guardian_source_update (
         GuardianSource *source )
 {
     GuardianSourceEngine *engine = guardian_sourcetype_get_engine (source->source_type);
+    int ret; 
+    int n = source->n_entries;
 
-    return engine->update_source ( engine, source );
+
+    ret = engine->update_source ( engine, source );
+
+    printf("%s: %d:%d\n", source->path,n, source->n_entries);
+
+    return ret;
 }
 
 /**

@@ -3,13 +3,14 @@ bin_PROGRAMS = guardian
 guardian_SOURCES = \
     guardian.c \
     settings.c settings.h \
+    scheduler.c scheduler.h \
     util.c util.h
 
 guardian_LDADD = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la \
     $(PCRE_LIBS) \
     $(OPENSSL_LIBS) \
-    $(PTHREAD_LIBS)
+    $(PTHREAD_LIBS) -lrt
 
 guardian_LDFLAGS = \
     $(PLATFORM_LDFLAGS)

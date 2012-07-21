@@ -31,6 +31,9 @@
 #define __GUARDIAN_SCHEDULER_H__
 
 void
-guardian_scheduler_add_source (guardiansource *source);
+guardian_scheduler_main ( void );
+
+void
+guardian_scheduler_add_source (GuardianSource *source);
 
 #endif

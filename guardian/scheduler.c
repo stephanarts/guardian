@@ -41,9 +41,77 @@
 
 #include <pthread.h>
 
+#include <time.h>
+
+#include <libguardian/libguardian.h>
+
+/** Define 5 Second interval */
+#define INTERVAL 2
+
+static int n_sources = 0;
+static GuardianSource **sources = NULL;
 
 void
-guardian_scheduler_add_source (guardiansource *source)
+guardian_scheduler_main ( void )
 {
-    
+    struct timespec s_t;
+    struct timespec e_t;
+    struct timespec sl_t;
+    int i;
+
+    GuardianSource **_source_ptr;
+
+    while (1)
+    {
+        clock_gettime (CLOCK_REALTIME, &s_t); 
+
+        for (i = 0; i < n_sources; ++i)
+        {
+            guardian_source_update (sources[i]);
+        }
+
+        clock_gettime (CLOCK_REALTIME, &e_t); 
+
+        sl_t.tv_sec = INTERVAL - (e_t.tv_sec - s_t.tv_sec);
+        sl_t.tv_nsec = 0;
+
+        if (clock_nanosleep (
+                CLOCK_REALTIME,
+                0,
+                &sl_t,
+                NULL))
+        {
+            return;
+        }
+    }
+}
+
+void
+guardian_scheduler_add_source ( GuardianSource *source)
+{
+    GuardianSource **_sources;
+    int i;
+
+    if (sources == NULL)
+    {
+        sources = malloc (sizeof(GuardianSource *) * 2);
+        sources[0] = source;
+        sources[1] = NULL;
+        n_sources = 1;
+        return;
+    }
+
+    _sources = malloc (sizeof(GuardianSource *) * n_sources + 2);
+
+
+    for(i = 0; i < n_sources; ++i)
+    {
+        _sources[i] = sources[i];
+    }
+    _sources[i] = source;
+
+    free (sources);
+    sources = _sources;
+
+    n_sources++;
 }
