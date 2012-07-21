@@ -39,6 +39,8 @@
 
 #include <pcre.h>
 
+#include <pthread.h>
+
 #include "memory.h"
 #include "error.h"
 #include "entry.h"
@@ -64,6 +66,8 @@ struct _GuardianField
 
     GuardianFieldEntry **base;
     size_t               nmemb;
+
+    pthread_mutex_t	 mutex;
 }; 
 
 static int
@@ -83,11 +87,18 @@ guardian_field_register (
     field->name = name;
     field->comp_func = comp_func;
 
+    /**
+     * Initialise the mutex
+     */
+    pthread_mutex_init (&field->mutex, NULL);
+
+    /** Copy the fields to the new array */
     for (i = 0; i < n_fields; ++i)
     {
         _fields[i] = fields[i];
     }
 
+    /** Append the new field */
     _fields[n_fields] = field;
 
     free (fields);
@@ -133,6 +144,18 @@ guardian_field_lookup ( const char *name )
     return NULL;
 }
 
+/**
+ * guardian_field_add_entry:
+ * @field: The field object
+ * @entry: The entry to add
+ * @len:   The length of the data field
+ * @data:  The data associated to this entry in this field
+ *
+ * NOTE:
+ * It's not a good idea to reallocate this array a few milion times.
+ * It is faster to allocate multitudes of 1024 pointers and keep the
+ * exact length of the array stored.
+ */
 void
 guardian_field_add_entry (
         GuardianField *field,
@@ -140,14 +163,20 @@ guardian_field_add_entry (
         size_t         len,
         char          *data )
 {
-    GuardianFieldEntry **entries = (GuardianFieldEntry **) malloc (sizeof (GuardianFieldEntry *) * (field->nmemb + 1));
+    GuardianFieldEntry **entries;
     GuardianFieldEntry *f_entry = (GuardianFieldEntry *)malloc (sizeof (GuardianFieldEntry));
     int i = 0;
 
+    /** Initialise the field_entry object */
     f_entry->entry = entry;
     f_entry->len = len;
     f_entry->data = (char *)malloc(len*sizeof(char));
     strncpy (f_entry->data, data, len);
+
+    /** Lock the field */
+    pthread_mutex_lock (&field->mutex);
+
+    entries = (GuardianFieldEntry **) malloc (sizeof (GuardianFieldEntry *) * (field->nmemb + 1));
 
     for (; i < field->nmemb && field->comp_func (f_entry, field->base[i]) < 0; ++i)
     {
@@ -163,4 +192,7 @@ guardian_field_add_entry (
     free (field->base);
     field->base = entries;
     field->nmemb++;
+
+    /** Unlock the field */
+    pthread_mutex_unlock (&field->mutex);
 }
