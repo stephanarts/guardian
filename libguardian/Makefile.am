@@ -35,6 +35,9 @@ libguardian_include_HEADERS = \
     libguardian.h
 
 libguardian_1_0_la_CFLAGS =               \
+    $(PTHREAD_CFLAGS) \
+    $(PCRE_CFLAGS) \
+    $(OPENSSL_CFLAGS) \
     -DLIBGUARDIAN_COMPILATION
 
 libguardian_1_0_la_LDFLAGS =              \
@@ -46,6 +49,7 @@ libguardian_1_0_la_LDFLAGS =              \
 libguardian_1_0_la_LIBADD = \
     $(OPENSSL_LIBS) \
     $(PCRE_LIBS) \
+    $(PTHREAD_LIBS) \
     -ldl
 
 INCLUDES = \
