@@ -43,10 +43,6 @@
 #include <sys/syslog.h>
 #endif
 
-#if 0
-#include <sys/stat.h>
-#endif
-
 #include <stdarg.h>
 
 #include "error.h"
@@ -83,7 +79,14 @@ struct _GuardianSource
     GuardianEntry **entries;
 };
 
-
+/**
+ * guardian_source_new:
+ * @type:  The SourceType (Eg. "syslog")
+ * @path:  The path       (Eg. "/var/log/messages")
+ * @error: 
+ *
+ * Returns: GuardianSource object, or NULL
+ */
 GuardianSource *
 guardian_source_new (
         char *type,
@@ -93,6 +96,7 @@ guardian_source_new (
     GuardianSource *source;
     GuardianSourcetype *source_type;
 
+    /** Check if a type is provided */
     if ( type == NULL )
     {
         if (error)
@@ -102,6 +106,7 @@ guardian_source_new (
         return NULL;
     }
 
+    /** Check if a path is provided */
     if ( path == NULL )
     {
         if (error)
@@ -111,6 +116,7 @@ guardian_source_new (
         return NULL;
     }
 
+    /** Look up the sourcetype object from it's name */
     source_type  = guardian_sourcetype_lookup ( type );
     if ( source_type == NULL )
     {
@@ -161,6 +167,13 @@ guardian_source_update (
     return engine->update_source ( engine, source );
 }
 
+/**
+ * guardian_source_get_hash
+ * @source: The Source object
+ * @hash:   A pointer to store the internal pointer to the 20-byte hash structure.
+ *
+ * Return: 0 on success
+ */
 int
 guardian_source_get_hash (
         GuardianSource *source,
@@ -171,6 +184,13 @@ guardian_source_get_hash (
     return 0;
 }
 
+/**
+ * guardian_source_set_hash
+ * @source:
+ * @hash: A pointer to a 20-byte hash structure.
+ *
+ * Return: 0 on success
+ */
 int
 guardian_source_set_hash (
         GuardianSource *source,
@@ -184,6 +204,16 @@ guardian_source_set_hash (
     return 0;
 }
 
+/**
+ * guardian_source_push_entry:
+ * @source:
+ * @entry:
+ *
+ * NOTE:
+ * It's not a good idea to reallocate this array a few milion times.
+ * It is faster to allocate multitudes of 1024 pointers and keep the
+ * exact length of the array stored.
+ */
 void
 guardian_source_push_entry (
         GuardianSource *source,
@@ -200,5 +230,4 @@ guardian_source_push_entry (
 
     source->entries[source->n_entries] = entry;
     source->n_entries++;
-
 }

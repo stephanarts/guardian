@@ -105,11 +105,18 @@ guardian_field_register (
     fields = _fields;
     n_fields++;
 
+    /** Sort the entries */
     qsort (fields, n_fields, sizeof (GuardianField *), (comparison_fn_t) _guardian_field_compare_name);
 
     return field;
 }
 
+/**
+ * guardian_field_lookup:
+ * @name: The field name
+ *
+ * @Return: the corresponding GuardianField, or NULL.
+ */
 GuardianField *
 guardian_field_lookup ( const char *name )
 {
