@@ -153,7 +153,7 @@ guardian_field_add_entry (
     {
         entries[i] = field->base[i];
     }
-    entries[i] = entry;
+    entries[i] = f_entry;
 
     for (; i < field->nmemb; ++i)
     {
