@@ -169,7 +169,7 @@ guardian_source_update (
 
     ret = engine->update_source ( engine, source );
 
-    printf("%s: %d:%d\n", source->path,n, source->n_entries);
+    //printf("%s: %d:%d\n", source->path,n, source->n_entries);
 
     return ret;
 }
