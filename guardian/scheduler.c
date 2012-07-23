@@ -41,15 +41,36 @@
 
 #include <pthread.h>
 
+#include <semaphore.h>
+
 #include <time.h>
 
 #include <libguardian/libguardian.h>
 
 /** Define 5 Second interval */
 #define INTERVAL 2
-
 static int n_sources = 0;
 static GuardianSource **sources = NULL;
+
+/** 
+ * Requests from sockets are handled in threads,
+ * because 'queries' can take an arbitrary time
+ * to return.
+ */
+#define         THREADPOOL_SIZE 10
+static int      thread_count = 0;
+pthread_mutex_t thread_count_mutex;
+sem_t           max_threads_sem;
+
+pthread_mutex_t thread_busy_mutex;
+
+pthread_cond_t  t_max_threads_cv;
+
+static void *
+_guardian_scheduler_thread_run (void *__arg);
+
+static void *
+guardian_scheduler_concept (void *__arg);
 
 void
 guardian_scheduler_main ( void )
@@ -58,8 +79,31 @@ guardian_scheduler_main ( void )
     struct timespec e_t;
     struct timespec sl_t;
     int i;
+    pthread_t thread;
 
-    GuardianSource **_source_ptr;
+    pthread_mutex_init (
+            &thread_count_mutex,
+            NULL );
+
+    sem_init (
+            &max_threads_sem,
+            0,
+            0 );
+
+    pthread_cond_init (
+            &t_max_threads_cv,
+            NULL );
+
+    pthread_mutex_init (
+            &thread_busy_mutex,
+            NULL );
+
+    /** Spawn a new worker thread */
+    pthread_create (
+            &thread,
+            NULL,
+            guardian_scheduler_concept,
+            NULL);
 
     while (1)
     {
@@ -86,6 +130,12 @@ guardian_scheduler_main ( void )
     }
 }
 
+/**
+ * guardian_scheduler_add_source:
+ * @source: Source object
+ *
+ * Adds a source to be polled at regular intervals.
+ */
 void
 guardian_scheduler_add_source ( GuardianSource *source)
 {
@@ -114,4 +164,72 @@ guardian_scheduler_add_source ( GuardianSource *source)
     sources = _sources;
 
     n_sources++;
+}
+
+static void *
+guardian_scheduler_concept (void *__arg)
+{
+    pthread_t thread;
+
+    while (1)
+    {
+        printf(",[%d]\n", thread_count);
+
+        pthread_mutex_lock (&thread_count_mutex);
+
+        /** Check the number of running threads */
+        if (thread_count < THREADPOOL_SIZE )
+        {
+            /** Increase the running thread-count */
+            thread_count++;
+
+            /** Spawn a new worker thread */
+            pthread_create (
+                    &thread,
+                    NULL,
+                    _guardian_scheduler_thread_run,
+                    NULL);
+            /** Unlock the mutex */
+            pthread_mutex_unlock (&thread_count_mutex);
+
+        }
+        else
+        {
+            /** Unlock the mutex */
+            pthread_mutex_unlock (&thread_count_mutex);
+
+            sem_wait (&max_threads_sem);
+        }
+    }
+}
+
+
+
+static void *
+_guardian_scheduler_thread_run (void *__arg)
+{
+
+    pthread_mutex_lock (&thread_busy_mutex);
+    pthread_mutex_unlock (&thread_busy_mutex);
+
+    printf(".1\n");
+    pthread_mutex_lock (&thread_count_mutex);
+    printf(".2\n");
+
+    if (thread_count >= (THREADPOOL_SIZE-1))
+    {
+        /** decrease the running thread-count */
+        thread_count--;
+        pthread_mutex_unlock (&thread_count_mutex);
+
+        sem_post (&max_threads_sem);
+    }
+    else
+    {
+        /** decrease the running thread-count */
+        thread_count--;
+        pthread_mutex_unlock (&thread_count_mutex);
+    }
+
+    pthread_exit (NULL);
 }
