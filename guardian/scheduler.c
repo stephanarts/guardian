@@ -41,6 +41,8 @@
 
 #include <pthread.h>
 
+#include <errno.h>
+
 #include <semaphore.h>
 
 #include <time.h>
@@ -88,7 +90,7 @@ guardian_scheduler_main ( void )
     sem_init (
             &max_threads_sem,
             0,
-            0 );
+            THREADPOOL_SIZE );
 
     pthread_cond_init (
             &t_max_threads_cv,
@@ -169,38 +171,57 @@ guardian_scheduler_add_source ( GuardianSource *source)
 static void *
 guardian_scheduler_concept (void *__arg)
 {
+    int ret;
     pthread_t thread;
+    pthread_attr_t attr;
+
+    pthread_attr_init (&attr);
+    pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
 
     while (1)
     {
-        printf(",[%d]\n", thread_count);
+        /** Spawn a new worker thread */
+        ret = pthread_create (
+                &thread,
+                &attr,
+                _guardian_scheduler_thread_run,
+                NULL);
 
-        pthread_mutex_lock (&thread_count_mutex);
-
-        /** Check the number of running threads */
-        if (thread_count < THREADPOOL_SIZE )
+        if (ret == 0)
         {
-            /** Increase the running thread-count */
             thread_count++;
-
-            /** Spawn a new worker thread */
-            pthread_create (
-                    &thread,
-                    NULL,
-                    _guardian_scheduler_thread_run,
-                    NULL);
-            /** Unlock the mutex */
-            pthread_mutex_unlock (&thread_count_mutex);
-
         }
         else
         {
-            /** Unlock the mutex */
-            pthread_mutex_unlock (&thread_count_mutex);
+            switch (ret)
+            {
+                case EPERM:
+                    printf (">>> EPERM\n");
+                    break;
+                case EINVAL:
+                    printf (">>> EINVAL\n");
+                    break;
+                case EAGAIN:
+                    printf (">>> EAGAIN\n");
+                    break;
+            }
 
-            sem_wait (&max_threads_sem);
+            /*
+             * We could not create a thread, but the thread-pool is
+             * not full. Push to the semaphore to prevent a deadlock.
+             */
+            sem_post (&max_threads_sem);
         }
+
+        /**
+         * If the maximum number of threads is running,
+         * wait for the first one to close.
+         */
+        sem_wait (&max_threads_sem);
     }
+
+    /* This, we never reach */
+    pthread_exit (NULL);
 }
 
 
@@ -209,27 +230,14 @@ static void *
 _guardian_scheduler_thread_run (void *__arg)
 {
 
-    pthread_mutex_lock (&thread_busy_mutex);
-    pthread_mutex_unlock (&thread_busy_mutex);
+    /* BEGIN THREAD BODY, THE REAL STUFF */
 
-    printf(".1\n");
-    pthread_mutex_lock (&thread_count_mutex);
-    printf(".2\n");
+    /* END THREAD BODY, THE REAL STUFF */
 
-    if (thread_count >= (THREADPOOL_SIZE-1))
+    if (sem_post (&max_threads_sem) == -1)
     {
-        /** decrease the running thread-count */
-        thread_count--;
-        pthread_mutex_unlock (&thread_count_mutex);
-
-        sem_post (&max_threads_sem);
+        printf("SEM POST FAILED\n");
     }
-    else
-    {
-        /** decrease the running thread-count */
-        thread_count--;
-        pthread_mutex_unlock (&thread_count_mutex);
-    }
-
     pthread_exit (NULL);
 }
+
