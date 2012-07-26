@@ -40,9 +40,7 @@
 #endif
 
 #include <pthread.h>
-
 #include <errno.h>
-
 #include <semaphore.h>
 
 #include <time.h>
@@ -61,6 +59,12 @@ static GuardianSource **sources = NULL;
  */
 #define         THREADPOOL_SIZE 10
 sem_t           max_threads_sem;
+
+/**
+ * Any thread-job is first pushed to a queue.
+ */
+#define         QUEUE_SIZE      10
+sem_t           queue_size_sem;
 
 static int      thread_count = 0;
 
@@ -85,13 +89,27 @@ guardian_scheduler_main ( void )
             0,
             THREADPOOL_SIZE );
 
-    /** Spawn a new worker thread */
+    sem_init (
+            &queue_size_sem,
+            0,
+            0 );
+
+    /**
+     * Spawn a new thread, this thread will be responsible for
+     * getting some work done.
+     */
     pthread_create (
             &thread,
             NULL,
             guardian_scheduler_concept,
             NULL);
 
+    /**
+     * Enter the main loop, schedules jobs in the queue
+     *
+     * NOTE:
+     * Hmm, the queue is still missing
+     */
     while (1)
     {
         clock_gettime (CLOCK_REALTIME, &s_t); 
@@ -129,6 +147,7 @@ guardian_scheduler_add_source ( GuardianSource *source)
     GuardianSource **_sources;
     int i;
 
+    /** If no sources are defined */
     if (sources == NULL)
     {
         sources = malloc (sizeof(GuardianSource *) * 2);
@@ -138,16 +157,20 @@ guardian_scheduler_add_source ( GuardianSource *source)
         return;
     }
 
+    /** Increase the source list */
     _sources = malloc (sizeof(GuardianSource *) * n_sources + 2);
 
-
+    /** Copy all sources to the new list */
     for(i = 0; i < n_sources; ++i)
     {
         _sources[i] = sources[i];
     }
     _sources[i] = source;
 
+    /** Free the old list */
     free (sources);
+
+    /** And replace it with the new one */
     sources = _sources;
 
     n_sources++;
@@ -165,6 +188,11 @@ guardian_scheduler_concept (void *__arg)
 
     while (1)
     {
+        /**
+         * If the queue is empty, wait for a new job to be queued.
+         */
+        sem_wait (&queue_size_sem);
+
         /** Spawn a new worker thread */
         ret = pthread_create (
                 &thread,
@@ -174,26 +202,41 @@ guardian_scheduler_concept (void *__arg)
 
         if (ret == 0)
         {
+            /** Ooh, we have a thread */
             thread_count++;
         }
         else
         {
+            /** Stuff went wrong */
             switch (ret)
             {
-                case EPERM:
-                    printf (">>> EPERM\n");
-                    break;
-                case EINVAL:
-                    printf (">>> EINVAL\n");
-                    break;
                 case EAGAIN:
-                    printf (">>> EAGAIN\n");
+                    /**
+                     * Now we have a problem, could be memory,
+                     * limits or other constraints
+                     */
+                    guardian_log_critical (
+                            "CRITICAL:  %s",
+                            "No resources to create thread\n");
+                    break;
+                case EPERM:
+                case EINVAL:
+                default:
+                    /** We don't really care why it went wrong here */
+                    guardian_log_critical (
+                            "CRITICAL:  %s",
+                            "Could not create thread; unknown error\n");
                     break;
             }
 
             /*
              * We could not create a thread, but the thread-pool is
              * not full. Push to the semaphore to prevent a deadlock.
+             *
+             * As a result, this thread will not dead-lock,
+             * but it will jump to 100% CPU and keep the system busy.
+             *
+             * Might not be the brightest idea ;-)
              */
             sem_post (&max_threads_sem);
         }
@@ -226,3 +269,10 @@ _guardian_scheduler_thread_run (void *__arg)
     pthread_exit (NULL);
 }
 
+
+void
+guardian_scheduler_queue_push ()
+{
+
+    sem_post (&queue_size_sem);
+}
