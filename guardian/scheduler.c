@@ -60,13 +60,10 @@ static GuardianSource **sources = NULL;
  * to return.
  */
 #define         THREADPOOL_SIZE 10
-static int      thread_count = 0;
-pthread_mutex_t thread_count_mutex;
 sem_t           max_threads_sem;
 
-pthread_mutex_t thread_busy_mutex;
+static int      thread_count = 0;
 
-pthread_cond_t  t_max_threads_cv;
 
 static void *
 _guardian_scheduler_thread_run (void *__arg);
@@ -83,22 +80,10 @@ guardian_scheduler_main ( void )
     int i;
     pthread_t thread;
 
-    pthread_mutex_init (
-            &thread_count_mutex,
-            NULL );
-
     sem_init (
             &max_threads_sem,
             0,
             THREADPOOL_SIZE );
-
-    pthread_cond_init (
-            &t_max_threads_cv,
-            NULL );
-
-    pthread_mutex_init (
-            &thread_busy_mutex,
-            NULL );
 
     /** Spawn a new worker thread */
     pthread_create (
