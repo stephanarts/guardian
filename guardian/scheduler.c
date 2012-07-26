@@ -45,6 +45,11 @@
 
 #include <time.h>
 
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
 #include <libguardian/libguardian.h>
 
 /** Define 5 Second interval */
@@ -68,6 +73,8 @@ sem_t           queue_size_sem;
 
 static int      thread_count = 0;
 
+#define         SOCK_PATH "/tmp/guardian.sock"
+
 
 static void *
 _guardian_scheduler_thread_run (void *__arg);
@@ -84,11 +91,41 @@ guardian_scheduler_main ( void )
     int i;
     pthread_t thread;
 
+    int s, len;
+    struct sockaddr_un local;
+
+    if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+        perror("socket");
+        exit(1);
+    }
+
+    local.sun_family = AF_UNIX;
+    strcpy(local.sun_path, SOCK_PATH);
+    unlink(local.sun_path);
+    len = strlen(local.sun_path) + sizeof(local.sun_family);
+    if (bind(s, (struct sockaddr *)&local, len) == -1) {
+        perror("bind");
+        exit(1);
+    }
+
+    if (listen(s, 5) == -1) {
+        perror("listen");
+        exit(1);
+    }
+
+
+    /** 
+     * Create semaphore used for guarding the maximum
+     * number of simultanious running threads.
+     */
     sem_init (
             &max_threads_sem,
             0,
             THREADPOOL_SIZE );
 
+    /** 
+     * Create semaphore used for guarding the event-queue.
+     */
     sem_init (
             &queue_size_sem,
             0,
@@ -112,6 +149,7 @@ guardian_scheduler_main ( void )
      */
     while (1)
     {
+
         clock_gettime (CLOCK_REALTIME, &s_t); 
 
         for (i = 0; i < n_sources; ++i)
