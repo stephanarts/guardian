@@ -43,6 +43,8 @@
 #include <getopt.h>
 #endif
 
+#include <signal.h>
+
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -106,6 +108,22 @@ show_usage ()
     return;
 }
 
+void
+process_signal (int s)
+{
+    printf("%d\n", s);
+    switch (s)
+    {
+        case SIGINT:
+            printf("aaa\n");
+            guardian_scheduler_main_quit ();
+            break;
+        default:
+            break;
+    }
+    return;
+}
+
 /**
  * main
  * @argc: Number of elements in argv
@@ -127,6 +145,14 @@ main (int argc, char **argv)
     int i = 0;
 
     char plugin_path[1024];
+
+    struct sigaction sa;
+
+    sa.sa_handler = process_signal;
+    sa.sa_flags = SA_RESTART;
+    sigemptyset(&sa.sa_mask);
+
+    sigaction (SIGINT, &sa, NULL);
 
     GuardianSettings *settings = NULL;
 
@@ -271,6 +297,7 @@ main (int argc, char **argv)
     source = guardian_source_new ("syslog", "/var/log/syslog", &error);
     guardian_scheduler_add_source ( source );
 
+    /** Start the main loop */
     guardian_scheduler_main ( );
 
     exit (0);

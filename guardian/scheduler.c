@@ -75,6 +75,8 @@ static int      thread_count = 0;
 
 #define         SOCK_PATH "/tmp/guardian.sock"
 
+static int      main_loop_running = 0;
+
 
 static void *
 _guardian_scheduler_thread_run (void *__arg);
@@ -93,6 +95,13 @@ guardian_scheduler_main ( void )
 
     int s, len;
     struct sockaddr_un local;
+
+    if (main_loop_running == 1)
+    {
+        return;
+    }
+
+    main_loop_running = 1;
 
     if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
         perror("socket");
@@ -130,8 +139,7 @@ guardian_scheduler_main ( void )
             &queue_size_sem,
             0,
             0 );
-
-    /**
+    /*
      * Spawn a new thread, this thread will be responsible for
      * getting some work done.
      */
@@ -168,7 +176,9 @@ guardian_scheduler_main ( void )
                 &sl_t,
                 NULL))
         {
-            return;
+            /** If we return from the loop here, we exit */
+            if (main_loop_running == 0)
+                return;
         }
     }
 }
@@ -298,12 +308,15 @@ _guardian_scheduler_thread_run (void *__arg)
 
     /* BEGIN THREAD BODY, THE REAL STUFF */
 
+    sleep (10);
+
     /* END THREAD BODY, THE REAL STUFF */
 
     if (sem_post (&max_threads_sem) == -1)
     {
         printf("SEM POST FAILED\n");
     }
+    printf("exit\n");
     pthread_exit (NULL);
 }
 
@@ -313,4 +326,12 @@ guardian_scheduler_queue_push ()
 {
 
     sem_post (&queue_size_sem);
+}
+
+void
+guardian_scheduler_main_quit ( void )
+{
+    /*pthread_mutex_lock ();*/
+    main_loop_running = 0;
+    /*pthread_mutex_unlock ();*/
 }

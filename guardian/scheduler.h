@@ -34,6 +34,9 @@ void
 guardian_scheduler_main ( void );
 
 void
+guardian_scheduler_main_quit ( void );
+
+void
 guardian_scheduler_add_source (GuardianSource *source);
 
 #endif
