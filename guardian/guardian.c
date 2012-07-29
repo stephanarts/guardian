@@ -115,6 +115,7 @@ process_signal (int s)
     switch (s)
     {
         case SIGINT:
+        case SIGTERM:
             printf("aaa\n");
             guardian_scheduler_main_quit ();
             break;
@@ -153,6 +154,7 @@ main (int argc, char **argv)
     sigemptyset(&sa.sa_mask);
 
     sigaction (SIGINT, &sa, NULL);
+    sigaction (SIGTERM, &sa, NULL);
 
     GuardianSettings *settings = NULL;
 
