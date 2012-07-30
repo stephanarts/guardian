@@ -185,6 +185,13 @@ guardian_scheduler_main ( void )
         /** If we return from the loop here, we exit */
         if (main_loop_running == 0)
         {
+            /**
+             * Cancel the 'scheduler' thread, it is probably stuck 
+             * in a semaphore.
+             */
+            pthread_cancel (thread);
+
+            /** Exit this thread */
             pthread_exit (NULL);
         }
     }
@@ -234,7 +241,6 @@ guardian_scheduler_add_source ( GuardianSource *source)
 static void *
 guardian_scheduler_concept (void *__arg)
 {
-    int i;
     int ret;
     pthread_t      thread;
     pthread_attr_t attr;
@@ -247,7 +253,13 @@ guardian_scheduler_concept (void *__arg)
         /**
          * If the queue is empty, wait for a new job to be queued.
          */
-        //sem_wait (&queue_size_sem);
+        sem_wait (&queue_size_sem);
+
+        /** If we return from the loop here, we exit */
+        if (main_loop_running == 0)
+        {
+            pthread_exit (NULL);
+        }
 
         /** Spawn a new worker thread */
         ret = pthread_create (
@@ -295,12 +307,6 @@ guardian_scheduler_concept (void *__arg)
              * Might not be the brightest idea ;-)
              */
             sem_post (&max_threads_sem);
-        }
-
-        /** If we return from the loop here, we exit */
-        if (main_loop_running == 0)
-        {
-            pthread_exit (NULL);
         }
 
         /**
