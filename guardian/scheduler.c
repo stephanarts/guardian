@@ -176,9 +176,16 @@ guardian_scheduler_main ( void )
                 &sl_t,
                 NULL))
         {
-            /** If we return from the loop here, we exit */
-            if (main_loop_running == 0)
-                return;
+            /**
+             * Sleep failed (due to an interrupt, most likely...)
+             * let's not pay too much attention. We'll close the thread later anyways.
+             */
+        }
+
+        /** If we return from the loop here, we exit */
+        if (main_loop_running == 0)
+        {
+            pthread_exit (NULL);
         }
     }
 }
@@ -227,8 +234,9 @@ guardian_scheduler_add_source ( GuardianSource *source)
 static void *
 guardian_scheduler_concept (void *__arg)
 {
+    int i;
     int ret;
-    pthread_t thread;
+    pthread_t      thread;
     pthread_attr_t attr;
 
     pthread_attr_init (&attr);
@@ -239,14 +247,14 @@ guardian_scheduler_concept (void *__arg)
         /**
          * If the queue is empty, wait for a new job to be queued.
          */
-        sem_wait (&queue_size_sem);
+        //sem_wait (&queue_size_sem);
 
         /** Spawn a new worker thread */
         ret = pthread_create (
-                &thread,
-                &attr,
-                _guardian_scheduler_thread_run,
-                NULL);
+            &thread,
+            &attr,
+            _guardian_scheduler_thread_run,
+            NULL);
 
         if (ret == 0)
         {
@@ -289,6 +297,12 @@ guardian_scheduler_concept (void *__arg)
             sem_post (&max_threads_sem);
         }
 
+        /** If we return from the loop here, we exit */
+        if (main_loop_running == 0)
+        {
+            pthread_exit (NULL);
+        }
+
         /**
          * If the maximum number of threads is running,
          * wait for the first one to close.
@@ -305,18 +319,17 @@ guardian_scheduler_concept (void *__arg)
 static void *
 _guardian_scheduler_thread_run (void *__arg)
 {
-
     /* BEGIN THREAD BODY, THE REAL STUFF */
 
-    sleep (10);
+//    sleep (1);
 
     /* END THREAD BODY, THE REAL STUFF */
 
     if (sem_post (&max_threads_sem) == -1)
     {
-        printf("SEM POST FAILED\n");
+        //printf("SEM POST FAILED\n");
     }
-    printf("exit\n");
+
     pthread_exit (NULL);
 }
 

@@ -111,12 +111,16 @@ show_usage ()
 void
 process_signal (int s)
 {
-    printf("%d\n", s);
     switch (s)
     {
         case SIGINT:
+            /**
+             * Let's ignore further instances of SIGINT.
+             */
+            signal (SIGINT, SIG_IGN);
+            guardian_scheduler_main_quit ();
+            break;
         case SIGTERM:
-            printf("aaa\n");
             guardian_scheduler_main_quit ();
             break;
         default:
