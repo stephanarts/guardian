@@ -87,15 +87,16 @@ guardian_scheduler_concept (void *__arg);
 void
 guardian_scheduler_main ( void )
 {
-    struct timespec s_t;
-    struct timespec e_t;
-    struct timespec sl_t;
-    int i;
+    struct timespec timeout;
+    int fd;
+    int n_fds = 1;
+    fd_set r_fds;
     pthread_t thread;
 
     int s, len;
     struct sockaddr_un local;
 
+    /** If the main-loop is already running, return */
     if (main_loop_running == 1)
     {
         return;
@@ -103,7 +104,13 @@ guardian_scheduler_main ( void )
 
     main_loop_running = 1;
 
-    if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+    /** Set the timeout on 10 seconds */
+    timeout.tv_sec = 10;
+    timeout.tv_nsec = 0;
+
+    FD_ZERO (&r_fds);
+
+    if ((s = socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0)) == -1) {
         perror("socket");
         exit(1);
     }
@@ -122,6 +129,7 @@ guardian_scheduler_main ( void )
         exit(1);
     }
 
+    FD_SET (s, &r_fds);
 
     /** 
      * Create semaphore used for guarding the maximum
@@ -157,34 +165,49 @@ guardian_scheduler_main ( void )
      */
     while (1)
     {
-
-        clock_gettime (CLOCK_REALTIME, &s_t); 
-
-        for (i = 0; i < n_sources; ++i)
+        fd = pselect (
+                n_fds,      /** Number of file-descriptors */
+                &r_fds,     /** Read FD_SET         */
+                NULL,       /** Write FD_SET        */
+                NULL,       /** Except FD_SET       */
+                &timeout,   /** Timeout timespec    */
+                NULL );     /** Signal sigset_t     */
+        switch (fd)
         {
-            guardian_source_update (sources[i]);
-        }
-
-        clock_gettime (CLOCK_REALTIME, &e_t); 
-
-        sl_t.tv_sec = INTERVAL - (e_t.tv_sec - s_t.tv_sec);
-        sl_t.tv_nsec = 0;
-
-        if (clock_nanosleep (
-                CLOCK_REALTIME,
-                0,
-                &sl_t,
-                NULL))
-        {
-            /**
-             * Sleep failed (due to an interrupt, most likely...)
-             * let's not pay too much attention. We'll close the thread later anyways.
+            /** ERROR */
+            case -1: 
+                break;
+            /** Timeout */
+            case 0:
+                printf(".\n");
+                break;
+            /** Oooh, we have data */
+            /** 
+             * TODO:
+             * Think of a way to prevent a DoS on the update mechanism,
+             * flooding the queue with commands may never prevent the
+             * program from updating the datasources.
              */
+            default:
+                /** If we have data on the listening socket, accept */
+                if (s == fd)
+                {
+                }
+                else
+                {
+                }
+                break;
         }
 
         /** If we return from the loop here, we exit */
         if (main_loop_running == 0)
         {
+            /** Close the socket */
+            close (s);
+
+            /** Remove the unix socket file */
+            unlink (SOCK_PATH);
+
             /**
              * Cancel the 'scheduler' thread, it is probably stuck 
              * in a semaphore.
