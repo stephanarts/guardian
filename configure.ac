@@ -162,7 +162,7 @@ AC_OUTPUT([
 Makefile
 po/Makefile.in
 libguardian/Makefile
-guardian/Makefile
+guardiand/Makefile
 data/Makefile
 plugins/Makefile
 plugins/syslog/Makefile

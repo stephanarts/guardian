@@ -1,21 +1,21 @@
-bin_PROGRAMS = guardian
+bin_PROGRAMS = guardiand
 
-guardian_SOURCES = \
+guardiand_SOURCES = \
     guardian.c \
     settings.c settings.h \
     scheduler.c scheduler.h \
     util.c util.h
 
-guardian_LDADD = \
+guardiand_LDADD = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la \
     $(PCRE_LIBS) \
     $(OPENSSL_LIBS) \
     $(PTHREAD_LIBS) -lrt
 
-guardian_LDFLAGS = \
+guardiand_LDFLAGS = \
     $(PLATFORM_LDFLAGS)
 
-guardian_CFLAGS = \
+guardiand_CFLAGS = \
     $(PCRE_CFLAGS) \
     $(OPENSSL_CFLAGS) \
     $(PTHREAD_CFLAGS) \
@@ -23,7 +23,7 @@ guardian_CFLAGS = \
     -DPLUGINDIR=\"$(libdir)/guardian\" \
     -Wall
 
-guardian_DEPENDENCIES = \
+guardiand_DEPENDENCIES = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la
 
 INCLUDES = \

@@ -74,6 +74,8 @@ sem_t           queue_size_sem;
 static int      thread_count = 0;
 
 #define         SOCK_PATH "/tmp/guardian.sock"
+#define         BUFFER_LEN      1024
+char            buffer[BUFFER_LEN];
 
 static int      main_loop_running = 0;
 
@@ -93,8 +95,11 @@ guardian_scheduler_main ( void )
     fd_set r_fds;
     pthread_t thread;
 
-    int s, len;
+    int s, r_s, len;
     struct sockaddr_un local;
+    struct sockaddr_un r_addr;
+    socklen_t r_addr_size;
+
 
     /** If the main-loop is already running, return */
     if (main_loop_running == 1)
@@ -114,6 +119,8 @@ guardian_scheduler_main ( void )
         perror("socket");
         exit(1);
     }
+
+    r_addr_size = sizeof(struct sockaddr_un);
 
     local.sun_family = AF_UNIX;
     strcpy(local.sun_path, SOCK_PATH);
@@ -192,9 +199,13 @@ guardian_scheduler_main ( void )
                 /** If we have data on the listening socket, accept */
                 if (s == fd)
                 {
+                    r_s = accept ( s, &r_addr, &r_addr_size);
+                    FD_SET (r_s, &r_fds);
                 }
                 else
                 {
+                    /** Read data */
+                    recv (fd, buffer, BUFFER_LEN, 0);
                 }
                 break;
         }
