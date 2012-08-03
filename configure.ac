@@ -163,6 +163,7 @@ Makefile
 po/Makefile.in
 libguardian/Makefile
 guardiand/Makefile
+guardian/Makefile
 data/Makefile
 plugins/Makefile
 plugins/syslog/Makefile
