@@ -202,8 +202,9 @@ main (int argc, char **argv)
                 verbosity = verbosity + 1;
                 break;
             default:
-		fprintf(stderr, "Try '%s --help' for more information\n", PACKAGE_NAME);
-		break;
+                fprintf(stderr, "Try '%s --help' for more information\n", PACKAGE_NAME);
+                exit(1);
+                break;
         }
     }
 
