@@ -60,6 +60,8 @@
 
 #include <openssl/sha.h>
 
+#define         SOCK_PATH "/tmp/guardian.sock"
+
 enum {
     OPTION_VERSION = 0,
     OPTION_VERBOSE,
@@ -111,5 +113,74 @@ show_usage ()
 int
 main (int argc, char **argv)
 {
+    int option_index = 0;
+    int c = 0;
+    int verbosity = 0;
+
+    int s, len;
+    struct sockaddr_un remote;
+
+    while (1)
+    {
+        c = getopt_long (argc, argv, "vVh",
+                    long_options, &option_index);
+        if (c == -1)
+            break;
+
+        switch (c)
+        {
+            case 0:
+                switch (option_index)
+                {
+                    case OPTION_VERSION:
+                        show_version();
+                        exit(0);
+                        break;
+                    case OPTION_HELP:
+                        show_usage();
+                        exit(0);
+                        break;
+                    case OPTION_FATAL_WARNINGS:
+                        break;
+                }
+                break;
+            case 'V':
+                show_version ();
+                exit(0);
+                break;
+            case 'h':
+                show_usage();
+                exit(0);
+                break;
+            case 'v':
+                verbosity = verbosity + 1;
+                break;
+            default:
+                fprintf(stderr, "Try '%s --help' for more information\n", argv[0]);
+                exit (1);
+                break;
+        }
+    }
+
+    if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+        perror("socket");
+        exit(1);
+    }
+
+    printf("Trying to connect...\n");
+
+    remote.sun_family = AF_UNIX;
+    strcpy(remote.sun_path, SOCK_PATH);
+    len = strlen(remote.sun_path) + sizeof(remote.sun_family);
+    if (connect(s, (struct sockaddr *)&remote, len) == -1) {
+        perror("connect");
+        exit(1);
+    }
+
+    printf("Connected.\n");
+
+    send (s, "Hello World", 10, 0);
+
+    close (s);
     exit(0);
 }
