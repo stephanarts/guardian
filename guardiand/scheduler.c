@@ -89,8 +89,7 @@ guardian_scheduler_concept (void *__arg);
 void
 guardian_scheduler_main ( void )
 {
-    struct timespec timeout;
-    int fd;
+    int ret;
     int n_fds = 1;
     fd_set r_fds;
     pthread_t thread;
@@ -108,12 +107,6 @@ guardian_scheduler_main ( void )
     }
 
     main_loop_running = 1;
-
-    /** Set the timeout on 10 seconds */
-    timeout.tv_sec = 10;
-    timeout.tv_nsec = 0;
-
-    FD_ZERO (&r_fds);
 
     if ((s = socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0)) == -1) {
         perror("socket");
@@ -136,8 +129,6 @@ guardian_scheduler_main ( void )
         exit(1);
     }
 
-    FD_SET (s, &r_fds);
-
     /** 
      * Create semaphore used for guarding the maximum
      * number of simultanious running threads.
@@ -154,6 +145,7 @@ guardian_scheduler_main ( void )
             &queue_size_sem,
             0,
             0 );
+
     /*
      * Spawn a new thread, this thread will be responsible for
      * getting some work done.
@@ -164,6 +156,8 @@ guardian_scheduler_main ( void )
             guardian_scheduler_concept,
             NULL);
 
+    n_fds = s+1;
+
     /**
      * Enter the main loop, schedules jobs in the queue
      *
@@ -172,43 +166,48 @@ guardian_scheduler_main ( void )
      */
     while (1)
     {
-        fd = pselect (
+        FD_ZERO (&r_fds);
+        FD_SET (s, &r_fds);
+
+        ret = pselect (
                 n_fds,      /** Number of file-descriptors */
                 &r_fds,     /** Read FD_SET         */
                 NULL,       /** Write FD_SET        */
                 NULL,       /** Except FD_SET       */
-                &timeout,   /** Timeout timespec    */
+                NULL,       /** Timeout timespec    */
                 NULL );     /** Signal sigset_t     */
-        switch (fd)
+        switch (ret)
         {
             /** ERROR */
             case -1: 
+                if (errno != EINTR)
+                {
+                    printf("ERROR: \n");
+                }
                 break;
             /** Timeout */
             case 0:
-                printf(".\n");
                 break;
-            /** Oooh, we have data */
-            /** 
-             * TODO:
-             * Think of a way to prevent a DoS on the update mechanism,
-             * flooding the queue with commands may never prevent the
-             * program from updating the datasources.
-             */
             default:
+                /** Oooh, we have data */
+                /** 
+                 * TODO:
+                 * Think of a way to prevent a DoS on the update mechanism,
+                 * flooding the queue with commands may never prevent the
+                 * program from updating the datasources.
+                 */
                 /** If we have data on the listening socket, accept */
-                if (s == fd)
+                if (FD_ISSET (s, &r_fds))
                 {
+                    printf("New connection\n");
                     r_s = accept ( s, &r_addr, &r_addr_size);
                     FD_SET (r_s, &r_fds);
                 }
-                else
-                {
-                    /** Read data */
-                    recv (fd, buffer, BUFFER_LEN, 0);
-                }
+
+                /** TODO: Look at the other sockets, and possibly signals */
                 break;
         }
+
 
         /** If we return from the loop here, we exit */
         if (main_loop_running == 0)
