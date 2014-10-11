@@ -30,6 +30,11 @@
 #ifndef __GUARDIAN_FIELD_H__
 #define __GUARDIAN_FIELD_H__
 
+#ifndef comparison_fn_t
+typedef int (*__compar_fn_t) (__const void *, __const void *);
+typedef __compar_fn_t comparison_fn_t;
+#endif 
+
 typedef struct _GuardianFieldEntry GuardianFieldEntry;
 
 typedef struct _GuardianField GuardianField;

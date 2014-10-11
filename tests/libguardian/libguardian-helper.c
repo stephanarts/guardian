@@ -49,9 +49,18 @@
 
 #define BUFFER_SIZE 1024
 
+
+#define POS_GMT_OFFSET 120
+#define NEG_GMT_OFFSET -120
+
 int
 main (int argc, char **argv)
 {
+    libguardian_init();
 
+    guardian_set_timezone_gmt_offset(POS_GMT_OFFSET);
+    guardian_set_timezone_gmt_offset(NEG_GMT_OFFSET);
+
+    
     exit(0);
 }

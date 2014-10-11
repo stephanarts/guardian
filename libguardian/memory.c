@@ -35,7 +35,7 @@
 
 static int allow_malloc = 1;
 
-inline void *
+void *
 guardian_new ( size_t nmemb, size_t size)
 {
 #ifdef ENABLE_ASSERT

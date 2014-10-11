@@ -13,5 +13,10 @@ httpd_la_LDFLAGS =       \
     -module              \
     $(PLATFORM_LDFLAGS)
 
+httpd_la_CFLAGS =   \
+    $(PCRE_CFLAGS) \
+    -std=c99
+
+
 INCLUDES = \
     -I$(top_srcdir)

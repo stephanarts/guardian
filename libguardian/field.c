@@ -39,6 +39,7 @@
 
 #include <pcre.h>
 
+#include <sys/types.h>
 #include <pthread.h>
 
 #include "memory.h"

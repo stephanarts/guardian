@@ -127,7 +127,7 @@ AC_CHECK_HEADER(pthread.h,
                 [Define to 1 if you have the <pthread.h> header file])
       AX_PTHREAD()
     ],
-    [ AC_MSG_ERROR([Can't find the <sys/select.h> header file]) ]
+    [ AC_MSG_ERROR([Can't find the <pthread.h> header file]) ]
 )
 
 dnl *** Check for getopt.h
