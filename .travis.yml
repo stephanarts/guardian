@@ -6,3 +6,5 @@ compiler:
 before_install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq libzmq-dev
+
+script: ./configure && make && make check
