@@ -5,6 +5,7 @@ compiler:
 
 before_install:
  - sudo apt-get update -qq
+ - sudo apt-get install intltool
  - sh autogen.sh
 
 script: ./configure && make && make check
