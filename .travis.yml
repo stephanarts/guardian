@@ -7,7 +7,7 @@ before_install:
  - sudo add-apt-repository ppa:chris-lea/zeromq -y
  - sudo apt-get update -qq
  - sudo apt-get install intltool
- - sudo apt-get install zeromq3
+ - sudo apt-get install libzmq3-dev 
  - sh autogen.sh
 
 script: ./configure && make && make check
