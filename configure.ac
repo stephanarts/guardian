@@ -20,14 +20,13 @@ dnl *** Debugging support for DEV snapshots ***
 dnl *******************************************
 m4_define([guardian_debug_default], [ifelse(guardian_version_tag(), [git], [full], [minimum])])
 
-AC_COPYRIGHT([Copyright (c) 2012
+AC_COPYRIGHT([Copyright (c) 2014
            Stephan Arts <stephan@xfce.org>.])
 
 AC_INIT([guardian], [guardian_version], [])
 AC_PREREQ([2.50])
 
-GUARDIAN_VERSION=guardian_version
-AM_INIT_AUTOMAKE([guardian], [$GUARDIAN_VERSION])
+AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_MAINTAINER_MODE
@@ -146,6 +145,10 @@ AC_SUBST(PCRE_CFLAGS)
 PKG_CHECK_MODULES([OPENSSL], [openssl >= 0.9.8])
 AC_SUBST(OPENSSL_LIBS)
 AC_SUBST(OPENSSL_CFLAGS)
+
+PKG_CHECK_MODULES([ZMQ], [libzmq >= 4.0.2])
+AC_SUBST(ZMQ_LIBS)
+AC_SUBST(ZMQ_CFLAGS)
 
 dnl *****************************
 dnl *** Configuration options ***

@@ -34,7 +34,7 @@
 #ifndef __GUARDIAN_MEMORY_H__
 #define __GUARDIAN_MEMORY_H__
 
-inline void *
+void *
 guardian_new ( size_t nmemb, size_t size);
 
 void

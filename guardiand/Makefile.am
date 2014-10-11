@@ -10,6 +10,7 @@ guardiand_LDADD = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la \
     $(PCRE_LIBS) \
     $(OPENSSL_LIBS) \
+    $(ZMQ_LIBS) \
     $(PTHREAD_LIBS) -lrt
 
 guardiand_LDFLAGS = \
@@ -18,6 +19,7 @@ guardiand_LDFLAGS = \
 guardiand_CFLAGS = \
     $(PCRE_CFLAGS) \
     $(OPENSSL_CFLAGS) \
+    $(ZMQ_CFLAGS) \
     $(PTHREAD_CFLAGS) \
     -DSYSCONFDIR=\"$(sysconfdir)\" \
     -DPLUGINDIR=\"$(libdir)/guardian\" \

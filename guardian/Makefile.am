@@ -6,6 +6,7 @@ guardian_SOURCES = \
 guardian_LDADD = \
     $(PCRE_LIBS) \
     $(OPENSSL_LIBS) \
+    $(ZMQ_LIBS) \
     $(PTHREAD_LIBS) -lrt
 
 guardian_LDFLAGS = \
@@ -14,6 +15,7 @@ guardian_LDFLAGS = \
 guardian_CFLAGS = \
     $(PCRE_CFLAGS) \
     $(OPENSSL_CFLAGS) \
+    $(ZMQ_CFLAGS) \
     $(PTHREAD_CFLAGS) \
     -DSYSCONFDIR=\"$(sysconfdir)\" \
     -DPLUGINDIR=\"$(libdir)/guardian\" \
