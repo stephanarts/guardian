@@ -54,7 +54,7 @@ struct _GuardianEntry
      * SHA1 hash of the length field ((4 bytes) in Network byte order),
      * and the entry-data.
      */
-    char            hash[20];   
+    unsigned char   hash[20];   
 
     /** Length of the data-field    */
     size_t          len;

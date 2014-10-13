@@ -71,6 +71,8 @@ GuardianSourcetype *syslog_type = NULL;
 GuardianField      *timestamp_field = NULL;
 GuardianField      *syslog_tag_field = NULL;
 
+static void        *_ctx = NULL;
+
 static void
 _plugin_register_types ( GuardianPlugin *plugin );
 
@@ -91,12 +93,20 @@ _syslog_tag_compare_func (
         const void *b );
 
 GuardianPlugin *
-guardian_plugin_init ()
+guardian_plugin_init (void *ctx)
 {
     const char *errors = NULL;
     int err_offset;
-    GuardianPlugin *plugin = guardian_new (sizeof (GuardianPlugin), 1);
+    GuardianPlugin *plugin;
 
+    /* Can't initialise this plugin twice */
+    if (_ctx != NULL) {
+        return NULL;
+    }
+
+    plugin = guardian_new (sizeof (GuardianPlugin), 1);
+
+    _ctx = ctx;
     plugin->register_types = _plugin_register_types;
 
     pcre_date_context = pcre_compile (

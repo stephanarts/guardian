@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2012-2014 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -60,6 +60,8 @@
 
 #include <openssl/sha.h>
 
+#include <zmq.h>
+
 #include <libguardian/libguardian.h>
 
 #include "assert.h"
@@ -88,7 +90,7 @@ static void
 show_version ()
 {
     printf ("%s %s\n", PACKAGE_NAME, PACKAGE_VERSION);
-    printf ("Copyright (c) 2012 Stephan Arts\n");
+    printf ("Copyright (c) 2012-2014 Stephan Arts\n");
     printf ("There is NO WARRANTY, to the extent permitted by law.\n");
     return;
 }
@@ -152,6 +154,8 @@ main (int argc, char **argv)
     char plugin_path[1024];
 
     struct sigaction sa;
+
+    void *ctx = zmq_ctx_new();
 
     sa.sa_handler = process_signal;
     sa.sa_flags = SA_RESTART;
@@ -277,7 +281,7 @@ main (int argc, char **argv)
                      */
                     if (strcmp (&plugin_path[i-3], ".so") == 0)
                     {
-                        plugin = guardian_plugin_load ( plugin_path, &error );
+                        plugin = guardian_plugin_load ( plugin_path, ctx, &error );
                         if ( plugin == NULL )
                         {
                             guardian_log_warning ( "%s", guardian_error_get_msg (error));
@@ -305,7 +309,9 @@ main (int argc, char **argv)
     guardian_scheduler_add_source ( source );
 
     /** Start the main loop */
-    guardian_scheduler_main ( );
+    guardian_scheduler_main ( ctx );
+
+    zmq_ctx_term(ctx);
 
     exit (0);
 }

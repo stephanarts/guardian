@@ -17,5 +17,5 @@ syslog_la_CFLAGS =   \
     $(PCRE_CFLAGS) \
     -std=c99
 
-INCLUDES = \
+AM_CPPFLAGS = \
     -I$(top_srcdir)

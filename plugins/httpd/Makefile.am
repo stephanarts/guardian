@@ -18,5 +18,5 @@ httpd_la_CFLAGS =   \
     -std=c99
 
 
-INCLUDES = \
+AM_CPPFLAGS = \
     -I$(top_srcdir)

@@ -21,5 +21,5 @@ guardian_CFLAGS = \
     -DPLUGINDIR=\"$(libdir)/guardian\" \
     -Wall
 
-INCLUDES = \
+AM_CPPFLAGS = \
     -I$(top_srcdir)

@@ -10,5 +10,5 @@ libguardian_helper_LDADD = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la \
     $(PCRE_LIBS)
 
-INCLUDES = \
+AM_CPPFLAGS = \
     -I$(top_srcdir)

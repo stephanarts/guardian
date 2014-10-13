@@ -31,7 +31,7 @@
 #define __GUARDIAN_SCHEDULER_H__
 
 void
-guardian_scheduler_main ( void );
+guardian_scheduler_main ( void *ctx );
 
 void
 guardian_scheduler_main_quit ( void );

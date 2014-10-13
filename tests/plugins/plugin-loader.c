@@ -37,6 +37,8 @@
 
 #include <stdio.h>
 
+#include <zmq.h>
+
 #include <libguardian/libguardian.h>
 
 #ifndef PLUGINDIR
@@ -58,6 +60,8 @@ main (int argc, char **argv)
 
     char buffer[BUFFER_SIZE];
 
+    void *ctx = zmq_ctx_new();
+
     if (argc < 2)
     {
         fprintf (stderr, "No plugin-name provided\n");
@@ -70,7 +74,7 @@ main (int argc, char **argv)
 
     fprintf(stderr, "Loading plugin: %s\n", plugin_path);
 
-    plugin = guardian_plugin_load ( plugin_path, &error );
+    plugin = guardian_plugin_load ( plugin_path, ctx, &error );
     if (plugin)
     {
         fprintf(stderr, "Plugin %s Loaded\n", argv[1]);
@@ -78,7 +82,7 @@ main (int argc, char **argv)
     }
     else
     {
-        fprintf(stderr, guardian_error_get_msg (error));
+        fprintf(stderr, "%s\n", guardian_error_get_msg (error));
         exit(1);
     }
 

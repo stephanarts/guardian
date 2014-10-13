@@ -37,6 +37,7 @@ libguardian_include_HEADERS = \
 libguardian_1_0_la_CFLAGS =               \
     $(PTHREAD_CFLAGS) \
     $(PCRE_CFLAGS) \
+    $(ZMQ_CFLAGS) \
     $(OPENSSL_CFLAGS) \
     -std=c99 \
     -DLIBGUARDIAN_COMPILATION
@@ -50,7 +51,8 @@ libguardian_1_0_la_LDFLAGS =              \
 libguardian_1_0_la_LIBADD = \
     $(OPENSSL_LIBS) \
     $(PCRE_LIBS) \
+    $(ZMQ_LIBS) \
     $(PTHREAD_LIBS)
 
-INCLUDES = \
+AM_CPPFLAGS = \
     -I$(top_srcdir)

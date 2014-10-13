@@ -43,6 +43,7 @@
 #include <dlfcn.h>
 #endif
 
+#include <string.h>
 #include <errno.h>
 
 #include "error.h"
@@ -69,7 +70,10 @@ guardian_plugin_extract_fields (
 }
 
 GuardianPlugin *
-guardian_plugin_load ( char *path, GuardianError **error )
+guardian_plugin_load (
+        char *path,
+        void *ctx,
+        GuardianError **error )
 {
     void *handle = NULL;
     GuardianPlugin *plugin;
@@ -77,7 +81,7 @@ guardian_plugin_load ( char *path, GuardianError **error )
     char error_msg[200];
     char *ld_error = NULL;
 
-    GuardianPlugin *(*_plugin_init)(void);
+    GuardianPlugin *(*_plugin_init)(void *);
 
     handle = dlopen (path, RTLD_NOW );
     error_sv = errno;
@@ -103,7 +107,7 @@ guardian_plugin_load ( char *path, GuardianError **error )
             /**
              * Call the initialisor, and create the plugin-object
              */
-            plugin = _plugin_init();
+            plugin = _plugin_init(ctx);
             if ( plugin != NULL )
             {
                 plugin->handle = handle;

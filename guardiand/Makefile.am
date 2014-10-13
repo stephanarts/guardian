@@ -28,5 +28,5 @@ guardiand_CFLAGS = \
 guardiand_DEPENDENCIES = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la
 
-INCLUDES = \
+AM_CPPFLAGS = \
     -I$(top_srcdir)

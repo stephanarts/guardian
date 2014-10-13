@@ -45,7 +45,10 @@ struct _GuardianPlugin
 };
 
 GuardianPlugin *
-guardian_plugin_load ( char *, GuardianError **);
+guardian_plugin_load ( 
+        char *,
+        void *,
+        GuardianError **);
 
 void
 guardian_plugin_register_types ( GuardianPlugin * );
