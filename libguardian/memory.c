@@ -31,6 +31,7 @@
 #include <stdlib.h>
 
 #include "types.h"
+#include "assert.h"
 #include "memory.h"
 
 static int allow_malloc = 1;
