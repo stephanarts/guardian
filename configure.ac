@@ -161,6 +161,13 @@ AC_ARG_ENABLE(assert,
 	]
 )
 
+AC_ARG_ENABLE(debug,
+	[  --enable-debug          enable debug],
+	[ AC_DEFINE([ENABLE_DEBUG], [1],
+	            [Define to 1 if you have enabled debugging])
+	]
+)
+
 AC_OUTPUT([
 Makefile
 po/Makefile.in
