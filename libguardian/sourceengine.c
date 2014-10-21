@@ -47,6 +47,7 @@
 
 #include "error.h"
 #include "entry.h"
+#include "memory.h"
 #include "source.h"
 #include "sourceengine.h"
 
@@ -64,7 +65,7 @@ guardian_source_engine_update (
 GuardianSourceEngine *
 guardian_source_engine_new ( void )
 {
-    GuardianSourceEngine *engine = (GuardianSourceEngine *)malloc (sizeof (GuardianSourceEngine));
+    GuardianSourceEngine *engine = (GuardianSourceEngine *)guardian_new(sizeof (GuardianSourceEngine), 1);
 
     return engine;
 }
