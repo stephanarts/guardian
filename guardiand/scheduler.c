@@ -61,12 +61,6 @@ void *_ctx = NULL;
 #define         BUFFER_LEN      1024
 char            buffer[BUFFER_LEN];
 
-static void *
-_guardian_scheduler_thread_run (void *__arg);
-
-static void *
-guardian_scheduler_concept (void *__arg);
-
 void
 guardian_scheduler_main ( void *ctx )
 {
@@ -111,9 +105,8 @@ guardian_scheduler_main ( void *ctx )
         if (items [1].revents & ZMQ_POLLIN) {
             int size = zmq_recv (controller, msg, 255, 0);
             if (size != -1) {
-                // Process weather update
-                printf("got data");
                 if(strncmp(msg, "42", 2)) {
+                    guardian_log_debug("Terminating main loop");
                     break;
                 }
             }
@@ -142,7 +135,7 @@ guardian_scheduler_add_source ( GuardianSource *source)
     /** If no sources are defined */
     if (sources == NULL)
     {
-        sources = malloc (sizeof(GuardianSource *) * 2);
+        sources = guardian_new(sizeof(GuardianSource *), 2);
         sources[0] = source;
         sources[1] = NULL;
         n_sources = 1;
@@ -150,7 +143,7 @@ guardian_scheduler_add_source ( GuardianSource *source)
     }
 
     /** Increase the source list */
-    _sources = malloc (sizeof(GuardianSource *) * n_sources + 2);
+    _sources = guardian_new(sizeof(GuardianSource *) * (n_sources + 2), 1);
 
     /** Copy all sources to the new list */
     for(i = 0; i < n_sources; ++i)
@@ -174,14 +167,14 @@ guardian_scheduler_main_quit ( )
     void *socket = zmq_socket(_ctx, ZMQ_REQ);
     int ret = 0;
 
-    printf("QUITTITN\n");
+    guardian_log_debug("Terminating %s", PACKAGE_NAME);
     
     zmq_connect(socket, "inproc://controller");
 
     ret = zmq_send(socket, "42", 2, 0);
     if (ret == -1)
     {
-        printf("E: %d", errno);
+        guardian_log_error("Failed to send termination message");
     }
 
     zmq_close(socket);

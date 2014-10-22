@@ -64,7 +64,7 @@ guardian_log_init ( int perror )
 void
 guardian_log_mask ( int mask )
 {
-    setlogmask (mask);
+    setlogmask (LOG_UPTO(mask));
 }
 
 void
@@ -73,7 +73,7 @@ guardian_log_alert ( const char *format, ... )
     va_list arg;
 
     va_start (arg, format);
-    vsyslog (LOG_ALERT, format, arg);
+    vsyslog (LOG_DAEMON | LOG_ALERT, format, arg);
     va_end (arg);
 
     return;
@@ -85,7 +85,7 @@ guardian_log_critical ( const char *format, ... )
     va_list arg;
 
     va_start (arg, format);
-    vsyslog (LOG_CRIT, format, arg);
+    vsyslog (LOG_DAEMON | LOG_CRIT, format, arg);
     va_end (arg);
 
     return;
@@ -97,7 +97,7 @@ guardian_log_error ( const char *format, ... )
     va_list arg;
 
     va_start (arg, format);
-    vsyslog (LOG_ERR, format, arg);
+    vsyslog (LOG_DAEMON | LOG_ERR, format, arg);
     va_end (arg);
 
     return;
@@ -109,7 +109,7 @@ guardian_log_warning ( const char *format, ... )
     va_list arg;
 
     va_start (arg, format);
-    vsyslog (LOG_WARNING, format, arg);
+    vsyslog (LOG_DAEMON | LOG_WARNING, format, arg);
     va_end (arg);
 
     return;
@@ -121,7 +121,7 @@ guardian_log_notice ( const char *format, ... )
     va_list arg;
 
     va_start (arg, format);
-    vsyslog (LOG_NOTICE, format, arg);
+    vsyslog (LOG_DAEMON | LOG_NOTICE, format, arg);
     va_end (arg);
 
     return;
@@ -133,7 +133,7 @@ guardian_log_info ( const char *format, ... )
     va_list arg;
 
     va_start (arg, format);
-    vsyslog (LOG_INFO, format, arg);
+    vsyslog (LOG_DAEMON | LOG_INFO, format, arg);
     va_end (arg);
 
     return;
@@ -145,7 +145,7 @@ guardian_log_debug ( const char *format, ... )
     va_list arg;
 
     va_start (arg, format);
-    vsyslog (LOG_DEBUG, format, arg);
+    vsyslog (LOG_DAEMON | LOG_DEBUG, format, arg);
     va_end (arg);
 
     return;

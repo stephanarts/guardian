@@ -104,6 +104,8 @@ guardian_plugin_init (void *ctx)
         return NULL;
     }
 
+    guardian_log_info("Initialise syslog plugin");
+
     plugin = guardian_new (sizeof (GuardianPlugin), 1);
 
     _ctx = ctx;

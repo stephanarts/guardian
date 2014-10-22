@@ -214,12 +214,21 @@ main (int argc, char **argv)
 
     if (verbosity == 0)
     {
+#ifdef ENABLE_DEBUG
+        guardian_log_init (1);
+#else
         guardian_log_init (0);
-
+#endif /* ENABLE_DEBUG */
         switch (log_level)
         {
             default:
+#ifdef ENABLE_DEBUG
+                guardian_log_mask (GUARDIAN_LOG_DEBUG);
+                guardian_log_info ("Set logging level to 'DEBUG'");
+#else
                 guardian_log_mask (log_level);
+                guardian_log_info ("Set logging level to '...'");
+#endif /* ENABLE_DEBUG */
         }
     }
     else
@@ -230,10 +239,11 @@ main (int argc, char **argv)
         {
             case 1:
                 guardian_log_mask (GUARDIAN_LOG_INFO);
+                guardian_log_info ("Set logging level to 'INFO'");
                 break;
             case 2:
-                printf("DEBUG\n");
-                guardian_log_mask (0);
+                guardian_log_mask (GUARDIAN_LOG_DEBUG);
+                guardian_log_info ("Set logging level to 'DEBUG'");
                 break;
         }
     }
@@ -247,7 +257,6 @@ main (int argc, char **argv)
     /**
      * Load settings from file
      */
-
     settings = guardian_settings_load (SYSCONFDIR"/guardian.conf", NULL);
 
     guardian_settings_get (settings, "key");
@@ -272,7 +281,7 @@ main (int argc, char **argv)
                 if (i > 1023)
                 {
                     /* Error, prevented buffer overflow... path too long */
-                    guardian_log_warning ( "%s", "Can not load plugin, plugin-path exceeds 1024 bytes");
+                    guardian_log_warning ( "Can not load plugin, plugin-path exceeds 1024 bytes");
                 }
                 else
                 {
@@ -290,7 +299,7 @@ main (int argc, char **argv)
                         }
                         else
                         {
-                            printf("Load plugin: %s\n", plugin_path);
+                            guardian_log_info("Load plugin: %s\n", plugin_path);
                             guardian_plugin_register_types ( plugin );
                         }
                     }
@@ -307,6 +316,11 @@ main (int argc, char **argv)
 
     source = guardian_source_new ("syslog", "/var/log/syslog", &error);
     guardian_scheduler_add_source ( source );
+
+#ifdef ENABLE_DEBUG
+    /** Do not allow further dynamic memory allocation */
+    guardian_set_allow_malloc(FALSE);
+#endif /* ENABLE_DEBUG */
 
     /** Start the main loop */
     guardian_scheduler_main ( ctx );
