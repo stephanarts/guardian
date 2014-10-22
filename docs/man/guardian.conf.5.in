@@ -1,5 +1,5 @@
 .\" Guardian configuration man-page
-.TH GUARDIAN_CONF 5 "JULI 2012"
+.TH GUARDIAN_CONF 5 "JULI 2012" @PACKAGE_VERSION@ "Guardian Documentation"
 .SH NAME
 guardian.conf \- Guardian configuration file
 .SH SYNOPSIS

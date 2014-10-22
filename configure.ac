@@ -183,6 +183,8 @@ tests/libguardian/Makefile
 tests/plugins/Makefile
 docs/Makefile
 docs/man/Makefile
+docs/man/guardian.1
+docs/man/guardiand.1
 docs/man/guardian.conf.5
 docs/libguardian/Makefile
 ])

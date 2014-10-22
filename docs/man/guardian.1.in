@@ -1,0 +1,20 @@
+.\" Guardian configuration man-page
+.TH GUARDIAN 1 "October 2014" @PACKAGE_VERSION@ "Guardian Documentation"
+.SH NAME
+guardian \- Guardian Command-line utility
+.SH SYNOPSIS
+guardiand [\-hV]
+.SH DESCRIPTION
+\...
+.SH OPTIONS
+.TP 5
+-h
+Display command usage information
+.TP 5
+-v
+Run in verbose mode
+.TP 5
+-V
+Show version information
+.SH BUGS
+It doesn't work yet.
