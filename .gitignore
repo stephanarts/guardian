@@ -6,8 +6,8 @@
 depcomp
 Makefile
 Makefile.in
-guardian/.deps
 guardian/guardian
+guardiand/guardiand
 aclocal.m4
 autom4te.cache
 INSTALL
@@ -25,6 +25,9 @@ configure
 install-sh
 ltmain.sh
 missing
+docs/man/guardian.1
+docs/man/guardiand.1
+docs/man/guardian.conf.5
 po/Makefile.in.in
 po/POTFILES
 po/stamp-it
