@@ -1,0 +1,44 @@
+#!/bin/sh
+
+test_valid_hash() {
+    TEMP_FILENAME=`mktemp`
+
+    # Test a file bigger then the buffer-size
+    dd if=/dev/urandom of=$TEMP_FILENAME bs=$1 count=1 2>/dev/null
+    SUM=`shasum $TEMP_FILENAME | awk '{ print $1 }'`
+
+    ./libguardian-helper --file-verify \
+        $TEMP_FILENAME \
+        $1 \
+        `shasum $TEMP_FILENAME | awk '{ print $1 }'`
+
+    if test $? -ne 0
+    then
+        unlink $TEMP_FILENAME
+        echo "Failed"
+        return 1;
+    fi
+
+    unlink $TEMP_FILENAME
+    return 0;
+}
+
+test_valid_hash 128
+if test $? -ne 0
+then
+    return 1;
+fi
+
+test_valid_hash 1024
+if test $? -ne 0
+then
+    return 1;
+fi
+
+test_valid_hash 1028
+if test $? -ne 0
+then
+    return 1;
+fi
+
+return 0

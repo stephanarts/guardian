@@ -1,7 +1,8 @@
 EXTRA_DIST = $(TESTS)
 
 TESTS = \
-    timezone.test
+    timezone.test \
+    file-verify.test
 
 check_PROGRAMS = libguardian-helper
 

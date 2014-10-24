@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,26 +27,23 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBGUARDIAN_H__
-#define __LIBGUARDIAN_H__
+#ifndef __GUARDIAN_FILE_H__
+#define __GUARDIAN_FILE_H__
 
-#define LIBGUARDIAN_INSIDE_LIBGUARDIAN_H
+typedef struct _GuardianFile GuardianFile;
 
-#include <libguardian/log.h>
-#include <libguardian/time.h>
-#include <libguardian/error.h>
-#include <libguardian/file.h>
-#include <libguardian/types.h>
-#include <libguardian/assert.h>
-#include <libguardian/memory.h>
-#include <libguardian/entry.h>
-#include <libguardian/source.h>
-#include <libguardian/sourceengine.h>
-#include <libguardian/sourcetype.h>
-#include <libguardian/field.h>
-#include <libguardian/plugin.h>
+struct _GuardianFile
+{
+    char *path;
+};
 
-void
-libguardian_init (void);
+GuardianFile *
+guardian_file_new(const char *path);
 
-#endif /* __LIBGUARDIAN_H__ */
+int
+guardian_file_verify (
+        GuardianFile *file,
+        size_t st_size,
+        const unsigned char *hash);
+
+#endif
