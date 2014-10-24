@@ -49,6 +49,13 @@
 #include "log.h"
 #include "file.h"
 
+struct _GuardianFile
+{
+    char *path;
+    FILE *file;
+};
+
+
 /** Allow DATA_BUFFER_SIZE to be overridden with compile-flags */
 #ifndef DATA_BUFFER_SIZE
 #define DATA_BUFFER_SIZE 1024
@@ -62,7 +69,32 @@ guardian_file_new(const char *path)
     file->path = guardian_new(1, strlen(path)+1);
     strncpy(file->path, path, strlen(path));
 
+    file->file = NULL;
+
     return file;
+}
+
+int
+guardian_file_open (GuardianFile *file)
+{
+    file->file = fopen (file->path, "r");
+    return 0;
+}
+
+int
+guardian_file_close (GuardianFile *file)
+{
+    fclose(file->file);
+    file->file = NULL;
+    return 0;
+}
+
+int
+guardian_file_seek (
+        GuardianFile *file,
+        size_t pos)
+{
+    return 0;
 }
 
 int
@@ -73,7 +105,6 @@ guardian_file_verify (
 {
     SHA_CTX sha_ctx;
 
-    FILE *f = NULL;
     int fd;
     struct stat buffer;
     int error_sv;
@@ -87,8 +118,7 @@ guardian_file_verify (
     size_t _size;
     int i = 0;
 
-    f = fopen (file->path, "r");
-    if (f == NULL)
+    if (file->file == NULL)
     {
         error_sv = errno;
         guardian_log_warning ("Can not open file: %s:'%s'", file->path, strerror (error_sv));
@@ -96,7 +126,7 @@ guardian_file_verify (
     }
 
     /* Read file statistics */
-    fd = fileno (f);
+    fd = fileno (file->file);
     fstat (fd, &buffer);
 
 
@@ -114,11 +144,11 @@ guardian_file_verify (
     {
         if (i+DATA_BUFFER_SIZE < st_size)
         {
-            _size = fread (data_buffer, 1, DATA_BUFFER_SIZE, f);
+            _size = fread (data_buffer, 1, DATA_BUFFER_SIZE, file->file);
         }
         else
         {
-            _size = fread (data_buffer, 1, st_size - i, f);
+            _size = fread (data_buffer, 1, st_size - i, file->file);
         }
 
         /*
@@ -137,3 +167,4 @@ guardian_file_verify (
 
     return 0;
 }
+

@@ -151,6 +151,7 @@ main (int argc, char **argv)
         //if (argc != 3)
         //   exit(1); 
         GuardianFile *f = guardian_file_new(argv[2]);
+
         for(c = 0; c < argc; ++c) {
             //fprintf(stderr, "%d: %s\n", c, argv[c]);
         }
@@ -166,7 +167,9 @@ main (int argc, char **argv)
             hash[c] = (unsigned char)n;
         }
 
+        guardian_file_open(f);
         int i = guardian_file_verify (f, atoi(argv[3]), hash);
+        guardian_file_close(f);
 
         //fprintf(stderr, "%d\n", i);
     }
