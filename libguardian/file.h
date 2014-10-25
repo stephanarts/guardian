@@ -51,4 +51,17 @@ guardian_file_verify (
         GuardianFile *file,
         size_t st_size,
         const unsigned char *hash);
+
+int
+guardian_file_get_hash (
+        GuardianFile *file,
+        size_t *st_size,
+        unsigned char **hash);
+
+int
+guardian_file_read (
+        GuardianFile *file,
+        size_t size,
+        size_t nmemb,
+        void   *buffer);
 #endif

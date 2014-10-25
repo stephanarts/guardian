@@ -94,6 +94,11 @@ guardian_file_seek (
         GuardianFile *file,
         size_t pos)
 {
+    if (file->file == NULL) {
+        return 1;
+    }
+
+    fseeko ( file->file, pos, SEEK_SET);
     return 0;
 }
 
@@ -121,14 +126,16 @@ guardian_file_verify (
     if (file->file == NULL)
     {
         error_sv = errno;
-        guardian_log_warning ("Can not open file: %s:'%s'", file->path, strerror (error_sv));
+        guardian_log_warning (
+            "Can not open file: %s:'%s'",
+            file->path,
+            strerror (error_sv));
         return -1;
     }
 
     /* Read file statistics */
     fd = fileno (file->file);
     fstat (fd, &buffer);
-
 
     /* If the file is smaller then expected,
      * it can't be the file we are looking for.
@@ -151,9 +158,6 @@ guardian_file_verify (
             _size = fread (data_buffer, 1, st_size - i, file->file);
         }
 
-        /*
-         * Add to the 'cache' context for verification.
-         */
         SHA1_Update (&sha_ctx, data_buffer, _size);
         i += _size;
     }
@@ -168,3 +172,66 @@ guardian_file_verify (
     return 0;
 }
 
+int
+guardian_file_get_hash (
+        GuardianFile *file,
+        size_t *st_size,
+        unsigned char **hash)
+{
+    SHA_CTX sha_ctx;
+
+    int fd;
+    struct stat buffer;
+    int error_sv;
+
+    char data_buffer[DATA_BUFFER_SIZE];
+
+    int i = 0;
+    size_t _size;
+
+    if (file->file == NULL)
+    {
+        error_sv = errno;
+        guardian_log_warning (
+            "Can not open file: %s:'%s'",
+            file->path,
+            strerror (error_sv));
+        return -1;
+    }
+
+    /* Read file statistics */
+    fd = fileno (file->file);
+    fstat (fd, &buffer);
+
+    *st_size = buffer.st_size;
+
+    SHA1_Init (&sha_ctx);
+
+    while (i < buffer.st_size)
+    {
+        if (i+DATA_BUFFER_SIZE < buffer.st_size)
+        {
+            _size = fread (data_buffer, 1, DATA_BUFFER_SIZE, file->file);
+        }
+        else
+        {
+            _size = fread (data_buffer, 1, buffer.st_size - i, file->file);
+        }
+
+        SHA1_Update (&sha_ctx, data_buffer, _size);
+        i += _size;
+    }
+
+    SHA1_Final ((unsigned char *)(*hash), &sha_ctx);
+
+    return 0;
+}
+
+int
+guardian_file_read (
+        GuardianFile *file,
+        size_t size,
+        size_t nmemb,
+        void   *buffer) {
+    return 0;
+}
