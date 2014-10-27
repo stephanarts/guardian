@@ -37,6 +37,8 @@
 
 #include <stdio.h>
 
+#include <fcntl.h>
+
 #include <zmq.h>
 
 #include <libguardian/libguardian.h>
@@ -71,6 +73,11 @@ main (int argc, char **argv)
     read (stdin, buffer, BUFFER_SIZE);
 
     sprintf (plugin_path, "%s/%s/%s%s.so", PLUGINDIR, argv[1], PLUGINSUBDIR, argv[1]);
+
+    int fd = open(plugin_path, O_RDONLY);
+    if (fd == -1) {
+        fprintf(stderr, "OPen Failed");
+    }
 
     fprintf(stderr, "Loading plugin: %s\n", plugin_path);
 

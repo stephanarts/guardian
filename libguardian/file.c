@@ -52,7 +52,12 @@
 struct _GuardianFile
 {
     char *path;
-    FILE *file;
+    FILE *stream;
+
+    /* Cached values to determine log rotation */
+    ino_t st_ino;
+    off_t st_pos;
+    off_t st_size;
 };
 
 
@@ -69,37 +74,9 @@ guardian_file_new(const char *path)
     file->path = guardian_new(1, strlen(path)+1);
     strncpy(file->path, path, strlen(path));
 
-    file->file = NULL;
+    file->stream = NULL;
 
     return file;
-}
-
-int
-guardian_file_open (GuardianFile *file)
-{
-    file->file = fopen (file->path, "r");
-    return 0;
-}
-
-int
-guardian_file_close (GuardianFile *file)
-{
-    fclose(file->file);
-    file->file = NULL;
-    return 0;
-}
-
-int
-guardian_file_seek (
-        GuardianFile *file,
-        size_t pos)
-{
-    if (file->file == NULL) {
-        return 1;
-    }
-
-    fseeko ( file->file, pos, SEEK_SET);
-    return 0;
 }
 
 int
@@ -123,7 +100,15 @@ guardian_file_verify (
     size_t _size;
     int i = 0;
 
-    if (file->file == NULL)
+    FILE *stream = NULL;
+
+    /**
+     * Use a separate stream,
+     * file->stream is reserved for read operations.
+     */
+    stream = fopen(file->path, "r");
+
+    if (stream == NULL)
     {
         error_sv = errno;
         guardian_log_warning (
@@ -134,7 +119,7 @@ guardian_file_verify (
     }
 
     /* Read file statistics */
-    fd = fileno (file->file);
+    fd = fileno (stream);
     fstat (fd, &buffer);
 
     /* If the file is smaller then expected,
@@ -142,6 +127,7 @@ guardian_file_verify (
      */
     if (buffer.st_size < st_size)
     {
+        fclose(stream);
         return 2;
     }
 
@@ -151,11 +137,11 @@ guardian_file_verify (
     {
         if (i+DATA_BUFFER_SIZE < st_size)
         {
-            _size = fread (data_buffer, 1, DATA_BUFFER_SIZE, file->file);
+            _size = fread (data_buffer, 1, DATA_BUFFER_SIZE, stream);
         }
         else
         {
-            _size = fread (data_buffer, 1, st_size - i, file->file);
+            _size = fread (data_buffer, 1, st_size - i, stream);
         }
 
         SHA1_Update (&sha_ctx, data_buffer, _size);
@@ -163,6 +149,8 @@ guardian_file_verify (
     }
 
     SHA1_Final ((unsigned char *)file_hash, &sha_ctx);
+
+    fclose(stream);
 
     if(memcmp(file_hash, hash, 20))
     {
@@ -189,7 +177,15 @@ guardian_file_get_hash (
     int i = 0;
     size_t _size;
 
-    if (file->file == NULL)
+    FILE *stream = NULL;
+    
+    /**
+     * Use a separate stream,
+     * file->stream is reserved for read operations.
+     */
+    stream = fopen(file->path, "r");
+
+    if (stream == NULL)
     {
         error_sv = errno;
         guardian_log_warning (
@@ -200,7 +196,7 @@ guardian_file_get_hash (
     }
 
     /* Read file statistics */
-    fd = fileno (file->file);
+    fd = fileno (stream);
     fstat (fd, &buffer);
 
     *st_size = buffer.st_size;
@@ -211,11 +207,11 @@ guardian_file_get_hash (
     {
         if (i+DATA_BUFFER_SIZE < buffer.st_size)
         {
-            _size = fread (data_buffer, 1, DATA_BUFFER_SIZE, file->file);
+            _size = fread (data_buffer, 1, DATA_BUFFER_SIZE, stream);
         }
         else
         {
-            _size = fread (data_buffer, 1, buffer.st_size - i, file->file);
+            _size = fread (data_buffer, 1, buffer.st_size - i, stream);
         }
 
         SHA1_Update (&sha_ctx, data_buffer, _size);
@@ -224,6 +220,8 @@ guardian_file_get_hash (
 
     SHA1_Final ((unsigned char *)(*hash), &sha_ctx);
 
+    fclose(stream);
+
     return 0;
 }
 
@@ -231,7 +229,54 @@ int
 guardian_file_read (
         GuardianFile *file,
         size_t size,
-        size_t nmemb,
         void   *buffer) {
-    return 0;
+
+    int fd;
+    struct stat st_buffer;
+    int s = 0;
+
+    if (file->stream == NULL) {
+        file->stream = fopen(file->path, "r");
+        if (file->stream == NULL) {
+            return -1;
+        }
+
+        fd = fileno (file->stream);
+        fstat (fd, &st_buffer);
+
+        file->st_ino  = st_buffer.st_ino;
+        file->st_size = st_buffer.st_size;
+        file->st_pos  = 0;
+    }
+
+    s = fread (buffer, 1, size, file->stream);
+    if (s < size) {
+        if (feof(file->stream)) {
+            clearerr(file->stream);
+            fd = fileno (file->stream);
+            fstat (fd, &st_buffer);
+            if (st_buffer.st_ino != file->st_ino) {
+                guardian_log_info ("File INODE changed, log-rotation expected. Opening new stream.");
+
+                fclose(file->stream);
+
+                file->stream = fopen(file->path, "r");
+                if (file->stream == NULL) {
+                    return -1;
+                }
+
+                fd = fileno (file->stream);
+                fstat (fd, &st_buffer);
+
+                file->st_ino  = st_buffer.st_ino;
+                file->st_size = st_buffer.st_size;
+                file->st_pos  = 0;
+            }
+        }
+        if (ferror(file->stream)) {
+            guardian_log_warning("An error occurred while reading file.");
+        }
+    }
+
+    return s;
 }

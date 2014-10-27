@@ -56,6 +56,27 @@ struct _GuardianEntry
      */
     unsigned char   hash[20];   
 
+    /**
+     * Timestamp value in ISO format
+     *
+     * ZULU Time:
+     *   YYYYMMDDThhmmssZ
+     * Timezone correction:
+     *   YYYYMMDDThhmmss+hhmm
+     *   YYYYMMDDThhmmss-hhmm
+     *
+     * Value is either 16 or 20 octets long.
+     * The value if timestamp[15] determines
+     * if the remaining 4 bytes contain any 
+     * data (hhmm, or nothing)
+     * Checking for 'Z', '+' or '-' is just 
+     * as expensive as checking for '\0'.
+     */
+    char            timestamp[20];
+
+    /** Line-Nr in the original file */
+    size_t          line_nr;
+
     /** Length of the data-field    */
     size_t          len;
 
@@ -65,22 +86,31 @@ struct _GuardianEntry
 
 GuardianEntry *
 guardian_entry_new (
+        size_t          line_nr,
         size_t          len,
         const char     *data,
+        const char     *timestamp,
         GuardianError **error)
 {
     GuardianEntry *entry = (GuardianEntry *)malloc (sizeof (GuardianEntry));
+
     SHA_CTX context;
     size_t n = htonl(len);
+    size_t s = htonl(line_nr);
 
     SHA1_Init (&context);
     SHA1_Update (&context, &n, sizeof(size_t));
+    SHA1_Update (&context, &s, sizeof(size_t));
     SHA1_Update (&context, data, len);
     SHA1_Final (entry->hash, &context);
 
+    entry->line_nr = line_nr;
     entry->len = len;
+
     entry->data = (char *)malloc(len);
     strncpy (entry->data, data, len);
+
+    strncpy (entry->timestamp, timestamp, sizeof(entry->timestamp));
 
     return entry;
 }

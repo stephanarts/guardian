@@ -335,13 +335,13 @@ _plugin_engine_update_source (
                     ptr++;
                 }
 
-                g_entry = guardian_entry_new (len, entry, NULL);
+                _plugin_extract_timestamp (len, entry, timestamp);
+
+                g_entry = guardian_entry_new (-1, len, entry, timestamp, NULL);
 
                 n_new_entries++;
 
-                guardian_source_push_entry ( source, g_entry );
-
-                _plugin_extract_timestamp (len, entry, timestamp);
+                //guardian_source_push_entry ( source, g_entry );
 
                 /*
                  * TODO: Calculate the correct year, and overwrite it in the timestamp.
@@ -387,11 +387,11 @@ _plugin_engine_update_source (
 
                 s_offset+=len+offset+1;
 
-                g_entry = guardian_entry_new (len, entry, NULL);
+                g_entry = guardian_entry_new (-1, len, entry, "", NULL);
 
                 n_new_entries++;
 
-                guardian_source_push_entry ( source, g_entry );
+                //guardian_source_push_entry ( source, g_entry );
                 
                 _plugin_extract_timestamp (len, entry, timestamp);
 

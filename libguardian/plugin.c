@@ -46,6 +46,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include <zmq.h>
+
 #include "error.h"
 #include "plugin.h"
 
@@ -111,11 +113,18 @@ guardian_plugin_load (
             if ( plugin != NULL )
             {
                 plugin->handle = handle;
+                //plugin->ctx    = ctx;
+                //plugin->socket = zmq_socket(ctx, ZMQ_REQ);
+
+                //zmq_connect(plugin->socket, "inproc://plugins");
+
                 handle = NULL;
                 return plugin;
             }
         }
-        
+    }
+    else {
+        ld_error = dlerror();
     }
     if ( error )
     {
@@ -124,7 +133,7 @@ guardian_plugin_load (
          */
         if (ld_error != NULL)
         {
-            *error = guardian_error_new ("Can not load plugin: '%s'", ld_error);
+            *error = guardian_error_new ("DLOPEN: Can not load plugin: '%s'", ld_error);
         }
         else
         {
@@ -146,4 +155,17 @@ guardian_plugin_load (
     }
 
     return NULL;
+}
+
+void
+guardian_plugin_push_entry (
+        GuardianPlugin *plugin,
+        const char *host, 
+        const char *source,
+        const char *timestamp,
+        const char *entry)
+{
+    char msg[256];
+    zmq_send(plugin->socket, host, strlen(host), 0);
+    zmq_recv(plugin->socket, msg, 255, 0);
 }

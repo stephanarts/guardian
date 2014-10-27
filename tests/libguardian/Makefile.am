@@ -1,11 +1,26 @@
 EXTRA_DIST = $(TESTS)
 
 TESTS = \
-    timezone.test \
+    timezone.test    \
+    file-verify.test \
+    file-read.test   \
+    source-read.test
+
+XFAIL_TESTS = \
     file-verify.test
 
-check_PROGRAMS = libguardian-helper
+check_PROGRAMS = \
+    file-helper \
+    source-helper \
+    libguardian-helper
 
+file_helper_LDADD = \
+    $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la \
+    $(PCRE_LIBS)
+
+source_helper_LDADD = \
+    $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la \
+    $(PCRE_LIBS)
 
 libguardian_helper_LDADD = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la \

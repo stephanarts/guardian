@@ -11,6 +11,7 @@ syslog_la_SOURCES = \
 syslog_la_LDFLAGS =   \
     -avoid-version       \
     -module              \
+    -export-dynamic      \
     $(PLATFORM_LDFLAGS)
 
 syslog_la_CFLAGS =   \

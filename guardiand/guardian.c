@@ -151,6 +151,8 @@ main (int argc, char **argv)
     struct dirent *dirp;
     int i = 0;
 
+    int n_workers = 2;
+
     char plugin_path[1024];
 
     struct sigaction sa;
@@ -323,9 +325,9 @@ main (int argc, char **argv)
 #endif /* ENABLE_DEBUG */
 
     /** Start the main loop */
-    guardian_scheduler_main ( ctx );
+    guardian_scheduler_main ( ctx, n_workers );
 
-    zmq_ctx_term(ctx);
+    //zmq_ctx_term(ctx);
 
     exit (0);
 }

@@ -39,16 +39,26 @@ typedef struct _GuardianPlugin GuardianPlugin;
 
 struct _GuardianPlugin
 {
-    void *handle;
+    void *handle; /* dlopen handle */
+    void *ctx;    /* zmq context   */
+    void *socket; /* zmq socket    */
     void (*register_types) ( GuardianPlugin * );
     void (*extract_fields) ( GuardianPlugin *, const char *entry );
 };
 
 GuardianPlugin *
 guardian_plugin_load ( 
-        char *,
-        void *,
+        char *path,
+        void *ctx,
         GuardianError **);
+
+void
+guardian_plugin_push_entry (
+        GuardianPlugin *,
+        const char *host, 
+        const char *source,
+        const char *timestamp,
+        const char *entry);
 
 void
 guardian_plugin_register_types ( GuardianPlugin * );

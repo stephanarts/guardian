@@ -1,0 +1,9 @@
+#!/bin/sh
+
+TEMP_FILENAME=`mktemp`
+
+echo "2014-10-12T11:11:11Z zeus Test\n" > $TEMP_FILENAME
+
+unlink $TEMP_FILENAME
+
+exit 0

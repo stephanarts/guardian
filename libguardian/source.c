@@ -162,9 +162,9 @@ int
 guardian_source_update (
         GuardianSource *source )
 {
-    GuardianSourceEngine *engine = guardian_sourcetype_get_engine (source->source_type);
+    GuardianSourceEngine *engine =
+            guardian_sourcetype_get_engine (source->source_type);
     int ret; 
-    int n = source->n_entries;
 
 
     ret = engine->update_source ( engine, source );
@@ -209,32 +209,4 @@ guardian_source_set_hash (
     }
     memcpy (source->hash, hash, 20);
     return 0;
-}
-
-/**
- * guardian_source_push_entry:
- * @source:
- * @entry:
- *
- * NOTE:
- * It's not a good idea to reallocate this array a few milion times.
- * It is faster to allocate multitudes of 1024 pointers and keep the
- * exact length of the array stored.
- */
-void
-guardian_source_push_entry (
-        GuardianSource *source,
-        GuardianEntry  *entry )
-{
-    if (source->entries)
-    {
-        source->entries = realloc (source->entries, (sizeof (GuardianEntry *) * (source->n_entries+1)));
-    }
-    else
-    {
-        source->entries = (GuardianEntry **)malloc (sizeof (GuardianEntry *));
-    }
-
-    source->entries[source->n_entries] = entry;
-    source->n_entries++;
 }

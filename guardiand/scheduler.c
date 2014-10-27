@@ -39,6 +39,8 @@
 #include <stdio.h>
 #endif
 
+#include <unistd.h>
+
 #include <string.h>
 
 #include <sys/types.h>
@@ -50,23 +52,63 @@
 
 #include <time.h>
 
+#include <semaphore.h>
+
 #include <libguardian/libguardian.h>
 
-/** Define 5 Second interval */
+/** Define 2 Second interval */
 #define INTERVAL 2
+
 static int n_sources = 0;
 static GuardianSource **sources = NULL;
 void *_ctx = NULL;
 
+sem_t worker_sem;
+
 #define         BUFFER_LEN      1024
 char            buffer[BUFFER_LEN];
 
-void
-guardian_scheduler_main ( void *ctx )
+pthread_t scheduler;
+
+static void *
+_guardian_scheduler_thread (void *arg)
 {
+    guardian_log_info("Start Scheduler\n");
+    while(1) {
+        sem_post (&worker_sem);
+        sleep(INTERVAL);
+    }
+    guardian_log_info("Exit Scheduler\n");
+    pthread_exit(NULL);
+}
+
+static void *
+_guardian_worker_thread (void *arg)
+{
+    char msg[256];
+    void *socket;
+
+    socket = zmq_socket(_ctx, ZMQ_REQ);
+    zmq_connect(socket, "inproc://workers");
+    while(1) {
+        sem_wait (&worker_sem);
+        zmq_send(socket, "A\n\0", 3, 0);
+        guardian_log_info("RECV\n", msg);
+        zmq_recv(socket, msg, 255, 100);
+        guardian_log_info("..'%s'\n", msg);
+    }
+    pthread_exit(NULL);
+}
+
+void
+guardian_scheduler_main ( void *ctx, int n_workers )
+{
+    int i = 0;
     int no_linger = 0;
     void *plugins;
     void *controller;
+
+    pthread_t *workers = NULL;
 
     if (_ctx != NULL) {
         return;
@@ -74,11 +116,26 @@ guardian_scheduler_main ( void *ctx )
 
     _ctx = ctx;
 
-    plugins    = zmq_socket(ctx, ZMQ_ROUTER);
+    plugins    = zmq_socket(ctx, ZMQ_REP);
     controller = zmq_socket(ctx, ZMQ_ROUTER);
 
-    zmq_bind(plugins,    "inproc://plugins");
+    zmq_bind(plugins,    "inproc://workers");
     zmq_bind(controller, "inproc://controller");
+
+    sem_init(&worker_sem, 0, 100000);
+
+    pthread_create (&scheduler, NULL, _guardian_scheduler_thread, NULL);
+
+    workers = guardian_new (sizeof(pthread_t), n_workers);
+
+    for (i = 0; i < n_workers; ++i)
+    {
+        pthread_create (
+            &workers[i],
+            NULL,
+            _guardian_worker_thread,
+            NULL);
+    }
 
     /**
      * Enter the main loop, schedules jobs in the queue
@@ -99,6 +156,8 @@ guardian_scheduler_main ( void *ctx )
             int size = zmq_recv (plugins, msg, 255, 0);
             if (size != -1) {
                 // Process task
+                guardian_log_debug("Send 'a': '%s'", msg);
+                zmq_send(plugins, "a", 1, 0);
             }
         }
 
@@ -107,17 +166,51 @@ guardian_scheduler_main ( void *ctx )
             if (size != -1) {
                 if(strncmp(msg, "42", 2)) {
                     guardian_log_debug("Terminating main loop");
+
+                    /** TODO:
+                     * Use another mechanism to properly end threads.
+                     */
+                    pthread_cancel(scheduler);
+                    pthread_join(scheduler, NULL);
+
+                    guardian_log_debug("Scheduler joined, waiting for workers");
+
+                    for (i = 0; i < n_workers; ++i)
+                    {
+                        pthread_cancel(workers[i]);
+                        pthread_join(workers[i], NULL);
+                    }
                     break;
                 }
             }
         }
     }
+
     zmq_setsockopt(controller, ZMQ_LINGER, &no_linger, sizeof(no_linger));
     zmq_close (controller);
     zmq_setsockopt(plugins, ZMQ_LINGER, &no_linger, sizeof(no_linger));
     zmq_close (plugins);
 
     _ctx = NULL;
+}
+
+void
+guardian_scheduler_main_quit ( )
+{
+    void *socket = zmq_socket(_ctx, ZMQ_REQ);
+    int ret = 0;
+
+    guardian_log_debug("Terminating %s", PACKAGE_NAME);
+
+    zmq_connect(socket, "inproc://controller");
+
+    ret = zmq_send(socket, "42", 2, 0);
+    if (ret == -1)
+    {
+        guardian_log_error("Failed to send termination message");
+    }
+
+    zmq_close(socket);
 }
 
 /**
@@ -161,21 +254,3 @@ guardian_scheduler_add_source ( GuardianSource *source)
     n_sources++;
 }
 
-void
-guardian_scheduler_main_quit ( )
-{
-    void *socket = zmq_socket(_ctx, ZMQ_REQ);
-    int ret = 0;
-
-    guardian_log_debug("Terminating %s", PACKAGE_NAME);
-    
-    zmq_connect(socket, "inproc://controller");
-
-    ret = zmq_send(socket, "42", 2, 0);
-    if (ret == -1)
-    {
-        guardian_log_error("Failed to send termination message");
-    }
-
-    zmq_close(socket);
-}

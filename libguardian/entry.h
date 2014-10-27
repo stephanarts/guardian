@@ -39,8 +39,10 @@ typedef struct _GuardianEntry GuardianEntry;
 
 GuardianEntry *
 guardian_entry_new (
+        size_t          line_nr,
         size_t          len,
         const char     *data,
+        const char     *timestamp,
         GuardianError **error);
 
 #endif /* __GUARDIAN_ENTRY_H__ */

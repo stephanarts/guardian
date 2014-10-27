@@ -7,38 +7,83 @@ test_valid_hash() {
     dd if=/dev/urandom of=$TEMP_FILENAME bs=$1 count=1 2>/dev/null
     SUM=`shasum $TEMP_FILENAME | awk '{ print $1 }'`
 
-    ./libguardian-helper --file-verify \
-        $TEMP_FILENAME \
-        $1 \
-        `shasum $TEMP_FILENAME | awk '{ print $1 }'`
+    if test $# -eq 2
+    then
+        echo "`dd if=/dev/urandom bs=$2 count=1 2>/dev/null`" >> $TEMP_FILENAME
+    fi
 
-    if test $? -ne 0
+    ./file-helper \
+        $TEMP_FILENAME \
+        `shasum $TEMP_FILENAME | awk '{ print $1 }'` \
+        $1
+
+    RET=$?
+
+    if test $RET -ne 0
     then
         unlink $TEMP_FILENAME
-        echo "Failed"
-        return 1;
+        return $RET;
     fi
 
     unlink $TEMP_FILENAME
     return 0;
 }
 
+echo -n "Check Valid Hash of 128 byte long file"
 test_valid_hash 128
 if test $? -ne 0
 then
+    echo "  - FAILED"
     return 1;
 fi
+echo "  - OK"
 
+echo -n "Check Valid Hash of 1024 byte long file"
 test_valid_hash 1024
 if test $? -ne 0
 then
+    echo " - FAILED"
     return 1;
 fi
+echo " - OK"
 
+echo -n "Check Valid Hash of 1028 byte long file"
 test_valid_hash 1028
 if test $? -ne 0
 then
+    echo " - FAILED"
     return 1;
 fi
+echo " - OK"
 
-return 0
+
+
+echo -n "Check Valid Hash of first 1024 bytes of a 2048 byte long file"
+test_valid_hash 1024 1024
+RET=$?
+if test $RET -ne 0
+then
+    echo " - FAILED: "$RET
+    return 1;
+fi
+echo " - OK"
+
+echo -n "Check Valid Hash of first 128 bytes of a 1152 byte long file"
+test_valid_hash 128 1024
+if test $? -ne 0
+then
+    echo "  - FAILED"
+    return 1;
+fi
+echo "  - OK"
+
+echo -n "Check Valid Hash of first 1024 bytes of a 1152 byte long file"
+test_valid_hash 1024 128
+if test $? -ne 0
+then
+    echo " - FAILED"
+    return 1;
+fi
+echo " - OK"
+
+return 0;

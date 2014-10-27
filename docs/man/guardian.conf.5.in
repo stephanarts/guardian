@@ -13,4 +13,3 @@ Configure the timezone_offset to UTC, override whatever the system tells us.
 .TP 5
 timezone_dst
 Is the system correcting for Daylight-savings time?
-

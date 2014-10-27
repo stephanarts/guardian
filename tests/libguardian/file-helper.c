@@ -39,30 +39,19 @@
 
 #include <string.h>
 
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
 
 #include <libguardian/libguardian.h>
 
-#ifndef PLUGINDIR
-#define PLUGINDIR "../../plugins"
-#endif
-
-#ifndef PLUGINSUBDIR
-#define PLUGINSUBDIR ".libs/"
-#endif
-
-#define BUFFER_SIZE 1024
-
-#define POS_GMT_OFFSET 120
-#define NEG_GMT_OFFSET -120
-
 enum {
     OPTION_VERSION = 0,
     OPTION_HELP,
-    OPTION_FILE_VERIFY,
-    OPTION_SOURCE_READ,
     OPTION_COUNT
 };
 
@@ -72,7 +61,6 @@ enum {
 static struct option long_options[] = {
     {"version",    0, 0, 'V'}, /* OPTION_VERSION */
     {"help",       0, 0, 'h'}, /* OPTION_HELP */
-    {"file-verify",0, 0, 0},   /* OPTION_FILE_VERIFY */
     {0, 0, 0, 0}
 };
 
@@ -88,17 +76,12 @@ show_version ()
 static void
 show_usage ()
 {
-    printf ("Usage: %s [options]\n"
-            "    [--file-verify <file> <hash>]\n"
-            "    [--source-read <def>]\n"
-            , PACKAGE_NAME);
+    printf ("Usage: %s [options] <file> <hash> [size]\n",
+            PACKAGE_NAME);
     printf ("\n");
     printf ("Options:\n");
     printf ("   --version  -V     Show version information\n");
     printf ("   --help     -h     Show usage information (this output)\n");
-    printf ("\n");
-    printf ("   --file-verify     Test file-verify feature\n");
-    printf ("   --source-read     Test source functionality\n");
     return;
 }
 
@@ -107,9 +90,10 @@ main (int argc, char **argv)
 {
     int option_index = 0;
     int c = 0;
+    int ret = 0;
 
-    int file_verify = 0;
-    int source_read = 0;
+    struct stat buffer;
+    int fd;
 
     while (1)
     {
@@ -131,12 +115,6 @@ main (int argc, char **argv)
                         show_usage();
                         exit(0);
                         break;
-                    case OPTION_FILE_VERIFY:
-                        file_verify = 1;
-                        break;
-                    case OPTION_SOURCE_READ:
-                        source_read = 1;
-                        break;
                 }
                 break;
             case 'V':
@@ -156,35 +134,29 @@ main (int argc, char **argv)
 
     libguardian_init();
 
-    if (file_verify == 1) {
-        //fprintf(stderr, "Verify file: %i", argc);
-        //if (argc != 3)
-        //   exit(1); 
-        GuardianFile *f = guardian_file_new(argv[2]);
+    GuardianFile *f = guardian_file_new(argv[1]);
 
-        for(c = 0; c < argc; ++c) {
-            //fprintf(stderr, "%d: %s\n", c, argv[c]);
-        }
+    if (strlen(argv[2]) != 40)
+       exit(1); 
 
-        if (strlen(argv[4]) != 40)
-           exit(1); 
-
-        /* Convert ASCII SHA sum to binary 20-byte string */
-        unsigned char hash[20];
-        for(c = 0; c < 20; ++c) {
-            unsigned int n;
-            sscanf(&argv[4][c*2], "%2x", &n);
-            hash[c] = (unsigned char)n;
-        }
-
-        int i = guardian_file_verify (f, atoi(argv[3]), hash);
-
-        //fprintf(stderr, "%d\n", i);
+    /* Convert 40-byte ASCII SHA sum to binary 20-byte string */
+    unsigned char hash[20];
+    for(c = 0; c < 20; ++c) {
+        unsigned int n;
+        sscanf(&argv[2][c*2], "%2x", &n);
+        hash[c] = (unsigned char)n;
     }
 
-    //guardian_set_timezone_gmt_offset(POS_GMT_OFFSET);
-    //guardian_set_timezone_gmt_offset(NEG_GMT_OFFSET);
-
+    if (argc != 4) {
+        fd = open (argv[1], O_RDONLY);
+        fstat (fd, &buffer);
+        close(fd);
     
-    exit(0);
+        ret = guardian_file_verify (f, buffer.st_size, hash);
+
+    } else {
+        ret = guardian_file_verify (f, atoi(argv[3]), hash);
+    }
+
+    exit(ret);
 }
