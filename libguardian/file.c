@@ -37,6 +37,8 @@
 
 #include <errno.h>
 
+#include <fcntl.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -255,8 +257,11 @@ guardian_file_read (
     if (s < size) {
         if (feof(file->stream)) {
             clearerr(file->stream);
-            fd = fileno (file->stream);
+
+            fd = open(file->path, O_RDONLY);
             fstat (fd, &st_buffer);
+            close(fd);
+
             if (st_buffer.st_ino != file->st_ino) {
                 guardian_log_info ("File INODE changed, log-rotation expected. Opening new stream.");
 
