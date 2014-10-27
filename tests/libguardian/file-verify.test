@@ -12,7 +12,7 @@ test_valid_hash() {
         echo "`dd if=/dev/urandom bs=$2 count=1 2>/dev/null`" >> $TEMP_FILENAME
     fi
 
-    ./file-helper \
+    ./file-helper --test-verify \
         $TEMP_FILENAME \
         `shasum $TEMP_FILENAME | awk '{ print $1 }'` \
         $1

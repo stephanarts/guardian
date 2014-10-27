@@ -49,9 +49,22 @@
 
 #include <libguardian/libguardian.h>
 
+struct _GuardianFile
+{
+    char *path;
+    FILE *stream;
+
+    /* Cached values to determine log rotation */
+    ino_t st_ino;
+    off_t st_pos;
+    off_t st_size;
+};
+
 enum {
     OPTION_VERSION = 0,
     OPTION_HELP,
+    OPTION_TEST_VERIFY,
+    OPTION_TEST_READ,
     OPTION_COUNT
 };
 
@@ -59,8 +72,10 @@ enum {
  * Command-line options *
  ************************/
 static struct option long_options[] = {
-    {"version",    0, 0, 'V'}, /* OPTION_VERSION */
-    {"help",       0, 0, 'h'}, /* OPTION_HELP */
+    {"version",     0, 0, 'V'}, /* OPTION_VERSION */
+    {"help",        0, 0, 'h'}, /* OPTION_HELP */
+    {"test-verify", 0, 0, 0},   /* OPTION_TEST_VERIFY */
+    {"test-read",   0, 0, 0},   /* OPTION_TEST_READ */
     {0, 0, 0, 0}
 };
 
@@ -76,12 +91,14 @@ show_version ()
 static void
 show_usage ()
 {
-    printf ("Usage: %s [options] <file> <hash> [size]\n",
+    printf ("Usage: %s [options]\n",
             PACKAGE_NAME);
     printf ("\n");
     printf ("Options:\n");
     printf ("   --version  -V     Show version information\n");
     printf ("   --help     -h     Show usage information (this output)\n");
+    printf ("\n");
+    printf ("   --test-verify     Verify file hash (SHA)\n");
     return;
 }
 
@@ -94,6 +111,11 @@ main (int argc, char **argv)
 
     struct stat buffer;
     int fd;
+
+    int _test_verify = 0;
+    int _test_read = 0;
+
+    char data_buffer[1024];
 
     while (1)
     {
@@ -115,6 +137,12 @@ main (int argc, char **argv)
                         show_usage();
                         exit(0);
                         break;
+                    case OPTION_TEST_VERIFY:
+                        _test_verify = 1;
+                        break;
+                    case OPTION_TEST_READ:
+                        _test_read = 1;
+                        break;
                 }
                 break;
             case 'V':
@@ -132,32 +160,55 @@ main (int argc, char **argv)
         }
     }
 
+    argc-=optind;
+    argv+=optind;
+
     libguardian_init();
 
-    GuardianFile *f = guardian_file_new(argv[1]);
+    if (_test_verify == 1) {
 
-    if (strlen(argv[2]) != 40)
-       exit(1); 
+        if (argc < 2)
+           exit(1); 
 
-    /* Convert 40-byte ASCII SHA sum to binary 20-byte string */
-    unsigned char hash[20];
-    for(c = 0; c < 20; ++c) {
-        unsigned int n;
-        sscanf(&argv[2][c*2], "%2x", &n);
-        hash[c] = (unsigned char)n;
+        if (strlen(argv[1]) != 40)
+           exit(1); 
+
+        GuardianFile *f = guardian_file_new(argv[0]);
+
+        /* Convert 40-byte ASCII SHA sum to binary 20-byte string */
+        unsigned char hash[20];
+        for(c = 0; c < 20; ++c) {
+            unsigned int n;
+            sscanf(&argv[1][c*2], "%2x", &n);
+            hash[c] = (unsigned char)n;
+        }
+
+        /* If no file-size is specified, check the whole file */
+        if (argc != 3) {
+            fd = open (argv[0], O_RDONLY);
+            fstat (fd, &buffer);
+            close(fd);
+        
+            ret = guardian_file_verify (f, buffer.st_size, hash);
+
+        } else {
+            ret = guardian_file_verify (f, atoi(argv[2]), hash);
+        }
+
+        exit(ret);
     }
 
-    /* If no file-size is specified, check the whole file */
-    if (argc != 4) {
-        fd = open (argv[1], O_RDONLY);
-        fstat (fd, &buffer);
-        close(fd);
-    
-        ret = guardian_file_verify (f, buffer.st_size, hash);
 
-    } else {
-        ret = guardian_file_verify (f, atoi(argv[3]), hash);
+    if (_test_read == 1) {
+
+        GuardianFile *f = guardian_file_new(argv[0]);
+
+        guardian_file_read (f,
+            1024,
+            &data_buffer);
+
+        fprintf(stdout, "%u\n", f->st_ino);
+
+        exit(ret);
     }
-
-    exit(ret);
 }
