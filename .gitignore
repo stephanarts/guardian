@@ -1,6 +1,9 @@
 *.o
 *.lo
 *.la
+*.log
+*.trs
+.*.swp
 .deps
 .libs
 depcomp
@@ -33,10 +36,8 @@ po/POTFILES
 po/stamp-it
 po/*.gmo
 po/guardian.pot
-tests/libguardian/libguardian-helper
-tests/libguardian/*.log
+tests/libguardian/*-helper
 tests/plugins/plugin-loader
-tests/plugins/*.log
 m4/libtool.m4
 m4/ltversion.m4
 m4/ltsugar.m4
