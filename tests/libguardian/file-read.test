@@ -1,9 +1,21 @@
 #!/bin/sh
 
 TEMP_FILENAME=`mktemp`
+TEMP_FILENAM2=`mktemp`
 
-echo "2014-10-12T11:11:11Z zeus Test\n" > $TEMP_FILENAME
+echo "2014-10-12t11:11:11z zeus test\n" > $temp_filename
+echo "2014-10-12T11:11:12Z zeus Test\n" >> $TEMP_FILENAME
+
+# READ FILE
+
+mv $TEMP_FILENAME $TEMP_FILENAME_2
+
+echo "2014-10-12T11:11:13Z zeus Test\n" > $TEMP_FILENAME
+echo "2014-10-12T11:11:14Z zeus Test\n" >> $TEMP_FILENAME
+
+# READ FILE AGAIN
 
 unlink $TEMP_FILENAME
+unlink $TEMP_FILENAME_2
 
 exit 0
