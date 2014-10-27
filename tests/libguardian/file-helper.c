@@ -147,6 +147,7 @@ main (int argc, char **argv)
         hash[c] = (unsigned char)n;
     }
 
+    /* If no file-size is specified, check the whole file */
     if (argc != 4) {
         fd = open (argv[1], O_RDONLY);
         fstat (fd, &buffer);
