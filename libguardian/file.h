@@ -51,5 +51,6 @@ int
 guardian_file_read (
         GuardianFile *file,
         size_t size,
-        void   *buffer);
+        void   *buffer,
+        GuardianError **error);
 #endif

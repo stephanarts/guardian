@@ -50,6 +50,7 @@
 #include <openssl/sha.h>
 
 #include "memory.h"
+#include "error.h"
 #include "log.h"
 #include "file.h"
 
@@ -233,15 +234,27 @@ int
 guardian_file_read (
         GuardianFile *file,
         size_t size,
-        void   *buffer) {
+        void   *buffer,
+        GuardianError **error) {
 
     int fd;
     struct stat st_buffer;
-    int s = 0;
+    size_t s = 0;
+    int error_sv;
 
     if (file->stream == NULL) {
         file->stream = fopen(file->path, "r");
         if (file->stream == NULL) {
+            if (error) {
+                *error = guardian_error_new (
+                    "Can not open file: %s:'%s'",
+                    file->path,
+                    strerror (error_sv));
+            }
+            guardian_log_error (
+                "Can not open file: %s:'%s'",
+                file->path,
+                strerror (error_sv));
             return -1;
         }
 
@@ -269,6 +282,19 @@ guardian_file_read (
 
                 file->stream = fopen(file->path, "r");
                 if (file->stream == NULL) {
+                    error_sv = errno;
+
+                    if (error) {
+                        *error = guardian_error_new (
+                            "Can not open file: %s:'%s'",
+                            file->path,
+                            strerror (error_sv));
+                    }
+                    guardian_log_error (
+                        "Can not open file: %s:'%s'",
+                        file->path,
+                        strerror (error_sv));
+
                     return -1;
                 }
 

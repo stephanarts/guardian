@@ -156,6 +156,9 @@ main (int argc, char **argv)
 
     libguardian_init();
 
+    guardian_log_init (1);
+    guardian_log_mask (GUARDIAN_LOG_DEBUG);
+
     if (file_verify == 1) {
         //fprintf(stderr, "Verify file: %i", argc);
         //if (argc != 3)

@@ -203,11 +203,49 @@ main (int argc, char **argv)
 
         GuardianFile *f = guardian_file_new(argv[0]);
 
-        guardian_file_read (f,
+        int i = guardian_file_read (f,
             1024,
-            &data_buffer);
+            &data_buffer,
+            NULL);
 
-        fprintf(stdout, "%u\n", f->st_ino);
+        ino_t st_ino = f->st_ino;
+
+        rename(argv[0], argv[1]);
+
+        int fd = open(argv[0], O_CREAT|O_WRONLY);
+        write(fd, "1243\n", 5);
+        close(fd);
+
+        /* Determine EOF and discover rotation */
+        int a = guardian_file_read (f,
+            1024-i,
+            &data_buffer[i],
+            NULL);
+
+        if (a > 0)
+        {
+            ret = 1;
+            exit(ret);
+        }
+        
+        /* Read file */
+        i = guardian_file_read (f,
+            1024-i,
+            &data_buffer[i],
+            NULL);
+
+        if (i != 5) {
+            fprintf(stderr, "Read %d bytes, expected 5\n", i);
+            ret = 2;
+            exit(ret);
+        }
+
+        if (f->st_ino == st_ino) {
+            ret = 1;
+            exit(ret);
+        }
+
+        printf("%s\n", data_buffer);
 
         exit(ret);
     }

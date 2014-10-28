@@ -1,19 +1,22 @@
 #!/bin/sh
 
 TEMP_FILENAME=`mktemp`
-TEMP_FILENAM2=`mktemp`
+TEMP_FILENAME_2=`mktemp`
 
-echo "2014-10-12t11:11:11z zeus test\n" > $temp_filename
-echo "2014-10-12T11:11:12Z zeus Test\n" >> $TEMP_FILENAME
+echo "2014-10-12t11:11:11Z zeus Test" > $TEMP_FILENAME
+echo "2014-10-12T11:11:12Z zeus Test" >> $TEMP_FILENAME
 
-# READ FILE
+OUT=`./file-helper --test-read $TEMP_FILENAME $TEMP_FILENAME_2`
+RET=$?
+if test $RET -ne 0
+then
+    echo $RET
+    unlink $TEMP_FILENAME
+    unlink $TEMP_FILENAME_2
+    exit 1
+fi
 
-mv $TEMP_FILENAME $TEMP_FILENAME_2
-
-echo "2014-10-12T11:11:13Z zeus Test\n" > $TEMP_FILENAME
-echo "2014-10-12T11:11:14Z zeus Test\n" >> $TEMP_FILENAME
-
-# READ FILE AGAIN
+echo $OUT
 
 unlink $TEMP_FILENAME
 unlink $TEMP_FILENAME_2
