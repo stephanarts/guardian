@@ -39,6 +39,10 @@
 
 #include <string.h>
 
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>

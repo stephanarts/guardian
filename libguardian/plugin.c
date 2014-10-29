@@ -169,3 +169,10 @@ guardian_plugin_push_entry (
     zmq_send(plugin->socket, host, strlen(host), 0);
     zmq_recv(plugin->socket, msg, 255, 0);
 }
+
+void
+guardian_plugin_free (
+	GuardianPlugin *plugin)
+{
+
+}

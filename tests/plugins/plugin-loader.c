@@ -39,6 +39,9 @@
 
 #include <fcntl.h>
 
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <zmq.h>
 
 #include <libguardian/libguardian.h>
