@@ -263,8 +263,6 @@ main (int argc, char **argv)
 
     guardian_settings_get (settings, "key");
     
-    guardian_set_timezone_gmt_offset ( 120 );
-
     /**
      * Load all plugins from PLUGINDIR
      */

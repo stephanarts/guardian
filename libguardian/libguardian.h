@@ -33,7 +33,6 @@
 #define LIBGUARDIAN_INSIDE_LIBGUARDIAN_H
 
 #include <libguardian/log.h>
-#include <libguardian/time.h>
 #include <libguardian/error.h>
 #include <libguardian/file.h>
 #include <libguardian/types.h>

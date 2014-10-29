@@ -54,6 +54,7 @@
 #include <libguardian/libguardian.h>
 
 #define DATA_BUFFER_SIZE 1024
+#define ISO_TIMESTAMP_MAX_LEN 20
 
 /*** FIELD MATCHING REGULAR EXPRESSIONS ***/
 
@@ -120,8 +121,6 @@ guardian_plugin_init (void *ctx)
             &errors,
             &err_offset,
             NULL);
-
-    guardian_get_timezone_gmt_offset (&min_offset);
 
     return plugin;
 }
