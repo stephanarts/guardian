@@ -129,6 +129,14 @@ AC_CHECK_HEADER(pthread.h,
     [ AC_MSG_ERROR([Can't find the <pthread.h> header file]) ]
 )
 
+dnl *** Check for time.h
+dnl ***************************
+AC_CHECK_HEADER(time.h,
+    [ AC_DEFINE([HAVE_TIME_H], [1],
+                [Define to 1 if you have the <time.h> header file])
+    ]
+)
+
 dnl *** Check for getopt.h
 dnl ***************************
 AC_CHECK_HEADER(getopt.h,

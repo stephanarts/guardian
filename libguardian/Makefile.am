@@ -42,6 +42,7 @@ libguardian_1_0_la_CFLAGS =               \
     $(ZMQ_CFLAGS) \
     $(OPENSSL_CFLAGS) \
     -std=c99 \
+    -D_XOPEN_SOURCE=600 \
     -DLIBGUARDIAN_COMPILATION
 
 libguardian_1_0_la_LDFLAGS =              \

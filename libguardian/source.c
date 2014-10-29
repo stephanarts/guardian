@@ -43,6 +43,9 @@
 #include <sys/syslog.h>
 #endif
 
+#include <unistd.h>
+#include <sys/types.h>
+
 #include <stdarg.h>
 
 #include "error.h"

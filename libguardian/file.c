@@ -35,6 +35,10 @@
 #include <stdlib.h>
 #endif
 
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+
 #include <errno.h>
 
 #include <unistd.h>
