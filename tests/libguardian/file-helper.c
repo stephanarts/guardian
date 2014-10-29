@@ -45,6 +45,7 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 
 #ifdef HAVE_GETOPT_H
@@ -216,7 +217,7 @@ main (int argc, char **argv)
 
         rename(argv[0], argv[1]);
 
-        int fd = open(argv[0], O_CREAT|O_WRONLY);
+        int fd = open(argv[0], O_CREAT|O_WRONLY, 0);
         write(fd, "1243\n", 5);
         close(fd);
 
