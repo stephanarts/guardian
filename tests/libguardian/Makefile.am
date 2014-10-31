@@ -6,8 +6,7 @@ TESTS = \
     file-read.test   \
     source-read.test
 
-XFAIL_TESTS = \
-    file-verify.test
+XFAIL_TESTS =
 
 check_PROGRAMS = \
     file-helper \
