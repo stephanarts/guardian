@@ -205,7 +205,7 @@ main (int argc, char **argv)
 
 
     if (_test_read == 1) {
-
+        GuardianError *err = NULL;
         GuardianFile *f = guardian_file_new(argv[0]);
 
         int i = guardian_file_read (f,
@@ -217,7 +217,7 @@ main (int argc, char **argv)
 
         rename(argv[0], argv[1]);
 
-        int fd = open(argv[0], O_CREAT|O_WRONLY, 0);
+        int fd = open(argv[0], O_CREAT|O_WRONLY, 0600);
         write(fd, "1243\n", 5);
         close(fd);
 
@@ -237,10 +237,13 @@ main (int argc, char **argv)
         i = guardian_file_read (f,
             1024-i,
             &data_buffer[i],
-            NULL);
+            &err);
 
         if (i != 5) {
             fprintf(stderr, "Read %d bytes, expected 5\n", i);
+            if (err) {
+                fprintf(stderr, "%s", guardian_error_get_msg(err));
+            }
             ret = 2;
             exit(ret);
         }
