@@ -14,6 +14,7 @@ libguardian_1_0_la_SOURCES = \
     source.c \
     sourceengine.c \
     sourcetype.c \
+    timestamp.c \
     entry.c \
     field.c \
     plugin.c \
@@ -26,9 +27,10 @@ libguardian_include_HEADERS = \
     log.h \
     types.h \
     error.h \
+    source.h \
     sourceengine.h \
     sourcetype.h \
-    source.h \
+    timestamp.h \
     entry.h \
     field.h \
     plugin.h \
@@ -40,7 +42,6 @@ libguardian_1_0_la_CFLAGS =               \
     $(ZMQ_CFLAGS) \
     $(OPENSSL_CFLAGS) \
     -std=c99 \
-    -D_XOPEN_SOURCE=600 \
     -DLIBGUARDIAN_COMPILATION
 
 libguardian_1_0_la_LDFLAGS =              \

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PLUGIN=syslog
+PLUGIN=syslog-plugin
 LINE="Jan 01 10:12:03 localhost kernel: [ 0000.000000] Initializing cgroup subsys cpu"
 
 OUTPUT=`./plugin-loader $PLUGIN 2>&1`;

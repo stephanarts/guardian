@@ -35,6 +35,7 @@
 #include <libguardian/log.h>
 #include <libguardian/error.h>
 #include <libguardian/file.h>
+#include <libguardian/timestamp.h>
 #include <libguardian/types.h>
 #include <libguardian/assert.h>
 #include <libguardian/memory.h>

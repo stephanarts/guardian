@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -31,39 +31,38 @@
 #error "Only <libguardian/libguardian.h> can be included directly, this file may disappear or change contents"
 #endif
 
-#ifndef __GUARDIAN_PLUGIN_H__
-#define __GUARDIAN_PLUGIN_H__
+#ifndef __GUARDIAN_TIMESTAMP_H__
+#define __GUARDIAN_TIMESTAMP_H__
+
+int
+guardian_timestamp_init(void);
+
+int
+guardian_register_timestamp (
+    const char *);
+
+int
+guardian_find_timestamp (
+    char   *buffer,
+    size_t *len,
+    int     hint);
+
+int
+guardian_extract_timestamp (
+    const char *buffer,
+    int         hint,
+    struct tm  *timeptr);
 
 
-typedef struct _GuardianPlugin GuardianPlugin;
+/*
+int
+guardian_extract_timestamp (
+    char   *buffer,
+    size_t *len,
+    long    timestamp_fmt_hint,
+    struct tm *_tm,
+    char  **timestamp,
+    int    *timestamp_len);
+*/
 
-struct _GuardianPlugin
-{
-    void *handle; /* dlopen handle */
-    void (*register_types) ( GuardianPlugin * );
-    void (*extract_fields) ( GuardianPlugin *, const char *entry );
-};
-
-GuardianPlugin *
-guardian_plugin_load ( 
-        char *path,
-        GuardianError **);
-
-void
-guardian_plugin_push_entry (
-        GuardianPlugin *,
-        const char *host, 
-        const char *source,
-        const char *timestamp,
-        const char *entry);
-
-void
-guardian_plugin_register_types ( GuardianPlugin * );
-
-void
-guardian_plugin_extract_fields (
-        GuardianPlugin *,
-        const char *entry );
-
-
-#endif /* __GUARDIAN_PLUGIN_H__ */
+#endif /* __GUARDIAN_TIMESTAMP_H__ */

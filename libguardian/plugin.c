@@ -74,7 +74,6 @@ guardian_plugin_extract_fields (
 GuardianPlugin *
 guardian_plugin_load (
         char *path,
-        void *ctx,
         GuardianError **error )
 {
     void *handle = NULL;
@@ -83,7 +82,7 @@ guardian_plugin_load (
     char error_msg[200];
     char *ld_error = NULL;
 
-    GuardianPlugin *(*_plugin_init)(void *);
+    GuardianPlugin *(*_plugin_init)(void);
 
     handle = dlopen (path, RTLD_NOW );
     error_sv = errno;
@@ -109,14 +108,10 @@ guardian_plugin_load (
             /**
              * Call the initialisor, and create the plugin-object
              */
-            plugin = _plugin_init(ctx);
+            plugin = _plugin_init();
             if ( plugin != NULL )
             {
                 plugin->handle = handle;
-                //plugin->ctx    = ctx;
-                //plugin->socket = zmq_socket(ctx, ZMQ_REQ);
-
-                //zmq_connect(plugin->socket, "inproc://plugins");
 
                 handle = NULL;
                 return plugin;
@@ -166,8 +161,6 @@ guardian_plugin_push_entry (
         const char *entry)
 {
     char msg[256];
-    zmq_send(plugin->socket, host, strlen(host), 0);
-    zmq_recv(plugin->socket, msg, 255, 0);
 }
 
 void

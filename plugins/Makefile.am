@@ -1,1 +1,2 @@
-SUBDIRS=syslog
+SUBDIRS= \
+    syslog-plugin

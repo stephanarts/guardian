@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,43 +27,78 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined (LIBGUARDIAN_INSIDE_LIBGUARDIAN_H) && !defined(LIBGUARDIAN_COMPILATION)
-#error "Only <libguardian/libguardian.h> can be included directly, this file may disappear or change contents"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
 #endif
 
-#ifndef __GUARDIAN_PLUGIN_H__
-#define __GUARDIAN_PLUGIN_H__
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
+#endif
 
-typedef struct _GuardianPlugin GuardianPlugin;
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
 
-struct _GuardianPlugin
+#include <time.h>
+
+#include <pcre.h>
+
+#include "timestamp.h"
+
+#define MAX_FORMATS 50
+#define MAX_FORMAT_LENGTH 20
+
+static long n_formats = 0;
+
+static char formats[MAX_FORMATS][MAX_FORMAT_LENGTH];
+
+/**
+ * Register a Timestamp format, the timestamp code
+ * uses strptime() internally, so a timestamp format
+ * must be written according to the format defined by
+ * strftime().
+ */
+int
+guardian_register_timestamp (
+    const char   *format)
 {
-    void *handle; /* dlopen handle */
-    void (*register_types) ( GuardianPlugin * );
-    void (*extract_fields) ( GuardianPlugin *, const char *entry );
-};
+    if (n_formats < MAX_FORMATS)
+    {
+        strncpy(formats[n_formats], format, MAX_FORMAT_LENGTH);
+        n_formats++;
+        return n_formats-1;
+    }
+    return -1;
+}
 
-GuardianPlugin *
-guardian_plugin_load ( 
-        char *path,
-        GuardianError **);
+int
+guardian_timestamp_init(void)
+{
+    /* Standard Syslog Timestamp format */
+    guardian_register_timestamp (
+        "%b %e %T");
 
-void
-guardian_plugin_push_entry (
-        GuardianPlugin *,
-        const char *host, 
-        const char *source,
-        const char *timestamp,
-        const char *entry);
+    return 0;
+}
 
-void
-guardian_plugin_register_types ( GuardianPlugin * );
-
-void
-guardian_plugin_extract_fields (
-        GuardianPlugin *,
-        const char *entry );
-
-
-#endif /* __GUARDIAN_PLUGIN_H__ */
+/**
+ * guardian_extract_timestamp:
+ *
+ * Returns:
+ *  0 on success;
+ */
+int
+guardian_extract_timestamp (
+    const char *buffer,
+    int         hint,
+    struct tm  *timeptr)
+{
+    if (strptime(buffer, formats[hint], timeptr)) {
+        return 0;
+    }
+    return 1;
+}

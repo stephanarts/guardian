@@ -184,8 +184,8 @@ guardiand/Makefile
 guardian/Makefile
 data/Makefile
 plugins/Makefile
-plugins/syslog/Makefile
-plugins/httpd/Makefile
+plugins/syslog-plugin/Makefile
+plugins/httpd-plugin/Makefile
 tests/Makefile
 tests/libguardian/Makefile
 tests/plugins/Makefile

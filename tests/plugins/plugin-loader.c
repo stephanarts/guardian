@@ -65,8 +65,6 @@ main (int argc, char **argv)
 
     char buffer[BUFFER_SIZE];
 
-    void *ctx = zmq_ctx_new();
-
     if (argc < 2)
     {
         fprintf (stderr, "No plugin-name provided\n");
@@ -84,7 +82,7 @@ main (int argc, char **argv)
 
     fprintf(stderr, "Loading plugin: %s\n", plugin_path);
 
-    plugin = guardian_plugin_load ( plugin_path, ctx, &error );
+    plugin = guardian_plugin_load ( plugin_path, &error );
     if (plugin)
     {
         fprintf(stderr, "Plugin %s Loaded\n", argv[1]);

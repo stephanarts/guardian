@@ -62,6 +62,8 @@
 
 #include <zmq.h>
 
+#include <time.h>
+
 #include <libguardian/libguardian.h>
 
 #include "assert.h"
@@ -290,7 +292,7 @@ main (int argc, char **argv)
                      */
                     if (strcmp (&plugin_path[i-3], ".so") == 0)
                     {
-                        plugin = guardian_plugin_load ( plugin_path, ctx, &error );
+                        plugin = guardian_plugin_load ( plugin_path, &error );
                         if ( plugin == NULL )
                         {
                             guardian_log_warning ( "%s", guardian_error_get_msg (error));
