@@ -31,9 +31,11 @@
 #include <config.h>
 #endif
 
-#ifdef HAVE_STDLIB_H
+#ifdef have_stdlib_h
 #include <stdlib.h>
 #endif
+
+#include <time.h>
 
 #include <libguardian/libguardian.h>
 

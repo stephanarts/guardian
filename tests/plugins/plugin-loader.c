@@ -44,6 +44,8 @@
 
 #include <zmq.h>
 
+#include <time.h>
+
 #include <libguardian/libguardian.h>
 
 #ifndef PLUGINDIR
