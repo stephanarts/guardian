@@ -43,6 +43,10 @@
 #include <getopt.h>
 #endif
 
+#include <time.h>
+
+#include <curses.h>
+
 #include <signal.h>
 
 #include <sys/socket.h>
@@ -98,9 +102,63 @@ show_usage ()
     printf ("   --help     -h     Show usage information (this output)\n");
     printf ("              -v     Show verbose output\n");
     printf ("              -vv    Show very-verbose output\n");
+    printf ("              -i     Run interactive menu\n");
     printf ("\n");
     printf ("   --fatal-warnings  Make all warnings fatal\n");
     return;
+}
+
+static void
+run_menu (void)
+{
+    int i;
+    int y, x;
+    time_t t;
+    WINDOW *win = initscr();
+    while(1) {
+        werase(win);
+        getmaxyx(win, y, x);
+
+        time(&t);
+        if (x >= 24) {
+            wmove(win, 0, (x-24)/2);
+            waddnstr(win, ctime(&t), 24);
+        }
+        if (x > strlen(PACKAGE_NAME)+strlen(PACKAGE_VERSION)+28) {
+            wmove(win, 0, 1);
+            waddstr(win, PACKAGE_NAME);
+
+            wmove(win, 0, (x-24)/2);
+            waddnstr(win, ctime(&t), 24);
+
+            wmove(win, 0, x-strlen(PACKAGE_VERSION)-1);
+            waddstr(win, PACKAGE_VERSION);
+        } else {
+            if (x > strlen(PACKAGE_NAME)+26) {
+                wmove(win, 0, 1);
+                waddstr(win, PACKAGE_NAME);
+
+                wmove(win, 0, x-25);
+                waddnstr(win, ctime(&t), 24);
+            } else {
+                if (x >= 24) {
+                    wmove(win, 0, (x-24)/2);
+                    waddnstr(win, ctime(&t), 24);
+                }
+            }
+        }
+
+        WINDOW *w = subwin(win, y-1, x, 1, 0);
+        wborder(w, 0, 0, 0, 0, 0, 0, 0, 0);
+        wmove(win, 10, 10);
+        i = wgetch(win);
+        if (i == 'q') {
+            wclear(win);
+            wrefresh(win);
+            break;
+        }
+    }
+    endwin();
 }
 
 /**
@@ -117,12 +175,9 @@ main (int argc, char **argv)
     int c = 0;
     int verbosity = 0;
 
-    int s, len;
-    struct sockaddr_un remote;
-
     while (1)
     {
-        c = getopt_long (argc, argv, "vVh",
+        c = getopt_long (argc, argv, "vVhi",
                     long_options, &option_index);
         if (c == -1)
             break;
@@ -155,6 +210,10 @@ main (int argc, char **argv)
             case 'v':
                 verbosity = verbosity + 1;
                 break;
+            case 'i':
+                run_menu();
+                exit(0);
+                break;
             default:
                 fprintf(stderr, "Try '%s --help' for more information\n", argv[0]);
                 exit (1);
@@ -162,25 +221,5 @@ main (int argc, char **argv)
         }
     }
 
-    if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
-        perror("socket");
-        exit(1);
-    }
-
-    printf("Trying to connect...\n");
-
-    remote.sun_family = AF_UNIX;
-    strcpy(remote.sun_path, SOCK_PATH);
-    len = strlen(remote.sun_path) + sizeof(remote.sun_family);
-    if (connect(s, (struct sockaddr *)&remote, len) == -1) {
-        perror("connect");
-        exit(1);
-    }
-
-    printf("Connected.\n");
-
-    send (s, "Hello World", 10, 0);
-
-    close (s);
     exit(0);
 }

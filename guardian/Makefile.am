@@ -7,7 +7,9 @@ guardian_LDADD = \
     $(PCRE_LIBS) \
     $(OPENSSL_LIBS) \
     $(ZMQ_LIBS) \
-    $(PTHREAD_LIBS) -lrt
+    $(PTHREAD_LIBS) \
+    -lncurses \
+    -lrt
 
 guardian_LDFLAGS = \
     $(PLATFORM_LDFLAGS)

@@ -146,6 +146,13 @@ AC_CHECK_HEADER(getopt.h,
     [ AC_MSG_ERROR([Can't find header <getopt.h>]) ]
 )
 
+AC_CHECK_HEADER(ncurses.h,
+    [ AC_DEFINE([HAVE_NCURSES_H], [1],
+                [Define to 1 if you have the <ncurses.h> header file])
+    ],
+    [ AC_MSG_ERROR([Can't find header <ncurses.h>]) ]
+)
+
 PKG_CHECK_MODULES([PCRE], [libpcre >= 8.0])
 AC_SUBST(PCRE_LIBS)
 AC_SUBST(PCRE_CFLAGS)
