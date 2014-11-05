@@ -120,10 +120,10 @@ run_menu (void)
         getmaxyx(win, y, x);
 
         time(&t);
-        if (x >= 24) {
-            wmove(win, 0, (x-24)/2);
-            waddnstr(win, ctime(&t), 24);
-        }
+
+        /* Check if there is enough horizontal space
+         * to draw the package name, version and date+time.
+         */
         if (x > strlen(PACKAGE_NAME)+strlen(PACKAGE_VERSION)+28) {
             wmove(win, 0, 1);
             waddstr(win, PACKAGE_NAME);
@@ -134,6 +134,9 @@ run_menu (void)
             wmove(win, 0, x-strlen(PACKAGE_VERSION)-1);
             waddstr(win, PACKAGE_VERSION);
         } else {
+            /* Check if there is enough horizontal space
+             * to draw the package name and date+time.
+             */
             if (x > strlen(PACKAGE_NAME)+26) {
                 wmove(win, 0, 1);
                 waddstr(win, PACKAGE_NAME);
@@ -141,6 +144,9 @@ run_menu (void)
                 wmove(win, 0, x-25);
                 waddnstr(win, ctime(&t), 24);
             } else {
+                /* Check if there is enough horizontal space
+                 * to draw the date+time.
+                 */
                 if (x >= 24) {
                     wmove(win, 0, (x-24)/2);
                     waddnstr(win, ctime(&t), 24);
@@ -150,7 +156,7 @@ run_menu (void)
 
         WINDOW *w = subwin(win, y-1, x, 1, 0);
         wborder(w, 0, 0, 0, 0, 0, 0, 0, 0);
-        wmove(win, 10, 10);
+        wmove(w, 1, 1);
         i = wgetch(win);
         if (i == 'q') {
             wclear(win);
