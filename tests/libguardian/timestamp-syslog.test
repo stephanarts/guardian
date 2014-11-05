@@ -1,0 +1,3 @@
+#!/bin/sh
+./timestamp-helper --test-verify 
+exit 0

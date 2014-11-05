@@ -56,8 +56,8 @@
 
 #include <libguardian/libguardian.h>
 
-/** Define 2 Second interval */
-#define INTERVAL 2
+/** Define 10 Second interval */
+#define INTERVAL 10
 
 static int n_sources = 0;
 static GuardianSource **sources = NULL;
@@ -76,6 +76,7 @@ _guardian_scheduler_thread (void *arg)
     guardian_log_info("Start Scheduler\n");
     while(1) {
         sem_post (&worker_sem);
+        printf(":");
         sleep(INTERVAL);
     }
     guardian_log_info("Exit Scheduler\n");
@@ -92,8 +93,10 @@ _guardian_worker_thread (void *arg)
     zmq_connect(socket, "inproc://workers");
     while(1) {
         sem_wait (&worker_sem);
+        printf(".");
         zmq_send(socket, "A\n\0", 3, 0);
-        guardian_log_info("RECV\n", msg);
+        guardian_log_info("RECV\n");
+
         zmq_recv(socket, msg, 255, 100);
         guardian_log_info("..'%s'\n", msg);
     }
@@ -122,7 +125,7 @@ guardian_scheduler_main ( void *ctx, int n_workers )
     zmq_bind(plugins,    "inproc://workers");
     zmq_bind(controller, "inproc://controller");
 
-    sem_init(&worker_sem, 0, 100000);
+    sem_init(&worker_sem, 0, 0);
 
     pthread_create (&scheduler, NULL, _guardian_scheduler_thread, NULL);
 

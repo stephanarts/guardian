@@ -43,6 +43,8 @@
 #include <getopt.h>
 #endif
 
+#include <time.h>
+
 #include <libguardian/libguardian.h>
 
 #ifndef PLUGINDIR

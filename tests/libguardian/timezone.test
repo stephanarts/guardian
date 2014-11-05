@@ -1,3 +1,0 @@
-#!/bin/sh
-./libguardian-helper --file-verify ./test.txt 12 14
-exit 0

@@ -153,7 +153,7 @@ main (int argc, char **argv)
     struct dirent *dirp;
     int i = 0;
 
-    int n_workers = 2;
+    int n_workers = 5;
 
     char plugin_path[1024];
 
@@ -293,7 +293,7 @@ main (int argc, char **argv)
                     if (strcmp (&plugin_path[i-3], ".so") == 0)
                     {
                         plugin = guardian_plugin_load ( plugin_path, &error );
-                        if ( plugin == NULL )
+                        if ( plugin == NULL && error)
                         {
                             guardian_log_warning ( "%s", guardian_error_get_msg (error));
                             guardian_error_free (error);
@@ -302,7 +302,7 @@ main (int argc, char **argv)
                         else
                         {
                             guardian_log_info("Load plugin: %s\n", plugin_path);
-                            guardian_plugin_register_types ( plugin );
+                            //guardian_plugin_register_types ( plugin );
                         }
                     }
                 }

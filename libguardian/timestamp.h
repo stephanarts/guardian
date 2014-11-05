@@ -53,16 +53,4 @@ guardian_extract_timestamp (
     int         hint,
     struct tm  *timeptr);
 
-
-/*
-int
-guardian_extract_timestamp (
-    char   *buffer,
-    size_t *len,
-    long    timestamp_fmt_hint,
-    struct tm *_tm,
-    char  **timestamp,
-    int    *timestamp_len);
-*/
-
 #endif /* __GUARDIAN_TIMESTAMP_H__ */

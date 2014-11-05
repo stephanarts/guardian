@@ -1,9 +1,9 @@
 EXTRA_DIST = $(TESTS)
 
 TESTS = \
-    timezone.test    \
-    file-verify.test \
-    file-read.test   \
+    file-verify.test      \
+    file-read.test        \
+    timestamp-syslog.test \
     source-read.test
 
 XFAIL_TESTS =
@@ -11,6 +11,7 @@ XFAIL_TESTS =
 check_PROGRAMS = \
     file-helper \
     source-helper \
+    timestamp-helper \
     libguardian-helper
 
 file_helper_LDADD = \
@@ -18,6 +19,10 @@ file_helper_LDADD = \
     $(PCRE_LIBS)
 
 source_helper_LDADD = \
+    $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la \
+    $(PCRE_LIBS)
+
+timestamp_helper_LDADD = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la \
     $(PCRE_LIBS)
 
