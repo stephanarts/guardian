@@ -61,44 +61,33 @@
 
 static int n_sources = 0;
 static GuardianSource **sources = NULL;
+static char *source_state = NULL;
 void *_ctx = NULL;
-
-sem_t worker_sem;
 
 #define         BUFFER_LEN      1024
 char            buffer[BUFFER_LEN];
-
-pthread_t scheduler;
-
-static void *
-_guardian_scheduler_thread (void *arg)
-{
-    guardian_log_info("Start Scheduler\n");
-    while(1) {
-        sem_post (&worker_sem);
-        printf(":");
-        sleep(INTERVAL);
-    }
-    guardian_log_info("Exit Scheduler\n");
-    pthread_exit(NULL);
-}
 
 static void *
 _guardian_worker_thread (void *arg)
 {
     char msg[256];
     void *socket;
+    int ret = 0;
+    int timeout = 0;
 
     socket = zmq_socket(_ctx, ZMQ_REQ);
     zmq_connect(socket, "inproc://workers");
     while(1) {
-        sem_wait (&worker_sem);
-        printf(".");
-        zmq_send(socket, "A\n\0", 3, 0);
-        guardian_log_info("RECV\n");
-
+        //printf(".");
+        zmq_send(socket, "GET-COMMAND\n\0", 13, 0);
         zmq_recv(socket, msg, 255, 100);
-        guardian_log_info("..'%s'\n", msg);
+
+        //guardian_log_info("..'%s'\n", msg);
+        ret = sscanf(msg, "WAIT[%d]", &timeout);
+        if (ret == 1) {
+            sleep(timeout);
+            guardian_log_info("WORKER SLEEP\n");
+        }
     }
     pthread_exit(NULL);
 }
@@ -124,10 +113,6 @@ guardian_scheduler_main ( void *ctx, int n_workers )
 
     zmq_bind(plugins,    "inproc://workers");
     zmq_bind(controller, "inproc://controller");
-
-    sem_init(&worker_sem, 0, 0);
-
-    pthread_create (&scheduler, NULL, _guardian_scheduler_thread, NULL);
 
     workers = guardian_new (sizeof(pthread_t), n_workers);
 
@@ -159,8 +144,13 @@ guardian_scheduler_main ( void *ctx, int n_workers )
             int size = zmq_recv (plugins, msg, 255, 0);
             if (size != -1) {
                 // Process task
-                guardian_log_debug("Send 'a': '%s'", msg);
-                zmq_send(plugins, "a", 1, 0);
+                if(!strncmp(msg, "GET-COMMAND", 11)) {
+                    snprintf(msg, 255, "WAIT[%d]%n", INTERVAL, &size);
+                    zmq_send(plugins, msg, size, 0);
+                } else {
+                    guardian_log_debug("Send 'a': '%s'", msg);
+                    zmq_send(plugins, "a", 1, 0);
+                }
             }
         }
 
@@ -173,10 +163,6 @@ guardian_scheduler_main ( void *ctx, int n_workers )
                     /** TODO:
                      * Use another mechanism to properly end threads.
                      */
-                    pthread_cancel(scheduler);
-                    pthread_join(scheduler, NULL);
-
-                    guardian_log_debug("Scheduler joined, waiting for workers");
 
                     for (i = 0; i < n_workers; ++i)
                     {
@@ -226,6 +212,7 @@ void
 guardian_scheduler_add_source ( GuardianSource *source)
 {
     GuardianSource **_sources;
+    char *_source_state;
     int i;
 
     /** If no sources are defined */
@@ -234,25 +221,33 @@ guardian_scheduler_add_source ( GuardianSource *source)
         sources = guardian_new(sizeof(GuardianSource *), 2);
         sources[0] = source;
         sources[1] = NULL;
+        source_state = guardian_new(sizeof(char), 2);
+        source_state[0] = 'I';
+        source_state[1] = '\0';
         n_sources = 1;
         return;
     }
 
     /** Increase the source list */
     _sources = guardian_new(sizeof(GuardianSource *) * (n_sources + 2), 1);
+    _source_state = guardian_new(sizeof(char) * (n_sources + 2), 1);
 
     /** Copy all sources to the new list */
     for(i = 0; i < n_sources; ++i)
     {
         _sources[i] = sources[i];
+        _source_state[i] = source_state[i];
     }
     _sources[i] = source;
+    _source_state[i] = 'I';
 
     /** Free the old list */
     free (sources);
+    free (source_state);
 
     /** And replace it with the new one */
     sources = _sources;
+    source_state = _source_state;
 
     n_sources++;
 }
