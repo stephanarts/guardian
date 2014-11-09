@@ -64,7 +64,7 @@
 
 #include <openssl/sha.h>
 
-#define         SOCK_PATH "/tmp/guardian.sock"
+#define  SOCK_PATH "/tmp/guardian.sock"
 
 enum {
     OPTION_VERSION = 0,
@@ -153,9 +153,13 @@ run_menu (void)
                 }
             }
         }
+        wmove(win, y-1, 1);
+        waddnstr(win, "[q]uit", 6);
 
-        WINDOW *w = subwin(win, y-1, x, 1, 0);
-        wborder(w, 0, 0, 0, 0, 0, 0, 0, 0);
+        /* Draw a horizontal line */
+        WINDOW *w = subwin(win, 1, x, 1, 0);
+        wborder(w, 0, 0, 0, 0, ACS_HLINE, ACS_HLINE, ACS_HLINE, ACS_HLINE);
+
         wmove(w, 1, 1);
         i = wgetch(win);
         if (i == 'q') {
