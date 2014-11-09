@@ -120,6 +120,7 @@ guardian_source_new (
     }
 
     /** Look up the sourcetype object from it's name */
+    /* 
     source_type  = guardian_sourcetype_lookup ( type );
     if ( source_type == NULL )
     {
@@ -129,6 +130,7 @@ guardian_source_new (
         }
         return NULL;
     }
+    */
 
     source = (GuardianSource *)malloc (sizeof (GuardianSource));
     source->source_type = source_type;

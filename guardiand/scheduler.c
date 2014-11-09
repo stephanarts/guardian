@@ -74,6 +74,7 @@ _guardian_worker_thread (void *arg)
     void *socket;
     int ret = 0;
     int timeout = 0;
+    GuardianSource *source = NULL;
 
     socket = zmq_socket(_ctx, ZMQ_REQ);
     zmq_connect(socket, "inproc://workers");
@@ -85,8 +86,17 @@ _guardian_worker_thread (void *arg)
         //guardian_log_info("..'%s'\n", msg);
         ret = sscanf(msg, "WAIT[%d]", &timeout);
         if (ret == 1) {
-            sleep(timeout);
             guardian_log_info("WORKER SLEEP\n");
+            sleep(timeout);
+            continue;
+        }
+        ret = sscanf(msg, "PROCESS[%p]", &source);
+        if (ret == 1) {
+            guardian_log_info("PROCESS SOURCE\n");
+            //sleep(15);
+            sprintf(msg, "FINISH[%p]%n", source, &ret);
+            zmq_send(socket, msg, ret, 0);
+            zmq_recv(socket, msg, 255, 100);
         }
     }
     pthread_exit(NULL);
@@ -96,9 +106,12 @@ void
 guardian_scheduler_main ( void *ctx, int n_workers )
 {
     int i = 0;
+    int n_sleeping = 0;
     int no_linger = 0;
+    int ret = 0;
     void *plugins;
     void *controller;
+    GuardianSource *source = NULL;
 
     pthread_t *workers = NULL;
 
@@ -145,12 +158,60 @@ guardian_scheduler_main ( void *ctx, int n_workers )
             if (size != -1) {
                 // Process task
                 if(!strncmp(msg, "GET-COMMAND", 11)) {
-                    snprintf(msg, 255, "WAIT[%d]%n", INTERVAL, &size);
-                    zmq_send(plugins, msg, size, 0);
-                } else {
-                    guardian_log_debug("Send 'a': '%s'", msg);
-                    zmq_send(plugins, "a", 1, 0);
+                    source = NULL;
+                    n_sleeping = 0;
+                    for(i = 0; i < n_sources; ++i) {
+                        if (source_state[i] == 'S') {
+                            n_sleeping++;
+                        }
+                        if (source_state[i] == 'I') {
+                            source = sources[i];
+                            source_state[i] = 'R';
+                            break;
+                        }
+                    }
+
+                    /* If no source available, wait */
+                    if (source == NULL) {
+                        /* If enough sources are sleeping,
+                         * mark them as idle so they can be
+                         * scheduled again.
+                         */
+                        if (n_sleeping == n_sources) {
+                            for(i = 0; i < n_sources; ++i) {
+                                source_state[i] = 'I';
+                            }
+                        }
+
+                        snprintf(msg, 255, "WAIT[%d]%n", INTERVAL, &size);
+                        zmq_send(plugins, msg, size, 0);
+                    } else {
+                        guardian_log_debug("Worker Processing Source[%d]", i);
+                        snprintf(msg, 255, "PROCESS[%p]%n", source, &size);
+                        zmq_send(plugins, msg, size, 0);
+                    }
+                    continue;
                 }
+                /* Check if it is a message indicating
+                 * a worker thread is finished processing.
+                 */
+                ret = sscanf(msg, "FINISH[%p]", &source);
+                if (ret == 1) {
+                    guardian_log_debug("Worker Finished");
+                    /* Mark the source as sleeping so it
+                     * won't be rescheduled immediately.
+                     */
+                    for(i = 0; i < n_sources; ++i) {
+                        if(sources[i] == source) {
+                            source_state[i] = 'S';
+                            break;
+                        }
+                    }
+                    zmq_send(plugins, "-", 1, 0);
+                    continue;
+                } 
+                guardian_log_debug("Send 'a': '%s'", msg);
+                zmq_send(plugins, "a", 1, 0);
             }
         }
 
@@ -214,6 +275,11 @@ guardian_scheduler_add_source ( GuardianSource *source)
     GuardianSource **_sources;
     char *_source_state;
     int i;
+
+    if (source == NULL) {
+        guardian_log_error("Can not schedule NULL source\n");
+        return;
+    }
 
     /** If no sources are defined */
     if (sources == NULL)
