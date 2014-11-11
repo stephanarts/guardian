@@ -1,3 +1,35 @@
 #!/bin/sh
-./timestamp-helper --test-verify 
+TS="Nov 5 13:17:38 example tag[pid]: message"
+./timestamp-helper --test-verify "$TS"
+RET=$?
+if test $RET -ne 0
+then
+    exit 1
+fi
+
+TS="2005/11/05 13:17:38 W00T"
+./timestamp-helper --test-verify "$TS"
+RET=$?
+if test $RET -ne 0
+then
+    exit 1
+fi
+
+TS="127.0.0.1 - - [05/Nov/2005:13:17:38 +0100]"
+./timestamp-helper --test-verify "$TS"
+RET=$?
+if test $RET -ne 0
+then
+    echo $RET
+    exit 1
+fi
+
+TS="127.0.0.1 - - [05/Nov/2005T13:17:38 +0100]"
+./timestamp-helper --test-verify "$TS"
+RET=$?
+if test $RET -ne 0
+then
+    echo $RET
+    exit 1
+fi
 exit 0

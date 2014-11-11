@@ -55,6 +55,16 @@
 static long n_formats = 0;
 
 static char formats[MAX_FORMATS][MAX_FORMAT_LENGTH];
+static pcre *format_exp[MAX_FORMATS];
+
+/**
+ * Build a regexp that can be used to find a string
+ * matching the strftime() format in a buffer.
+ */
+static int
+_guardian_timestamp_build_regexp (
+    const char *format,
+    pcre **regexp);
 
 /**
  * Register a Timestamp format, the timestamp code
@@ -68,6 +78,12 @@ guardian_register_timestamp (
 {
     if (n_formats < MAX_FORMATS)
     {
+        /* Build a regexp capable of finding this timestamp
+         * in a string.
+         */
+
+        _guardian_timestamp_build_regexp (format, &format_exp[n_formats]);
+
         strncpy(formats[n_formats], format, MAX_FORMAT_LENGTH);
         n_formats++;
         return n_formats-1;
@@ -75,12 +91,71 @@ guardian_register_timestamp (
     return -1;
 }
 
+/**
+ * Build a regexp that can be used to find a string
+ * matching the strftime() format in a buffer.
+ */
+static int
+_guardian_timestamp_build_regexp (
+    const char *format,
+    pcre **regexp) {
+
+    const char *errors = NULL;
+    int err_offset;
+
+    if(strcmp("%d/%b/%Y:%T %z", format) == 0) {
+        *regexp = pcre_compile (
+            "(\\d{2}\\/\\D{3}\\/\\d{4}:\\d{2}:\\d{2}:\\d{2})",
+            PCRE_FIRSTLINE |
+            PCRE_MULTILINE |
+            PCRE_NEWLINE_ANYCRLF |
+            PCRE_UTF8,
+            &errors,
+            &err_offset,
+            NULL);
+        if (errors) {
+            fprintf(stderr, "Compile regexp failed\n%s\n", errors);
+        }
+    } else {
+        *regexp = NULL; 
+    }
+    if(strcmp("%d/%b/%YT%T %z", format) == 0) {
+        *regexp = pcre_compile (
+            "(\\d{2}\\/\\D{3}\\/\\d{4}T\\d{2}:\\d{2}:\\d{2})",
+            PCRE_FIRSTLINE |
+            PCRE_MULTILINE |
+            PCRE_NEWLINE_ANYCRLF |
+            PCRE_UTF8,
+            &errors,
+            &err_offset,
+            NULL);
+        if (errors) {
+            fprintf(stderr, "Compile regexp failed\n%s\n", errors);
+        }
+    }
+
+    return 0;
+}
+
 int
 guardian_timestamp_init(void)
 {
     /* Standard Syslog Timestamp format */
+    /* Nov 20 23:12:14 */
     guardian_register_timestamp (
         "%b %e %T");
+
+    /* 2005/11/20 23:12:14 */
+    guardian_register_timestamp (
+        "%Y/%m/%d %T");
+
+    /* 127.0.0.1 - - [01/Nov/2014:08:05:10 +0100] */
+    guardian_register_timestamp (
+        "%d/%b/%Y:%T %z");
+
+    /* 127.0.0.1 - - [01/Nov/2014T08:05:10 +0100] */
+    guardian_register_timestamp (
+        "%d/%b/%YT%T %z");
 
     return 0;
 }
@@ -94,11 +169,78 @@ guardian_timestamp_init(void)
 int
 guardian_extract_timestamp (
     const char *buffer,
+    size_t      len,
     int         hint,
     struct tm  *timeptr)
 {
-    if (strptime(buffer, formats[hint], timeptr)) {
-        return 0;
+    int i = 0;
+    int ret = 0;
+    int offsets[18];
+    const char *timestamp;
+
+    if (hint == -1) {
+        for (i = 0; i < n_formats; ++i) {
+
+            timestamp = buffer;
+
+            if (format_exp[i] != NULL) {
+                fprintf(stderr, "Executing regexp\n");
+                ret = pcre_exec (
+                    format_exp[i],
+                    NULL,
+                    buffer,
+                    len,
+                    0,
+                    PCRE_NOTEMPTY,
+                    offsets,
+                    18);
+
+                if ( ret >= 0 ) {
+                    pcre_get_substring (
+                        buffer,
+                        offsets,
+                        ret,
+                        1,
+                        &timestamp);
+                    fprintf(stderr,"Get substring\n");
+                } else {
+                    fprintf(stderr, "regexp failed\n");
+                }
+            }
+
+            fprintf(stderr, "}%s\n", timestamp);
+            if (strptime(timestamp, formats[i], timeptr)) {
+                return 0;
+            }
+        }
+    } else {
+        timestamp = buffer;
+
+        if (format_exp[hint] != NULL) {
+            ret = pcre_exec (
+                format_exp[hint],
+                NULL,
+                buffer,
+                len,
+                0,
+                PCRE_NOTEMPTY,
+                offsets,
+                18);
+
+            if ( ret >= 0 ) {
+                pcre_get_substring (
+                    buffer,
+                    offsets,
+                    ret,
+                    1,
+                    &timestamp);
+                fprintf(stderr,"Get substring\n");
+            }
+        }
+
+        if (strptime(timestamp, formats[hint], timeptr)) {
+            return 0;
+        }
     }
     return 1;
 }

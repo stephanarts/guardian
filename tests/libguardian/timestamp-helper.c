@@ -95,7 +95,7 @@ show_usage ()
     printf ("   --version  -V     Show version information\n");
     printf ("   --help     -h     Show usage information (this output)\n");
     printf ("\n");
-    printf ("   --test-verify\n");
+    printf ("   --test-verify <string>\n");
     return;
 }
 
@@ -159,35 +159,48 @@ main (int argc, char **argv)
     libguardian_init();
     guardian_timestamp_init();
 
-    if (_test_verify == 1) {
+    if (_test_verify == 1 && argc == 1) {
         struct tm time;
         int ret = 0;
 
-        guardian_extract_timestamp (
-            TIMESTAMP_TEST_SYSLOG,
-            0,
-            &time);
-        if (time.tm_hour != 13) {
-            ret=1;
-        }
-        if (time.tm_min != 17) {
-            ret = 2;
-        }
-        if (time.tm_sec != 38) {
-            ret = 3;
-        }
-        if (time.tm_mday != 5) {
-            ret = 4;
-        }
-        if (time.tm_mon != 10) {
-            ret = 5;
-            fprintf(stderr, "[%d]\n", time.tm_mon);
-        }
+        if (guardian_extract_timestamp (
+            argv[0],
+            strlen(argv[0]),
+            -1,
+            &time) == 0) {
 
-        fprintf(stderr, "[%d]\n", time.tm_year);
+            fprintf(stderr,
+                ">%d/%d/%d %d:%d:%d\n",
+                time.tm_mday,
+                time.tm_mon,
+                0,
+                time.tm_hour,
+                time.tm_min,
+                time.tm_sec);
+
+            if (time.tm_mday != 5) {
+                ret = 4;
+            }
+            if (time.tm_mon != 10) {
+                ret = 5;
+            }
+            if (time.tm_hour != 13) {
+                ret=1;
+            }
+            if (time.tm_min != 17) {
+                ret = 2;
+            }
+            if (time.tm_sec != 38) {
+                ret = 3;
+                fprintf(stderr, "[%d]\n", time.tm_sec);
+            }
+
+        } else {
+            ret = 10;
+        }
         
         exit(ret);
     }
 
-    exit(0);
+    exit(1);
 }

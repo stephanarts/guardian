@@ -50,6 +50,7 @@ guardian_find_timestamp (
 int
 guardian_extract_timestamp (
     const char *buffer,
+    size_t      len,
     int         hint,
     struct tm  *timeptr);
 
