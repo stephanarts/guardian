@@ -94,6 +94,10 @@ guardian_register_timestamp (
 /**
  * Build a regexp that can be used to find a string
  * matching the strftime() format in a buffer.
+ *
+ * TODO:
+ *  - Properly check buffer boundaries.
+ *  - Add support for more strftime parameters.
  */
 static int
 _guardian_timestamp_build_regexp (
@@ -102,37 +106,69 @@ _guardian_timestamp_build_regexp (
 
     const char *errors = NULL;
     int err_offset;
+    char buffer[200];
 
-    if(strcmp("%d/%b/%Y:%T %z", format) == 0) {
-        *regexp = pcre_compile (
-            "(\\d{2}\\/\\D{3}\\/\\d{4}:\\d{2}:\\d{2}:\\d{2})",
-            PCRE_FIRSTLINE |
-            PCRE_MULTILINE |
-            PCRE_NEWLINE_ANYCRLF |
-            PCRE_UTF8,
-            &errors,
-            &err_offset,
-            NULL);
-        if (errors) {
-            fprintf(stderr, "Compile regexp failed\n%s\n", errors);
+    int i = 0, a = 1;
+    buffer[0] = '(';
+
+    for(i = 0; format[i] != '\0'; ++i) {
+        switch(format[i]) {
+            case '%':
+                switch(format[i+1]) {
+                    case 'T':
+                        memcpy(&buffer[a], "\\d{2}:\\d{2}:\\d{2}", 17);
+                        a+=17;
+                        break;
+                    case 'e':
+                        memcpy(&buffer[a], "\\d{1,2}", 7);
+                        a+=7;
+                        break;
+                    case 'm':
+                        memcpy(&buffer[a], "\\d{2}", 5);
+                        a+=5;
+                        break;
+                    case 'd':
+                        memcpy(&buffer[a], "\\d{2}", 5);
+                        a+=5;
+                        break;
+                    case 'b':
+                        memcpy(&buffer[a], "\\D{3}", 5);
+                        a+=5;
+                        break;
+                    case 'Y':
+                        memcpy(&buffer[a], "\\d{4}", 5);
+                        a+=5;
+                        break;
+                    case 'z':
+                        memcpy(&buffer[a], "[\\+-]\\d{4}", 10);
+                        a+=10;
+                        break;
+                }
+                i++;
+                break;
+            default:
+                buffer[a] = format[i];
+                a++;
+                break;
         }
-    } else {
-        *regexp = NULL; 
     }
-    if(strcmp("%d/%b/%YT%T %z", format) == 0) {
-        *regexp = pcre_compile (
-            "(\\d{2}\\/\\D{3}\\/\\d{4}T\\d{2}:\\d{2}:\\d{2})",
-            PCRE_FIRSTLINE |
-            PCRE_MULTILINE |
-            PCRE_NEWLINE_ANYCRLF |
-            PCRE_UTF8,
-            &errors,
-            &err_offset,
-            NULL);
-        if (errors) {
-            fprintf(stderr, "Compile regexp failed\n%s\n", errors);
-        }
+    buffer[a] = ')';
+    buffer[a+1] = '\0';
+
+    *regexp = pcre_compile (
+        buffer,
+        PCRE_FIRSTLINE |
+        PCRE_MULTILINE |
+        PCRE_NEWLINE_ANYCRLF |
+        PCRE_UTF8,
+        &errors,
+        &err_offset,
+        NULL);
+    if (errors) {
+        fprintf(stderr, "Compile regexp failed\n%s\n", errors);
     }
+
+    //fprintf(stderr, "%s\n", buffer);
 
     return 0;
 }
