@@ -55,7 +55,8 @@
 static long n_formats = 0;
 
 static char formats[MAX_FORMATS][MAX_FORMAT_LENGTH];
-static pcre *format_exp[MAX_FORMATS];
+static pcre       *format_exp[MAX_FORMATS];
+static pcre_extra *format_exp_extra[MAX_FORMATS];
 
 /**
  * Build a regexp that can be used to find a string
@@ -76,6 +77,8 @@ int
 guardian_register_timestamp (
     const char   *format)
 {
+    const char *err = NULL;
+
     if (n_formats < MAX_FORMATS)
     {
         /* Build a regexp capable of finding this timestamp
@@ -83,6 +86,13 @@ guardian_register_timestamp (
          */
 
         _guardian_timestamp_build_regexp (format, &format_exp[n_formats]);
+        if (format_exp[n_formats]) {
+            format_exp_extra[n_formats] = 
+                    pcre_study (format_exp[n_formats], 0, &err);
+            if (err) {
+                fprintf("Study Failed: %s\n", err);
+            }
+        }
 
         strncpy(formats[n_formats], format, MAX_FORMAT_LENGTH);
         n_formats++;
@@ -223,7 +233,7 @@ guardian_extract_timestamp (
                 fprintf(stderr, "Executing regexp\n");
                 ret = pcre_exec (
                     format_exp[i],
-                    NULL,
+                    format_exp_extra[i],
                     buffer,
                     len,
                     0,
@@ -255,7 +265,7 @@ guardian_extract_timestamp (
         if (format_exp[hint] != NULL) {
             ret = pcre_exec (
                 format_exp[hint],
-                NULL,
+                format_exp_extra[hint],
                 buffer,
                 len,
                 0,
