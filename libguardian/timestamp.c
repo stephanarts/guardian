@@ -134,9 +134,6 @@ _guardian_timestamp_build_regexp (
                         a+=7;
                         break;
                     case 'm':
-                        memcpy(&buffer[a], "\\d{2}", 5);
-                        a+=5;
-                        break;
                     case 'd':
                         memcpy(&buffer[a], "\\d{2}", 5);
                         a+=5;
