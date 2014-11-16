@@ -1,7 +1,8 @@
 bin_PROGRAMS = guardian
 
 guardian_SOURCES = \
-    guardian.c
+    guardian.c \
+    search_window.c
 
 guardian_LDADD = \
     $(PCRE_LIBS) \

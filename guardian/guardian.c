@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -64,7 +64,13 @@
 
 #include <openssl/sha.h>
 
+#include "search_window.h"
+
 #define  SOCK_PATH "/tmp/guardian.sock"
+
+#define SEARCH_BUFFER_SIZE 50
+char search_buffer[SEARCH_BUFFER_SIZE];
+int  search_cursor = 0;
 
 enum {
     OPTION_VERSION = 0,
@@ -111,10 +117,18 @@ show_usage ()
 static void
 run_menu (void)
 {
+    int search_win = 0;
+    int time_win = 0;
     int i;
     int y, x;
     time_t t;
     WINDOW *win = initscr();
+    cbreak();
+    noecho();
+    nonl();
+    intrflush(win, FALSE);
+    
+    keypad(win, TRUE);
     while(1) {
         werase(win);
         getmaxyx(win, y, x);
@@ -154,18 +168,97 @@ run_menu (void)
             }
         }
         wmove(win, y-1, 1);
-        waddnstr(win, "[q]uit", 6);
+        waddnstr(win, "3.3k records", 12);
+
+        wmove(win, y-1, x-5);
+        waddnstr(win, "user", 4);
 
         /* Draw a horizontal line */
-        WINDOW *w = subwin(win, 1, x, 1, 0);
-        wborder(w, 0, 0, 0, 0, ACS_HLINE, ACS_HLINE, ACS_HLINE, ACS_HLINE);
+        wmove(win, 1, 0);
+        hline('-', x);
 
-        wmove(w, 1, 1);
-        i = wgetch(win);
-        if (i == 'q') {
-            wclear(win);
-            wrefresh(win);
-            break;
+        wmove(win, 3, x-1);
+        vline(' '|A_REVERSE,y-4 );
+
+        wmove(win, 2, x-1);
+        addch(ACS_UARROW | A_REVERSE);
+
+        wmove(win, 3, x-1);
+        addch(' ');
+
+        wmove(win, y-2, x-1);
+        addch(ACS_DARROW | A_REVERSE);
+
+        if (time_win) {
+            wmove(win, 2, 0);
+            waddstr(win, "2014/11/13 12:12:34.000  - koffie ....");
+            wmove(win, 3, 0);
+            waddstr(win, "    :12:34.000  - koffie ....");
+
+            wmove(win, 4, 0);
+            waddstr(win, "2014/11/13 12:12:34.000  - koffie");
+
+            //WINDOW *swin = subwin(win, 5, 18, 1, x-20); 
+            WINDOW *swin = subwin(win, 5, 18, 1, 2); 
+            wclear(swin);
+            wborder(swin, 0, 0, 0, 0, 0, 0, 0, 0);
+            wmove(swin, 0, 2);
+            waddstr(swin, "[ Timeframe ]");
+            wmove(swin, 1, 2);
+            waddstr(swin, "1 hour     ");
+            wmove(swin, 2, 2);
+            waddstr(swin, "4 hour     ");
+            wmove(swin, 3, 2);
+            waddstr(swin, "8 hour     ");
+            wmove(swin, 1, 1);
+            waddch(swin, '>');
+            wmove(swin, 1, 16);
+            waddch(swin, '<');
+
+        }
+        if (search_win) {
+            show_search_dialog (win, 1, 5);
+        }
+        if (time_win == search_win)
+        {
+            wmove(win, 2, 0);
+            waddstr(win, "2014/11/13 12:12:34.000  - koffie ....");
+            wmove(win, 3, 0);
+            waddstr(win, "    :12:34.000  - koffie ....");
+
+            wmove(win, 4, 0);
+            waddstr(win, "2014/11/13 12:12:34.000  - koffie");
+        }
+
+        //waddch(win, i);
+
+        waddch(win, i);
+
+        if (search_win == 1) {
+            if (search_window_input () != 0) {
+                search_win = 0;
+            }
+        } else {
+            i = wgetch(win);
+            if (i == 'q') {
+                wclear(win);
+                wrefresh(win);
+                break;
+            }
+            if (i == 't') {
+                time_win = 1;
+                wclear(win);
+                wrefresh(win);
+            }
+            if (i == '/') {
+                search_win = 1;
+                wclear(win);
+                wrefresh(win);
+            }
+            if (i == '\n') {
+                search_win = 0;
+                time_win = 0;
+            }
         }
     }
     endwin();
