@@ -123,7 +123,6 @@ search_window_input(void)
                 }
                 search_buffer[a] = ' ';
 
-                search_cursor--;
                 search_buffer_len--;
             }
             break;
