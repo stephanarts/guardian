@@ -85,7 +85,7 @@ show_search_dialog (WINDOW *parent, int x, int y)
 }
 
 int
-search_window_input(void)
+search_dialog_input(void)
 {
     int a = search_cursor;
     char b;

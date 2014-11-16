@@ -2,7 +2,8 @@ bin_PROGRAMS = guardian
 
 guardian_SOURCES = \
     guardian.c \
-    search_window.c
+    search_dialog.c \
+    timeframe_dialog.c
 
 guardian_LDADD = \
     $(PCRE_LIBS) \

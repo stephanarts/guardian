@@ -64,7 +64,8 @@
 
 #include <openssl/sha.h>
 
-#include "search_window.h"
+#include "search_dialog.h"
+#include "timeframe_dialog.h"
 
 #define  SOCK_PATH "/tmp/guardian.sock"
 
@@ -127,6 +128,7 @@ run_menu (void)
     noecho();
     nonl();
     intrflush(win, FALSE);
+    curs_set(0);
     
     keypad(win, TRUE);
     while(1) {
@@ -177,50 +179,28 @@ run_menu (void)
         wmove(win, 1, 0);
         hline('-', x);
 
-        wmove(win, 3, x-1);
-        vline(' '|A_REVERSE,y-4 );
-
-        wmove(win, 2, x-1);
-        addch(ACS_UARROW | A_REVERSE);
-
-        wmove(win, 3, x-1);
-        addch(' ');
-
-        wmove(win, y-2, x-1);
-        addch(ACS_DARROW | A_REVERSE);
-
         if (time_win) {
-            wmove(win, 2, 0);
-            waddstr(win, "2014/11/13 12:12:34.000  - koffie ....");
-            wmove(win, 3, 0);
-            waddstr(win, "    :12:34.000  - koffie ....");
-
-            wmove(win, 4, 0);
-            waddstr(win, "2014/11/13 12:12:34.000  - koffie");
-
-            //WINDOW *swin = subwin(win, 5, 18, 1, x-20); 
-            WINDOW *swin = subwin(win, 5, 18, 1, 2); 
-            wclear(swin);
-            wborder(swin, 0, 0, 0, 0, 0, 0, 0, 0);
-            wmove(swin, 0, 2);
-            waddstr(swin, "[ Timeframe ]");
-            wmove(swin, 1, 2);
-            waddstr(swin, "1 hour     ");
-            wmove(swin, 2, 2);
-            waddstr(swin, "4 hour     ");
-            wmove(swin, 3, 2);
-            waddstr(swin, "8 hour     ");
-            wmove(swin, 1, 1);
-            waddch(swin, '>');
-            wmove(swin, 1, 16);
-            waddch(swin, '<');
-
+            show_timeframe_dialog(win, 1, 5);
         }
         if (search_win) {
             show_search_dialog (win, 1, 5);
         }
         if (time_win == search_win)
         {
+            /* Draw slider */
+            wmove(win, 3, x-1);
+            vline(' '|A_REVERSE,y-4 );
+
+            wmove(win, 2, x-1);
+            addch(ACS_UARROW | A_REVERSE);
+
+            wmove(win, 3, x-1);
+            addch(' ');
+
+            wmove(win, y-2, x-1);
+            addch(ACS_DARROW | A_REVERSE);
+            /*******/
+
             wmove(win, 2, 0);
             waddstr(win, "2014/11/13 12:12:34.000  - koffie ....");
             wmove(win, 3, 0);
@@ -232,32 +212,35 @@ run_menu (void)
 
         //waddch(win, i);
 
-        waddch(win, i);
+        //waddch(win, i);
+        wmove(win, y, 0);
 
         if (search_win == 1) {
-            if (search_window_input () != 0) {
+            if (search_dialog_input () != 0) {
                 search_win = 0;
             }
         } else {
-            i = wgetch(win);
-            if (i == 'q') {
-                wclear(win);
-                wrefresh(win);
-                break;
-            }
-            if (i == 't') {
-                time_win = 1;
-                wclear(win);
-                wrefresh(win);
-            }
-            if (i == '/') {
-                search_win = 1;
-                wclear(win);
-                wrefresh(win);
-            }
-            if (i == '\n') {
-                search_win = 0;
-                time_win = 0;
+            if (time_win == 1) {
+                if (timeframe_dialog_input () != 0) {
+                    time_win = 0;
+                }
+            } else {
+                i = wgetch(win);
+                if (i == 'q') {
+                    wclear(win);
+                    wrefresh(win);
+                    break;
+                }
+                if (i == 't') {
+                    time_win = 1;
+                    wclear(win);
+                    wrefresh(win);
+                }
+                if (i == '/') {
+                    search_win = 1;
+                    wclear(win);
+                    wrefresh(win);
+                }
             }
         }
     }
