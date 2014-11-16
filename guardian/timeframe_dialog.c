@@ -58,8 +58,8 @@ show_timeframe_dialog (WINDOW *parent, int x, int y)
 
     wmove(win, 1, 3);
     waddstr(win, "1 hour");
-    wmove(win, 2, 3);
-    waddstr(win, "2 hours");
+    wmove(win, 2, 1);
+    waddstr(win, "> 2 hours");
     wmove(win, 3, 3);
     waddstr(win, "8 hours");
 

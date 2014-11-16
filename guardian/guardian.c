@@ -27,6 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define COLOR_GREY 8
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -124,12 +126,13 @@ run_menu (void)
     int y, x;
     time_t t;
     WINDOW *win = initscr();
+    start_color();
     cbreak();
     noecho();
     nonl();
     intrflush(win, FALSE);
     curs_set(0);
-    
+
     keypad(win, TRUE);
     while(1) {
         werase(win);
@@ -145,7 +148,9 @@ run_menu (void)
             waddstr(win, PACKAGE_NAME);
 
             wmove(win, 0, (x-24)/2);
+            attrset(A_BOLD);
             waddnstr(win, ctime(&t), 24);
+            attrset(A_NORMAL);
 
             wmove(win, 0, x-strlen(PACKAGE_VERSION)-1);
             waddstr(win, PACKAGE_VERSION);
