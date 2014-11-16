@@ -104,8 +104,8 @@ search_window_input(void)
             break;
         case KEY_RIGHT:
             search_cursor++;
-            if (search_cursor == SEARCH_BUFFER_SIZE) {
-                search_cursor = SEARCH_BUFFER_SIZE-1;
+            if (search_cursor > search_buffer_len) {
+                search_cursor = search_buffer_len;
             }
             break;
         case KEY_LEFT:
