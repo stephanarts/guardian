@@ -102,6 +102,22 @@ AC_CHECK_HEADER(dirent.h,
     ]
 )
 
+dnl *** Check for zlib.h
+dnl ***************************
+AC_CHECK_HEADER(zlib.h,
+    [ AC_DEFINE([HAVE_ZLIB_H], [1],
+                [Define to 1 if you have the <zlib.h> header file])
+    ]
+)
+
+dnl *** Check for bzlib.h
+dnl ***************************
+AC_CHECK_HEADER(bzlib.h,
+    [ AC_DEFINE([HAVE_BZLIB_H], [1],
+                [Define to 1 if you have the <bzlib.h> header file])
+    ]
+)
+
 dnl *** Check for sys/select.h
 dnl ***************************
 AC_CHECK_HEADER(sys/select.h,

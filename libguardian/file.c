@@ -50,6 +50,14 @@
 
 #include <string.h>
 
+#ifdef HAVE_ZLIB_H
+#include <zlib.h>
+#endif /* HAVE_ZLIB_H */
+
+#ifdef HAVE_BZLIB_H
+#include <bzlib.h>
+#endif /* HAVE_BZLIB_H */
+
 
 #include <openssl/sha.h>
 
