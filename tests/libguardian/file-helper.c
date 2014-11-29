@@ -229,6 +229,7 @@ main (int argc, char **argv)
 
         if (a > 0)
         {
+            fprintf(stderr, "Read error.\n", i);
             ret = 1;
             exit(ret);
         }
@@ -249,6 +250,7 @@ main (int argc, char **argv)
         }
 
         if (f->st_ino == st_ino) {
+            fprintf(stderr, "Inodes are identical, rotation not detected.\n", i);
             ret = 1;
             exit(ret);
         }
