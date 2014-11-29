@@ -72,6 +72,7 @@ struct _GuardianFile
     FILE *stream;
 
     /* Cached values to determine log rotation */
+    struct timespec st_mtim;
     ino_t st_ino;
     off_t st_pos;
     off_t st_size;
@@ -276,6 +277,7 @@ guardian_file_read (
         file->st_ino  = st_buffer.st_ino;
         file->st_size = st_buffer.st_size;
         file->st_pos  = 0;
+        file->st_mtim = st_buffer.st_mtim;
     }
 
     s = fread (buffer, 1, size, file->stream);
@@ -316,6 +318,7 @@ guardian_file_read (
                 file->st_ino  = st_buffer.st_ino;
                 file->st_size = st_buffer.st_size;
                 file->st_pos  = 0;
+                file->st_mtim = st_buffer.st_mtim;
             }
         }
         if (ferror(file->stream)) {

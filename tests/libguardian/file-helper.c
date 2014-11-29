@@ -60,6 +60,7 @@ struct _GuardianFile
     FILE *stream;
 
     /* Cached values to determine log rotation */
+    struct timespec st_mtim;
     ino_t st_ino;
     off_t st_pos;
     off_t st_size;
@@ -229,7 +230,7 @@ main (int argc, char **argv)
 
         if (a > 0)
         {
-            fprintf(stderr, "Read error.\n", i);
+            fprintf(stderr, "Read error.\n");
             ret = 1;
             exit(ret);
         }
@@ -250,7 +251,9 @@ main (int argc, char **argv)
         }
 
         if (f->st_ino == st_ino) {
-            fprintf(stderr, "Inodes are identical, rotation not detected.\n", i);
+            fprintf(stderr, "Inodes are identical, rotation not detected. %d=%d\n", f->st_ino, st_ino);
+            fprintf(stderr,"%s\n", data_buffer);
+
             ret = 1;
             exit(ret);
         }
