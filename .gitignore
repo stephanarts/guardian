@@ -28,6 +28,7 @@ configure
 install-sh
 ltmain.sh
 missing
+test-driver
 docs/man/guardian.1
 docs/man/guardiand.1
 docs/man/guardian.conf.5
