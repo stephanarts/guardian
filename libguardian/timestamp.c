@@ -48,6 +48,7 @@
 #include <pcre.h>
 
 #include "timestamp.h"
+#include "log.h"
 
 #define MAX_FORMATS 50
 #define MAX_FORMAT_LENGTH 20
@@ -90,7 +91,7 @@ guardian_register_timestamp (
             format_exp_extra[n_formats] = 
                     pcre_study (format_exp[n_formats], 0, &err);
             if (err) {
-                fprintf("Study Failed: %s\n", err);
+                guardian_log_error("Study Failed: %s\n", err);
             }
         }
 
@@ -122,6 +123,18 @@ _guardian_timestamp_build_regexp (
     buffer[0] = '(';
 
     for(i = 0; format[i] != '\0'; ++i) {
+        /* Lazy, most we can write to buffer in one loop is
+         * 17 bytes. If it could possibly get close to that,
+         * we break from the loop.
+         */
+        if (a > 175)
+        {
+            /* Could not build regexp,
+             * does not fit buffer.
+             */
+            return 1;
+        }
+
         switch(format[i]) {
             case '%':
                 switch(format[i+1]) {
