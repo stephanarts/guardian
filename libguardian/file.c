@@ -255,33 +255,53 @@ guardian_file_read (
     size_t s = 0;
     int error_sv;
 
+    /* If there is no stream, open one file for reading.
+     */
     if (file->stream == NULL) {
         file->stream = fopen(file->path, "r");
+
+        /* Check if a stream could be opened.
+         */
         if (file->stream == NULL) {
+            /* If a pointer is provided to store
+             * an error object, put it there.
+             * Otherwise, log the error directly
+             * from the library.
+             */
             if (error) {
                 *error = guardian_error_new (
                     "Can not open file: %s:'%s'",
                     file->path,
                     strerror (error_sv));
+            } else {
+                guardian_log_error (
+                    "Can not open file: %s:'%s'",
+                    file->path,
+                    strerror (error_sv));
             }
-            guardian_log_error (
-                "Can not open file: %s:'%s'",
-                file->path,
-                strerror (error_sv));
             return -1;
         }
 
+        /* Stat the file, this is needed to determine
+         * log-file rotation. But it can also be used
+         * for other things.
+         */
         fd = fileno (file->stream);
         fstat (fd, &st_buffer);
 
-        file->st_ino  = st_buffer.st_ino;
-        file->st_size = st_buffer.st_size;
+        file->st_ino  = st_buffer.st_ino;   /* Inode */
+        file->st_size = st_buffer.st_size;  /* Size  */
+        file->st_mtim = st_buffer.st_mtim;  /* Modification-time */
         file->st_pos  = 0;
-        file->st_mtim = st_buffer.st_mtim;
     }
 
+    /* Read from the file */
     s = fread (buffer, 1, size, file->stream);
     if (s < size) {
+
+        /* If the EOF flag is set, check if the file is rotated
+         * or if we are simply waiting for data.
+         */
         if (feof(file->stream)) {
             clearerr(file->stream);
 
@@ -289,8 +309,16 @@ guardian_file_read (
             fstat (fd, &st_buffer);
             close(fd);
 
+            /* If the file is rotated, close the stream
+             * and open a new one on the rotated file.
+             */
             if (st_buffer.st_ino != file->st_ino) {
-                guardian_log_info ("File INODE changed, log-rotation expected. Opening new stream.");
+                /* TODO:
+                 * Find a better way to log this.
+                 */
+                guardian_log_info (
+                        "File INODE changed, "
+                        "log-rotation expected. Opening new stream.");
 
                 fclose(file->stream);
 
@@ -317,8 +345,8 @@ guardian_file_read (
 
                 file->st_ino  = st_buffer.st_ino;
                 file->st_size = st_buffer.st_size;
-                file->st_pos  = 0;
                 file->st_mtim = st_buffer.st_mtim;
+                file->st_pos  = 0;
             }
         }
         if (ferror(file->stream)) {
