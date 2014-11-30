@@ -39,8 +39,10 @@
 
 #include <errno.h>
 
-#ifdef HAVE_SYS_SYSLOG_H
 #include <sys/syslog.h>
+
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
 #endif
 
 #include <unistd.h>
@@ -66,6 +68,11 @@ struct _GuardianSource
      * The source path (eg. /var/log/messages)
      */
     char *path;
+
+    /**
+     * The parent directory (eg. /var/log/)
+     */
+    char *dir;
 
     /**
      * The size of the source-object last time it was opened.
@@ -119,6 +126,7 @@ guardian_source_new (
         return NULL;
     }
 
+
     /** Look up the sourcetype object from it's name */
     /* 
     source_type  = guardian_sourcetype_lookup ( type );
@@ -137,6 +145,7 @@ guardian_source_new (
 
     source->path = (char *)malloc (strlen (path)+1);
     source->path = strcpy (source->path, path);
+    source->dir  = dirname(path);
 
     return source;
 }

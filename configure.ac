@@ -118,13 +118,12 @@ AC_CHECK_HEADER(bzlib.h,
     ]
 )
 
-dnl *** Check for sys/select.h
+dnl *** Check for libgen.h
 dnl ***************************
-AC_CHECK_HEADER(sys/select.h,
-    [ AC_DEFINE([HAVE_SYS_SELECT_H], [1],
-                [Define to 1 if you have the <sys/select.h> header file])
-    ],
-    [ AC_MSG_ERROR([Can't find the <sys/select.h> header file]) ]
+AC_CHECK_HEADER(libgen.h,
+    [ AC_DEFINE([HAVE_LIBGEN_H], [1],
+                [Define to 1 if you have the <libgen.h> header file])
+    ]
 )
 
 dnl *** Check for sys/syslog.h
@@ -142,7 +141,7 @@ AC_CHECK_HEADER(pthread.h,
                 [Define to 1 if you have the <pthread.h> header file])
       AX_PTHREAD()
     ],
-    [ AC_MSG_ERROR([Can't find the <pthread.h> header file]) ]
+    [ AC_MSG_ERROR([Cannot find the <pthread.h> header file]) ]
 )
 
 dnl *** Check for time.h
@@ -159,14 +158,14 @@ AC_CHECK_HEADER(getopt.h,
     [ AC_DEFINE([HAVE_GETOPT_H], [1],
                 [Define to 1 if you have the <getopt.h> header file])
     ],
-    [ AC_MSG_ERROR([Can't find header <getopt.h>]) ]
+    [ AC_MSG_ERROR([Cannot find header <getopt.h>]) ]
 )
 
 AC_CHECK_HEADER(ncurses.h,
     [ AC_DEFINE([HAVE_NCURSES_H], [1],
                 [Define to 1 if you have the <ncurses.h> header file])
     ],
-    [ AC_MSG_ERROR([Can't find header <ncurses.h>]) ]
+    [ AC_MSG_ERROR([Cannot find header <ncurses.h>]) ]
 )
 
 PKG_CHECK_MODULES([PCRE], [libpcre >= 8.0])
