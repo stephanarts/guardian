@@ -32,6 +32,8 @@
 
 #define LIBGUARDIAN_INSIDE_LIBGUARDIAN_H
 
+#include <time.h>
+
 #include <libguardian/log.h>
 #include <libguardian/error.h>
 #include <libguardian/file.h>
