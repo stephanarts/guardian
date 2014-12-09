@@ -6,6 +6,9 @@ plugin_LTLIBRARIES = \
     syslog-plugin.la
 
 syslog_plugin_la_SOURCES = \
+	syslog-file-engine.c \
+	syslog-tcp-engine.c \
+	syslog-udp-engine.c \
     syslog-plugin.c
 
 syslog_plugin_la_LDFLAGS =   \
