@@ -1,0 +1,10 @@
+.\" Guardian configuration man-page
+.TH LIBGUARDIAN 3 "October 2014" @PACKAGE_VERSION@ "Guardian Documentation"
+.SH NAME
+libguardian \- Guardian Extension Library
+.SH SYNOPSIS
+#include <libguardian/libguardian.h>
+.SH DESCRIPTION
+\...
+.SH BUGS
+It doesn't work yet.
