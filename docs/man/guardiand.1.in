@@ -18,3 +18,13 @@ Run in verbose mode
 Show version information
 .SH BUGS
 It doesn't work yet.
+.SH DESIGN This section describes some ramblings about the design.
+
+SourceEngines register which source-types they support.
+Each source-type can have a default source-engine. This can be set 
+in a config-file. A Source-Engine processes the source and calls the
+\'_new_entry\' callback function. For each entry it processes.
+It is also possible to call \'_new_entries\' on a number of entries at
+once, this could possibly speed up the parsing.
+The source-engine can save the state of a source if that is relevant.
+This could be usefull when parsing log-files.

@@ -48,4 +48,8 @@ struct _GuardianSourceEngine
 GuardianSourceEngine *
 guardian_source_engine_new ( void );
 
+void
+guardian_source_engine_register (
+        GuardianSourceEngine *engine );
+
 #endif /* __GUARDIAN_SOURCE_ENGINE_H__ */

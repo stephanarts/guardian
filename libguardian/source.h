@@ -39,39 +39,11 @@ typedef struct _GuardianSource GuardianSource;
 GuardianSource *
 guardian_source_new (
         char *type,
-        char *path,
+        char *name,
         GuardianError **error );
 
-const char *
-guardian_source_get_path (
-        GuardianSource *source );
-
-size_t
-guardian_source_get_size (
-        GuardianSource *source );
-
-int
-guardian_source_get_hash (
-        GuardianSource *source,
-        const char **hash );
-
-int
-guardian_source_set_hash (
-        GuardianSource *source,
-        const char *hash );
-
 void
-guardian_source_set_size (
-        GuardianSource *source,
-        size_t s );
-
-int
 guardian_source_update (
-        GuardianSource *source );
+        GuardianSource *source);
 
-void
-guardian_source_push_entry (
-        GuardianSource *source,
-        GuardianEntry  *entry );
-
-#endif /* __GUARDIAN_ENTRY_H__ */
+#endif /* __GUARDIAN_SOURCE_H__ */

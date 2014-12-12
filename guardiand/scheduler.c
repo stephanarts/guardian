@@ -93,7 +93,7 @@ _guardian_worker_thread (void *arg)
         ret = sscanf(msg, "PROCESS[%p]", &source);
         if (ret == 1) {
             guardian_log_info("PROCESS SOURCE\n");
-            //sleep(15);
+            guardian_source_update(source);
             sprintf(msg, "FINISH[%p]%n", source, &ret);
             zmq_send(socket, msg, ret, 0);
             zmq_recv(socket, msg, 255, 100);

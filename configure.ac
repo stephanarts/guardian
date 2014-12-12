@@ -206,6 +206,7 @@ guardiand/Makefile
 guardian/Makefile
 data/Makefile
 plugins/Makefile
+plugins/generator-plugin/Makefile
 plugins/syslog-plugin/Makefile
 plugins/httpd-plugin/Makefile
 tests/Makefile

@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,74 +27,48 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * This application is used by the various plugin test-scripts as a framework
- * for testing the various plugins.
- */
-
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
 
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
+#endif
 
-#include <fcntl.h>
+#include <openssl/sha.h>
 
-#include <sys/types.h>
-#include <unistd.h>
+#include <string.h>
 
-#include <zmq.h>
+#include <pcre.h>
 
-#include <time.h>
+#include <errno.h>
 
+#include <sys/stat.h>
+
+#include <stdarg.h>
 #include <libguardian/libguardian.h>
 
-#ifndef PLUGINDIR
-#define PLUGINDIR "../../plugins"
-#endif
+GuardianSourcetype *source_type = NULL;
 
-#ifndef PLUGINSUBDIR
-#define PLUGINSUBDIR ".libs/"
-#endif
+static void
+_plugin_engine_update_source (
+        GuardianSourceEngine *engine,
+        GuardianSource       *source );
 
-#define BUFFER_SIZE 1024
-
-int
-main (int argc, char **argv)
+GuardianPlugin *
+guardian_plugin_init ()
 {
+    const char *errors = NULL;
+    int err_offset;
     GuardianPlugin *plugin;
-    char *plugin_path = malloc (200);
-    GuardianError *error = NULL;
 
-    char buffer[BUFFER_SIZE];
+    guardian_log_info("Initialise generator plugin");
 
-    if (argc < 2)
-    {
-        fprintf (stderr, "No plugin-name provided\n");
-        return 1;
-    }
+    plugin = guardian_new (sizeof (GuardianPlugin), 1);
 
-    read (stdin, buffer, BUFFER_SIZE);
-
-    sprintf (plugin_path, "%s/%s/%s%s.so", PLUGINDIR, argv[1], PLUGINSUBDIR, argv[1]);
-
-    int fd = open(plugin_path, O_RDONLY);
-    if (fd == -1) {
-        fprintf(stderr, "Open Failed");
-    }
-
-    fprintf(stderr, "Loading plugin: %s\n", plugin_path);
-
-    plugin = guardian_plugin_load ( plugin_path, &error );
-    if (plugin)
-    {
-        fprintf(stderr, "Plugin %s Loaded\n", argv[1]);
-    }
-    else
-    {
-        fprintf(stderr, "%s\n", guardian_error_get_msg (error));
-        exit(1);
-    }
-
-    exit(0);
+    return plugin;
 }

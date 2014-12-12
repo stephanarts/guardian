@@ -65,7 +65,10 @@ guardian_source_engine_update (
 GuardianSourceEngine *
 guardian_source_engine_new ( void )
 {
-    GuardianSourceEngine *engine = (GuardianSourceEngine *)guardian_new(sizeof (GuardianSourceEngine), 1);
+    GuardianSourceEngine *engine = 
+        (GuardianSourceEngine *)guardian_new(
+                sizeof (GuardianSourceEngine),
+                1);
 
     return engine;
 }

@@ -153,7 +153,7 @@ main (int argc, char **argv)
     struct dirent *dirp;
     int i = 0;
 
-    int n_workers = 5;
+    int n_workers = 2;
 
     char plugin_path[1024];
 
@@ -310,13 +310,22 @@ main (int argc, char **argv)
         }
     }
 
-    source = guardian_source_new ("syslog", "/var/log/auth.log", &error);
+    source = guardian_source_new (
+            "syslog",
+            "file:///var/log/auth.log*",
+            &error);
     guardian_scheduler_add_source ( source );
 
-    source = guardian_source_new ("syslog", "/var/log/boot.log", &error);
+    source = guardian_source_new (
+            "syslog",
+            "file:///var/log/boot.log*",
+            &error);
     guardian_scheduler_add_source ( source );
 
-    source = guardian_source_new ("syslog", "/var/log/syslog", &error);
+    source = guardian_source_new (
+            "syslog",
+            "file:///var/log/syslog",
+            &error);
     guardian_scheduler_add_source ( source );
 
 #ifdef ENABLE_DEBUG

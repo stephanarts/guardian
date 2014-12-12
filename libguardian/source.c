@@ -45,6 +45,8 @@
 #include <libgen.h>
 #endif
 
+#include <dirent.h>
+
 #include <unistd.h>
 #include <sys/types.h>
 
@@ -55,6 +57,7 @@
 #include "source.h"
 #include "sourceengine.h"
 #include "sourcetype.h"
+#include "log.h"
 
 struct _GuardianSource
 {
@@ -67,23 +70,12 @@ struct _GuardianSource
     /**
      * The source path (eg. /var/log/messages)
      */
-    char *path;
+    char *name;
 
     /**
      * The parent directory (eg. /var/log/)
      */
     char *dir;
-
-    /**
-     * The size of the source-object last time it was opened.
-     */
-    off_t st_size;  /* Size in bytes */
-
-    /**
-     * The SHA1 hash of the source-data up until st_size.
-     * Used to identify tampering and logfile-rotation.
-     */
-    char  hash[20];
 
     size_t          n_entries;
     GuardianEntry **entries;
@@ -100,7 +92,7 @@ struct _GuardianSource
 GuardianSource *
 guardian_source_new (
         char *type,
-        char *path,
+        char *name,
         GuardianError **error )
 {
     GuardianSource *source;
@@ -116,65 +108,41 @@ guardian_source_new (
         return NULL;
     }
 
-    /** Check if a path is provided */
-    if ( path == NULL )
+    /** Check if a name is provided */
+    if ( name == NULL )
     {
         if (error)
         {
-            *error = guardian_error_new ("Can not create Source for 'NULL' path");
+            *error = guardian_error_new (
+                    "Can not create Source with no name.");
         }
         return NULL;
     }
 
 
     /** Look up the sourcetype object from it's name */
-    /* 
     source_type  = guardian_sourcetype_lookup ( type );
     if ( source_type == NULL )
     {
         if (error)
         {
-            *error = guardian_error_new ("SourceType '%s' unknown, can not create source object for '%s'", type, path);
+            *error = guardian_error_new (
+                    "SourceType '%s' unknown, can not create "
+                    "source object for '%s'", type, name);
         }
         return NULL;
     }
-    */
 
     source = (GuardianSource *)malloc (sizeof (GuardianSource));
     source->source_type = source_type;
-
-    source->path = (char *)malloc (strlen (path)+1);
-    source->path = strcpy (source->path, path);
-    source->dir  = dirname(path);
+    source->name = name;
 
     return source;
 }
 
-const char *
-guardian_source_get_path (
-        GuardianSource *source )
-{
-    return source->path;
-}
-
-size_t
-guardian_source_get_size (
-        GuardianSource *source )
-{
-    return source->st_size;
-}
-
 void
-guardian_source_set_size (
-        GuardianSource *source,
-        size_t s )
-{
-    source->st_size = s;
-}
-
-int
 guardian_source_update (
-        GuardianSource *source )
+    GuardianSource *source)
 {
     GuardianSourceEngine *engine =
             guardian_sourcetype_get_engine (source->source_type);
@@ -183,44 +151,4 @@ guardian_source_update (
 
     ret = engine->update_source ( engine, source );
 
-    //printf("%s: %d:%d\n", source->path,n, source->n_entries);
-
-    return ret;
-}
-
-/**
- * guardian_source_get_hash
- * @source: The Source object
- * @hash:   A pointer to store the internal pointer to the 20-byte hash structure.
- *
- * Return: 0 on success
- */
-int
-guardian_source_get_hash (
-        GuardianSource *source,
-        const char **hash )
-{
-    *hash = source->hash;
-
-    return 0;
-}
-
-/**
- * guardian_source_set_hash
- * @source:
- * @hash: A pointer to a 20-byte hash structure.
- *
- * Return: 0 on success
- */
-int
-guardian_source_set_hash (
-        GuardianSource *source,
-        const char *hash )
-{
-    if (hash == NULL)
-    {
-        return 1;
-    }
-    memcpy (source->hash, hash, 20);
-    return 0;
 }
