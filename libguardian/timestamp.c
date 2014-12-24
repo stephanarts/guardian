@@ -121,6 +121,8 @@ _guardian_timestamp_build_regexp (
 
     int i = 0, a = 1;
     buffer[0] = '(';
+    memcpy(&buffer[0], "(?<TIMESTAMP>", 13);
+    a=13;
 
     for(i = 0; format[i] != '\0'; ++i) {
         /* Lazy, most we can write to buffer in one loop is
