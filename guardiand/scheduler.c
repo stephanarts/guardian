@@ -56,15 +56,11 @@
 
 #include <libguardian/libguardian.h>
 
+#include "worker.h"
 #include "db.h"
 
 /** Define 10 Second interval */
 #define INTERVAL 1
-
-static void msg_free (void *data, void *hint)
-{
-    free (data);
-}
 
 static int n_sources = 0;
 static GuardianSource **sources = NULL;
@@ -73,75 +69,6 @@ void *_ctx = NULL;
 
 #define         BUFFER_LEN      1024
 char            buffer[BUFFER_LEN];
-
-static void *
-_guardian_worker_thread (void *arg)
-{
-    char msg[256];
-    void *socket;
-    void *d_socket;
-    int ret = 0;
-    int timeout = 0;
-    int a = 0;
-    zmq_msg_t n_entries_message;
-    GuardianSource *source = NULL;
-
-    socket = zmq_socket(_ctx, ZMQ_REQ);
-    d_socket = zmq_socket(_ctx, ZMQ_REQ);
-    zmq_connect(socket, "inproc://workers");
-    zmq_connect(d_socket, "inproc://data-processor");
-    while(1) {
-        //printf(".");
-        zmq_send(socket, "GET-COMMAND\n\0", 13, 0);
-        zmq_recv(socket, msg, 255, 100);
-
-        //guardian_log_info("..'%s'\n", msg);
-        ret = sscanf(msg, "WAIT[%d]", &timeout);
-        if (ret == 1) {
-            guardian_log_info("WORKER SLEEP\n");
-            sleep(timeout);
-            continue;
-        }
-        ret = sscanf(msg, "PROCESS[%p]", &source);
-        if (ret == 1) {
-            void *data;
-
-            guardian_log_info("PROCESS SOURCE\n");
-            //guardian_source_update(source);
-
-            for (a = 0; a < 5000; ++a) {
-                data = malloc(2000);
-                strcpy(data, "1234563786543538765453\n\0");
-                zmq_msg_init_data (
-                    &n_entries_message,
-                    data,
-                    strlen(data),
-                    msg_free,
-                    NULL);
-                zmq_msg_send (&n_entries_message, d_socket, ZMQ_SNDMORE);
-            }
-
-            data = malloc(sizeof(int));
-            *((int *)data) = (int)0xA;
-            zmq_msg_init_data (
-                &n_entries_message,
-                data,
-                sizeof(int),
-                msg_free,
-                NULL);
-            zmq_msg_send (&n_entries_message, d_socket, 0);
-
-            zmq_recv(d_socket, msg, 255, 100);
-
-            sprintf(msg, "FINISH[%p]%n", source, &ret);
-            zmq_send(socket, msg, ret, 0);
-            zmq_recv(socket, msg, 255, 100);
-
-            guardian_log_info("PROCESS SOURCE DONE\n");
-        }
-    }
-    pthread_exit(NULL);
-}
 
 void
 guardian_scheduler_main ( void *ctx, int n_workers )
@@ -175,11 +102,9 @@ guardian_scheduler_main ( void *ctx, int n_workers )
 
     for (i = 0; i < n_workers; ++i)
     {
-        pthread_create (
+        guardian_worker_thread_new (
             &workers[i],
-            NULL,
-            _guardian_worker_thread,
-            NULL);
+            _ctx);
     }
 
     /**

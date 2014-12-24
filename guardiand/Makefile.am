@@ -3,6 +3,7 @@ bin_PROGRAMS = guardiand
 guardiand_SOURCES = \
     guardian.c \
     settings.c settings.h \
+    worker.c worker.h \
     scheduler.c scheduler.h \
     db.c db.h \
     util.c util.h
