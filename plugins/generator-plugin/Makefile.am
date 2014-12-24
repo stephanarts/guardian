@@ -6,6 +6,7 @@ plugin_LTLIBRARIES = \
     generator-plugin.la
 
 generator_plugin_la_SOURCES = \
+    generator-engine.c \
     generator-plugin.c
 
 generator_plugin_la_LDFLAGS =       \

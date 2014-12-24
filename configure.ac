@@ -180,6 +180,10 @@ PKG_CHECK_MODULES([ZMQ], [libzmq >= 4.0.2])
 AC_SUBST(ZMQ_LIBS)
 AC_SUBST(ZMQ_CFLAGS)
 
+PKG_CHECK_MODULES([SQLITE3], [sqlite3 >= 3.4])
+AC_SUBST(SQLITE3_LIBS)
+AC_SUBST(SQLITE3_CFLAGS)
+
 dnl *****************************
 dnl *** Configuration options ***
 dnl *****************************

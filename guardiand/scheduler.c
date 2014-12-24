@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2012-2014 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -56,8 +56,15 @@
 
 #include <libguardian/libguardian.h>
 
+#include "db.h"
+
 /** Define 10 Second interval */
-#define INTERVAL 10
+#define INTERVAL 1
+
+static void msg_free (void *data, void *hint)
+{
+    free (data);
+}
 
 static int n_sources = 0;
 static GuardianSource **sources = NULL;
@@ -72,12 +79,17 @@ _guardian_worker_thread (void *arg)
 {
     char msg[256];
     void *socket;
+    void *d_socket;
     int ret = 0;
     int timeout = 0;
+    int a = 0;
+    zmq_msg_t n_entries_message;
     GuardianSource *source = NULL;
 
     socket = zmq_socket(_ctx, ZMQ_REQ);
+    d_socket = zmq_socket(_ctx, ZMQ_REQ);
     zmq_connect(socket, "inproc://workers");
+    zmq_connect(d_socket, "inproc://data-processor");
     while(1) {
         //printf(".");
         zmq_send(socket, "GET-COMMAND\n\0", 13, 0);
@@ -92,11 +104,40 @@ _guardian_worker_thread (void *arg)
         }
         ret = sscanf(msg, "PROCESS[%p]", &source);
         if (ret == 1) {
+            void *data;
+
             guardian_log_info("PROCESS SOURCE\n");
-            guardian_source_update(source);
+            //guardian_source_update(source);
+
+            for (a = 0; a < 5000; ++a) {
+                data = malloc(2000);
+                strcpy(data, "1234563786543538765453\n\0");
+                zmq_msg_init_data (
+                    &n_entries_message,
+                    data,
+                    strlen(data),
+                    msg_free,
+                    NULL);
+                zmq_msg_send (&n_entries_message, d_socket, ZMQ_SNDMORE);
+            }
+
+            data = malloc(sizeof(int));
+            *((int *)data) = (int)0xA;
+            zmq_msg_init_data (
+                &n_entries_message,
+                data,
+                sizeof(int),
+                msg_free,
+                NULL);
+            zmq_msg_send (&n_entries_message, d_socket, 0);
+
+            zmq_recv(d_socket, msg, 255, 100);
+
             sprintf(msg, "FINISH[%p]%n", source, &ret);
             zmq_send(socket, msg, ret, 0);
             zmq_recv(socket, msg, 255, 100);
+
+            guardian_log_info("PROCESS SOURCE DONE\n");
         }
     }
     pthread_exit(NULL);
@@ -111,6 +152,7 @@ guardian_scheduler_main ( void *ctx, int n_workers )
     int ret = 0;
     void *plugins;
     void *controller;
+    void *data_processor;
     GuardianSource *source = NULL;
 
     pthread_t *workers = NULL;
@@ -123,9 +165,11 @@ guardian_scheduler_main ( void *ctx, int n_workers )
 
     plugins    = zmq_socket(ctx, ZMQ_REP);
     controller = zmq_socket(ctx, ZMQ_ROUTER);
+    data_processor = zmq_socket(ctx, ZMQ_REP);
 
     zmq_bind(plugins,    "inproc://workers");
     zmq_bind(controller, "inproc://controller");
+    zmq_bind(data_processor, "inproc://data-processor");
 
     workers = guardian_new (sizeof(pthread_t), n_workers);
 
@@ -149,10 +193,12 @@ guardian_scheduler_main ( void *ctx, int n_workers )
         char msg [256];
         zmq_pollitem_t items [] = {
             { plugins , 0, ZMQ_POLLIN, 0 },
-            { controller, 0, ZMQ_POLLIN, 0 }
+            { controller, 0, ZMQ_POLLIN, 0 },
+            { data_processor, 0, ZMQ_POLLIN, 0 }
         };
-        zmq_poll (items, 2, -1);
+        zmq_poll (items, 3, -1);
 
+        /* Scheduling of worker threads */
         if (items [0].revents & ZMQ_POLLIN) {
             int size = zmq_recv (plugins, msg, 255, 0);
             if (size != -1) {
@@ -215,10 +261,11 @@ guardian_scheduler_main ( void *ctx, int n_workers )
             }
         }
 
+        /* Listen to Controller socket for STOP message */
         if (items [1].revents & ZMQ_POLLIN) {
             int size = zmq_recv (controller, msg, 255, 0);
             if (size != -1) {
-                if(strncmp(msg, "42", 2)) {
+                if(strncmp(msg, "STOP", 4)) {
                     guardian_log_debug("Terminating main loop");
 
                     /** TODO:
@@ -233,6 +280,29 @@ guardian_scheduler_main ( void *ctx, int n_workers )
                     break;
                 }
             }
+        }
+
+        /* Put data in a database */
+        if (items [2].revents & ZMQ_POLLIN) {
+
+            while (1) {
+                /* Every message-part is a log-entry */
+                zmq_msg_t message;
+                zmq_msg_init (&message);
+                zmq_msg_recv (&message, data_processor, 0);
+
+                //guardian_db_insert_entry();
+
+                //t = zmq_msg_size(&message);
+
+                zmq_msg_close(&message); 
+
+                if (!zmq_msg_more (&message)) {
+                    break;
+                }
+            }
+
+            zmq_send(data_processor, "0", 1, 0);
         }
     }
 
@@ -254,7 +324,7 @@ guardian_scheduler_main_quit ( )
 
     zmq_connect(socket, "inproc://controller");
 
-    ret = zmq_send(socket, "42", 2, 0);
+    ret = zmq_send(socket, "STOP", 4, 0);
     if (ret == -1)
     {
         guardian_log_error("Failed to send termination message");

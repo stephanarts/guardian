@@ -130,7 +130,7 @@ guardian_source_new (
                     "SourceType '%s' unknown, can not create "
                     "source object for '%s'", type, name);
         }
-        return NULL;
+        //return NULL;
     }
 
     source = (GuardianSource *)malloc (sizeof (GuardianSource));

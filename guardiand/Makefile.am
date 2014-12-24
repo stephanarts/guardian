@@ -4,6 +4,7 @@ guardiand_SOURCES = \
     guardian.c \
     settings.c settings.h \
     scheduler.c scheduler.h \
+    db.c db.h \
     util.c util.h
 
 guardiand_LDADD = \
@@ -11,6 +12,7 @@ guardiand_LDADD = \
     $(PCRE_LIBS) \
     $(OPENSSL_LIBS) \
     $(ZMQ_LIBS) \
+    $(SQLITE3_LIBS) \
     $(PTHREAD_LIBS) -lrt
 
 guardiand_LDFLAGS = \
@@ -20,6 +22,7 @@ guardiand_CFLAGS = \
     $(PCRE_CFLAGS) \
     $(OPENSSL_CFLAGS) \
     $(ZMQ_CFLAGS) \
+    $(SQLITE3_CFLAGS) \
     $(PTHREAD_CFLAGS) \
     -DSYSCONFDIR=\"$(sysconfdir)\" \
     -DPLUGINDIR=\"$(libdir)/guardian\" \

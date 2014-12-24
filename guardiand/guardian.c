@@ -70,6 +70,7 @@
 #include "util.h"
 #include "settings.h"
 #include "scheduler.h"
+#include "db.h"
 
 enum {
     OPTION_VERSION = 0,
@@ -283,7 +284,9 @@ main (int argc, char **argv)
                 if (i > 1023)
                 {
                     /* Error, prevented buffer overflow... path too long */
-                    guardian_log_warning ( "Can not load plugin, plugin-path exceeds 1024 bytes");
+                    guardian_log_warning (
+                            "Can not load plugin, "
+                            "plugin-path exceeds 1024 bytes");
                 }
                 else
                 {
@@ -292,16 +295,23 @@ main (int argc, char **argv)
                      */
                     if (strcmp (&plugin_path[i-3], ".so") == 0)
                     {
-                        plugin = guardian_plugin_load ( plugin_path, &error );
+                        plugin = guardian_plugin_load (
+                                plugin_path,
+                                &error );
+
                         if ( plugin == NULL && error)
                         {
-                            guardian_log_warning ( "%s", guardian_error_get_msg (error));
+                            guardian_log_warning (
+                                    "%s",
+                                    guardian_error_get_msg (error));
                             guardian_error_free (error);
                             error = NULL;
                         }
                         else
                         {
-                            guardian_log_info("Load plugin: %s\n", plugin_path);
+                            guardian_log_info(
+                                    "Load plugin: %s\n",
+                                    plugin_path);
                             //guardian_plugin_register_types ( plugin );
                         }
                     }
@@ -333,8 +343,12 @@ main (int argc, char **argv)
     guardian_set_allow_malloc(FALSE);
 #endif /* ENABLE_DEBUG */
 
+    guardian_db_init();
+
     /** Start the main loop */
     guardian_scheduler_main ( ctx, n_workers );
+
+    guardian_db_close();
 
     //zmq_ctx_term(ctx);
 
