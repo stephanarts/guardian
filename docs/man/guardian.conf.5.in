@@ -1,15 +1,27 @@
 .\" Guardian configuration man-page
-.TH GUARDIAN_CONF 5 "JULI 2012" @PACKAGE_VERSION@ "Guardian Documentation"
+.TH GUARDIAN_CONF 5 "DEC 2014" @PACKAGE_VERSION@ "Guardian Documentation"
 .SH NAME
 guardian.conf \- Guardian configuration file
 .SH SYNOPSIS
 guardian.conf
 .SH DESCRIPTION
-Configuration-file for Guardian.
+The configuration-file for guardian contains options that influence
+the startup behaviour of the program.
 .SH OPTIONS
-.TP 5
-timezone_utc_offset
-Configure the timezone_offset to UTC, override whatever the system tells us.
-.TP 5
-timezone_dst
-Is the system correcting for Daylight-savings time?
+.TP 3
+worker_threads
+Number of worker-threads to be spawned. For a simple installation a single
+thread could well be enough. If it is a very busy system, processing logs
+for multiple hosts, this value can be increased to optimally use the
+available resources.
+.TP 3
+config_db
+Location of the configuration-database. (SQLite3)
+.TP 3
+listen_port
+Network port used for listing for commands specified by guardian-agent.
+(Default: 5678)
+.TP
+listen_address
+Network address used for listing for commands specified by guardian-agent.
+(Default: 127.0.0.1)
