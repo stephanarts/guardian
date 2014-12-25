@@ -80,6 +80,7 @@ guardian_scheduler_main ( void *ctx, int n_workers )
     void *plugins;
     void *controller;
     void *data_processor;
+    void *agent;
     GuardianSource *source = NULL;
 
     pthread_t *workers = NULL;
@@ -93,10 +94,12 @@ guardian_scheduler_main ( void *ctx, int n_workers )
     plugins    = zmq_socket(ctx, ZMQ_REP);
     controller = zmq_socket(ctx, ZMQ_ROUTER);
     data_processor = zmq_socket(ctx, ZMQ_REP);
+    agent = zmq_socket(ctx, ZMQ_ROUTER);
 
     zmq_bind(plugins,    "inproc://workers");
     zmq_bind(controller, "inproc://controller");
     zmq_bind(data_processor, "inproc://data-processor");
+    zmq_bind(agent, "tcp://127.0.0.1:5678");
 
     workers = guardian_new (sizeof(pthread_t), n_workers);
 
@@ -117,9 +120,10 @@ guardian_scheduler_main ( void *ctx, int n_workers )
     {
         char msg [256];
         zmq_pollitem_t items [] = {
-            { plugins , 0, ZMQ_POLLIN, 0 },
+            { plugins, 0, ZMQ_POLLIN, 0 },
             { controller, 0, ZMQ_POLLIN, 0 },
-            { data_processor, 0, ZMQ_POLLIN, 0 }
+            { data_processor, 0, ZMQ_POLLIN, 0 },
+            { agent, 0, ZMQ_POLLIN, 0 },
         };
         zmq_poll (items, 3, -1);
 
@@ -228,6 +232,17 @@ guardian_scheduler_main ( void *ctx, int n_workers )
             }
 
             zmq_send(data_processor, "0", 1, 0);
+        }
+
+        /* Put data in a database */
+        if (items [3].revents & ZMQ_POLLIN) {
+            zmq_msg_t message;
+            zmq_msg_init (&message);
+            zmq_msg_recv (&message, agent, 0);
+
+            zmq_msg_close(&message); 
+
+            zmq_send(agent, "0", 1, 0);
         }
     }
 

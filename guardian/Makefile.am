@@ -2,6 +2,7 @@ bin_PROGRAMS = guardian
 
 guardian_SOURCES = \
     guardian.c \
+    interactive_menu.c \
     search_dialog.c \
     timeframe_dialog.c
 

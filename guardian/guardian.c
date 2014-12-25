@@ -64,12 +64,11 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <zmq.h>
+
 #include <openssl/sha.h>
 
-#include "search_dialog.h"
-#include "timeframe_dialog.h"
-
-#define  SOCK_PATH "/tmp/guardian.sock"
+#include "interactive_menu.h"
 
 #define SEARCH_BUFFER_SIZE 50
 char search_buffer[SEARCH_BUFFER_SIZE];
@@ -79,16 +78,20 @@ enum {
     OPTION_VERSION = 0,
     OPTION_VERBOSE,
     OPTION_HELP,
-    OPTION_FATAL_WARNINGS
+    OPTION_FATAL_WARNINGS,
+    OPTION_HOST,
+    OPTION_PORT
 };
 
 /************************
  * Command-line options *
  ************************/
 static struct option long_options[] = {
-    {"version", 0, 0, 'V'}, /* OPTION_VERSION */
-    {"help",    0, 0, 'h'}, /* OPTION_HELP    */
+    {"version", 0, 0, 'V'},      /* OPTION_VERSION */
+    {"help",    0, 0, 'h'},      /* OPTION_HELP    */
     {"fatal-warnings", 0, 0, 0}, /* OPTION_FATAL_WARNINGS */
+    {"host",    0, 0, 'H'},      /* OPTION_HOST    */
+    {"port",    0, 0, 'P'},      /* OPTION_PORT    */
     {0, 0, 0, 0}
 };
 
@@ -112,145 +115,15 @@ show_usage ()
     printf ("              -v     Show verbose output\n");
     printf ("              -vv    Show very-verbose output\n");
     printf ("              -i     Run interactive menu\n");
+    printf ("   --host     -H     Connect to guardian host\n");
+    printf ("                     (default: 127.0.0.1)\n");
+    printf ("   --port     -P     Connect on port\n");
+    printf ("                     (default: 5678)\n");
     printf ("\n");
     printf ("   --fatal-warnings  Make all warnings fatal\n");
     return;
 }
 
-static void
-run_menu (void)
-{
-    int search_win = 0;
-    int time_win = 0;
-    int i;
-    int y, x;
-    time_t t;
-    WINDOW *win = initscr();
-    start_color();
-    cbreak();
-    noecho();
-    nonl();
-    intrflush(win, FALSE);
-    curs_set(0);
-
-    keypad(win, TRUE);
-    while(1) {
-        werase(win);
-        getmaxyx(win, y, x);
-
-        time(&t);
-
-        /* Check if there is enough horizontal space
-         * to draw the package name, version and date+time.
-         */
-        if (x > strlen(PACKAGE_NAME)+strlen(PACKAGE_VERSION)+28) {
-            wmove(win, 0, 1);
-            waddstr(win, PACKAGE_NAME);
-
-            wmove(win, 0, (x-24)/2);
-            attrset(A_BOLD);
-            waddnstr(win, ctime(&t), 24);
-            attrset(A_NORMAL);
-
-            wmove(win, 0, x-strlen(PACKAGE_VERSION)-1);
-            waddstr(win, PACKAGE_VERSION);
-        } else {
-            /* Check if there is enough horizontal space
-             * to draw the package name and date+time.
-             */
-            if (x > strlen(PACKAGE_NAME)+26) {
-                wmove(win, 0, 1);
-                waddstr(win, PACKAGE_NAME);
-
-                wmove(win, 0, x-25);
-                waddnstr(win, ctime(&t), 24);
-            } else {
-                /* Check if there is enough horizontal space
-                 * to draw the date+time.
-                 */
-                if (x >= 24) {
-                    wmove(win, 0, (x-24)/2);
-                    waddnstr(win, ctime(&t), 24);
-                }
-            }
-        }
-        wmove(win, y-1, 1);
-        waddnstr(win, "3.3k records", 12);
-
-        wmove(win, y-1, x-5);
-        waddnstr(win, "user", 4);
-
-        /* Draw a horizontal line */
-        wmove(win, 1, 0);
-        hline('-', x);
-
-        if (time_win) {
-            show_timeframe_dialog(win, 1, 5);
-        }
-        if (search_win) {
-            show_search_dialog (win, 1, 5);
-        }
-        if (time_win == search_win)
-        {
-            /* Draw slider */
-            wmove(win, 3, x-1);
-            vline(' '|A_REVERSE,y-4 );
-
-            wmove(win, 2, x-1);
-            addch(ACS_UARROW | A_REVERSE);
-
-            wmove(win, 3, x-1);
-            addch(' ');
-
-            wmove(win, y-2, x-1);
-            addch(ACS_DARROW | A_REVERSE);
-            /*******/
-
-            wmove(win, 2, 0);
-            waddstr(win, "2014/11/13 12:12:34.000  - koffie ....");
-            wmove(win, 3, 0);
-            waddstr(win, "    :12:34.000  - koffie ....");
-
-            wmove(win, 4, 0);
-            waddstr(win, "2014/11/13 12:12:34.000  - koffie");
-        }
-
-        //waddch(win, i);
-
-        //waddch(win, i);
-        wmove(win, y, 0);
-
-        if (search_win == 1) {
-            if (search_dialog_input () != 0) {
-                search_win = 0;
-            }
-        } else {
-            if (time_win == 1) {
-                if (timeframe_dialog_input () != 0) {
-                    time_win = 0;
-                }
-            } else {
-                i = wgetch(win);
-                if (i == 'q') {
-                    wclear(win);
-                    wrefresh(win);
-                    break;
-                }
-                if (i == 't') {
-                    time_win = 1;
-                    wclear(win);
-                    wrefresh(win);
-                }
-                if (i == '/') {
-                    search_win = 1;
-                    wclear(win);
-                    wrefresh(win);
-                }
-            }
-        }
-    }
-    endwin();
-}
 
 /**
  * main
@@ -268,7 +141,7 @@ main (int argc, char **argv)
 
     while (1)
     {
-        c = getopt_long (argc, argv, "vVhi",
+        c = getopt_long (argc, argv, "vVhiHP",
                     long_options, &option_index);
         if (c == -1)
             break;
@@ -288,6 +161,10 @@ main (int argc, char **argv)
                         break;
                     case OPTION_FATAL_WARNINGS:
                         break;
+                    case OPTION_HOST:
+                        break;
+                    case OPTION_PORT:
+                        break;
                 }
                 break;
             case 'V':
@@ -302,8 +179,11 @@ main (int argc, char **argv)
                 verbosity = verbosity + 1;
                 break;
             case 'i':
-                run_menu();
+                show_interactive_menu();
                 exit(0);
+                break;
+            case 'H':
+            case 'P':
                 break;
             default:
                 fprintf(stderr, "Try '%s --help' for more information\n", argv[0]);
@@ -311,6 +191,15 @@ main (int argc, char **argv)
                 break;
         }
     }
+
+    int no_linger = 0;
+    void *ctx = zmq_ctx_new();
+    void *server = zmq_socket(ctx, ZMQ_REQ);
+
+    zmq_connect(server, "tcp://0.0.0.0:5678");
+    
+    zmq_setsockopt(server, ZMQ_LINGER, &no_linger, sizeof(no_linger));
+    zmq_close (server);
 
     exit(0);
 }
