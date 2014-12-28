@@ -55,7 +55,8 @@
 
 static long n_formats = 0;
 
-static char formats[MAX_FORMATS][MAX_FORMAT_LENGTH];
+static char        formats[MAX_FORMATS][MAX_FORMAT_LENGTH];
+static char        format_names[MAX_FORMATS][MAX_FORMAT_LENGTH];
 static pcre       *format_exp[MAX_FORMATS];
 static pcre_extra *format_exp_extra[MAX_FORMATS];
 
@@ -76,7 +77,8 @@ _guardian_timestamp_build_regexp (
  */
 int
 guardian_register_timestamp (
-    const char   *format)
+    const char   *format,
+    const char   *name)
 {
     const char *err = NULL;
 
@@ -96,6 +98,7 @@ guardian_register_timestamp (
         }
 
         strncpy(formats[n_formats], format, MAX_FORMAT_LENGTH);
+        strncpy(format_names[n_formats], name, MAX_FORMAT_LENGTH);
         n_formats++;
         return n_formats-1;
     }
@@ -121,8 +124,8 @@ _guardian_timestamp_build_regexp (
 
     int i = 0, a = 1;
     buffer[0] = '(';
-    memcpy(&buffer[0], "(?<TIMESTAMP>", 13);
-    a=13;
+    //memcpy(&buffer[0], "(?<TIMESTAMP>", 13);
+    //a=13;
 
     for(i = 0; format[i] != '\0'; ++i) {
         /* Lazy, most we can write to buffer in one loop is
@@ -201,19 +204,23 @@ guardian_timestamp_init(void)
     /* Standard Syslog Timestamp format */
     /* Nov 20 23:12:14 */
     guardian_register_timestamp (
-        "%b %e %T");
+        "%b %e %T",
+        "TIMESTAMP_SYSLOG");
 
     /* 2005/11/20 23:12:14 */
     guardian_register_timestamp (
-        "%Y/%m/%d %T");
+        "%Y/%m/%d %T",
+        "TIMESTAMP_NGINX");
 
     /* 127.0.0.1 - - [01/Nov/2014:08:05:10 +0100] */
     guardian_register_timestamp (
-        "%d/%b/%Y:%T %z");
+        "%d/%b/%Y:%T %z",
+        "TIMESTAMP_ISO.");
 
     /* 127.0.0.1 - - [01/Nov/2014T08:05:10 +0100] */
     guardian_register_timestamp (
-        "%d/%b/%YT%T %z");
+        "%d/%b/%YT%T %z",
+        "TIMESTAMP_ISO...");
 
     return 0;
 }

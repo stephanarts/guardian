@@ -39,7 +39,8 @@ guardian_timestamp_init(void);
 
 int
 guardian_register_timestamp (
-    const char *);
+    const char *format,
+    const char *name);
 
 int
 guardian_find_timestamp (
