@@ -3,23 +3,27 @@
 .SH NAME
 guardiand \- Guardian daemon process
 .SH SYNOPSIS
-guardiand [\-hvvV]
+guardiand [
+.IR options
+]
 .SH DESCRIPTION
 \...
 .SH OPTIONS
-.TP 5
--h
+.TP 3
+.B
+-h  --help
 Display command usage information
-.TP 5
--v
+.TP 3
+.B
+-v --verbose
 Run in verbose mode
-.TP 5
--V
+.TP 3
+.B
+-V --version
 Show version information
 .SH BUGS
 It doesn't work yet.
 .SH DESIGN This section describes some ramblings about the design.
-
 SourceEngines register which source-types they support.
 Each source-type can have a default source-engine. This can be set 
 in a config-file. A Source-Engine processes the source and calls the
@@ -28,3 +32,16 @@ It is also possible to call \'_new_entries\' on a number of entries at
 once, this could possibly speed up the parsing.
 The source-engine can save the state of a source if that is relevant.
 This could be usefull when parsing log-files.
+.PP
+Field definitions are specified with as regular expressions as followed:
+.TP 3
+.B
+(?<NAME>EXPRESSION)
+For example
+.IR
+(?<HOST>\\\\d)
+.PP
+Fields can be matched as followed:
+.TP 3
+.B
+%{HOST:host} %{A:a}

@@ -144,6 +144,15 @@ AC_CHECK_HEADER(pthread.h,
     [ AC_MSG_ERROR([Cannot find the <pthread.h> header file]) ]
 )
 
+dnl *** Check for pthread.h
+dnl ***************************
+AC_CHECK_HEADER(histedit.h,
+    [ AC_DEFINE([HAVE_HISTEDIT_H], [1],
+                [Define to 1 if you have the <histedit.h> header file])
+    ],
+    [ AC_MSG_ERROR([Cannot find the <histedit.h> header file, is libedit installed?]) ]
+)
+
 dnl *** Check for time.h
 dnl ***************************
 AC_CHECK_HEADER(time.h,

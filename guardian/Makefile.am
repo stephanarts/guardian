@@ -2,6 +2,7 @@ bin_PROGRAMS = guardian
 
 guardian_SOURCES = \
     guardian.c \
+    shell.c \
     interactive_menu.c \
     search_dialog.c \
     timeframe_dialog.c
@@ -12,7 +13,8 @@ guardian_LDADD = \
     $(ZMQ_LIBS) \
     $(PTHREAD_LIBS) \
     -lncurses \
-    -lrt
+    -lrt \
+    -ledit
 
 guardian_LDFLAGS = \
     $(PLATFORM_LDFLAGS)

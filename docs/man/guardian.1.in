@@ -3,18 +3,63 @@
 .SH NAME
 guardian \- Guardian Command-line utility
 .SH SYNOPSIS
-guardiand [\-hV]
+guardian
+[
+.IR options
+]
+.br
 .SH DESCRIPTION
-\...
+The guardian command-line utility provides an interface to the guardiand
+daemon process. It can be used to query, and configure the daemon.
 .SH OPTIONS
-.TP 5
--h
+.
+The
+.B guardian
+command line utility understands the following command line options.
+.TP 3
+.B
+-h  --help
 Display command usage information
-.TP 5
--v
+.TP 3
+.B
+-v  --verbose
 Run in verbose mode
-.TP 5
--V
+.TP 3
+.B
+-V  --version
 Show version information
+.TP 3
+.B
+-P  --port
+Provide Guardian Server Port
+.TP 3
+.B
+-H  --host
+Provide Guardian Server Host
+.TP 3
+.B
+-i  --interactive
+Interactive Menu
+.TP 3
+.B
+-s  --silent
+Silent mode
+.SH QUERY LANGUAGE
+.TP 3
+.B
+set (param)=...
+Set config parameter for command-line util.
+.TP 3
+.B
+exit
+Close the shell.
+
+.
 .SH BUGS
 It doesn't work yet.
+
+.SH SEE ALSO
+.PP
+.BR guardiand (1),
+.BR guardian.conf (5),
+.BR libguardian (3)

@@ -69,6 +69,7 @@
 #include <openssl/sha.h>
 
 #include "interactive_menu.h"
+#include "shell.h"
 
 #define SEARCH_BUFFER_SIZE 50
 char search_buffer[SEARCH_BUFFER_SIZE];
@@ -80,7 +81,8 @@ enum {
     OPTION_HELP,
     OPTION_FATAL_WARNINGS,
     OPTION_HOST,
-    OPTION_PORT
+    OPTION_PORT,
+    OPTION_SILENT
 };
 
 /************************
@@ -92,6 +94,7 @@ static struct option long_options[] = {
     {"fatal-warnings", 0, 0, 0}, /* OPTION_FATAL_WARNINGS */
     {"host",    0, 0, 'H'},      /* OPTION_HOST    */
     {"port",    0, 0, 'P'},      /* OPTION_PORT    */
+    {"silent",  0, 0, 's'},      /* OPTION_SILENT  */
     {0, 0, 0, 0}
 };
 
@@ -119,6 +122,8 @@ show_usage ()
     printf ("                     (default: 127.0.0.1)\n");
     printf ("   --port     -P     Connect on port\n");
     printf ("                     (default: 5678)\n");
+    printf ("   --silent   -s     Silent CLI\n");
+    printf ("                     (do not print shell prompt)\n");
     printf ("\n");
     printf ("   --fatal-warnings  Make all warnings fatal\n");
     return;
@@ -138,10 +143,11 @@ main (int argc, char **argv)
     int option_index = 0;
     int c = 0;
     int verbosity = 0;
+    int silent = 0;
 
     while (1)
     {
-        c = getopt_long (argc, argv, "vVhiHP",
+        c = getopt_long (argc, argv, "vVhiHPs",
                     long_options, &option_index);
         if (c == -1)
             break;
@@ -165,6 +171,9 @@ main (int argc, char **argv)
                         break;
                     case OPTION_PORT:
                         break;
+                    case OPTION_SILENT:
+                        silent = 1;
+                        break;
                 }
                 break;
             case 'V':
@@ -185,6 +194,9 @@ main (int argc, char **argv)
             case 'H':
             case 'P':
                 break;
+            case 's':
+                silent = 1;
+                break;
             default:
                 fprintf(stderr, "Try '%s --help' for more information\n", argv[0]);
                 exit (1);
@@ -200,6 +212,8 @@ main (int argc, char **argv)
     
     zmq_setsockopt(server, ZMQ_LINGER, &no_linger, sizeof(no_linger));
     zmq_close (server);
+
+    show_shell(silent);
 
     exit(0);
 }
