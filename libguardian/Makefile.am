@@ -11,6 +11,7 @@ libguardian_1_0_la_SOURCES = \
     file.c \
     log.c \
     error.c \
+    expression.c \
     source.c \
     sourceengine.c \
     sourcetype.c \
@@ -54,7 +55,8 @@ libguardian_1_0_la_LIBADD = \
     $(OPENSSL_LIBS) \
     $(PCRE_LIBS) \
     $(ZMQ_LIBS) \
-    $(PTHREAD_LIBS)
+    $(PTHREAD_LIBS) \
+    -lgrok
 
 AM_CPPFLAGS = \
     -I$(top_srcdir)

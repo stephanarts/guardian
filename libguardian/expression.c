@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,29 +27,61 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBGUARDIAN_H__
-#define __LIBGUARDIAN_H__
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
-#define LIBGUARDIAN_INSIDE_LIBGUARDIAN_H
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
 
 #include <time.h>
 
-#include <libguardian/log.h>
-#include <libguardian/error.h>
-#include <libguardian/file.h>
-#include <libguardian/timestamp.h>
-#include <libguardian/types.h>
-#include <libguardian/assert.h>
-#include <libguardian/memory.h>
-#include <libguardian/entry.h>
-#include <libguardian/source.h>
-#include <libguardian/sourceengine.h>
-#include <libguardian/sourcetype.h>
-#include <libguardian/field.h>
-#include <libguardian/plugin.h>
-#include <libguardian/expression.h>
+#include <pcre.h>
+#include <grok.h>
 
-void
-libguardian_init (void);
+#include "expression.h"
+#include "log.h"
 
-#endif /* __LIBGUARDIAN_H__ */
+#define MAX_FORMATS 50
+#define MAX_FORMAT_LENGTH 20
+
+#define TEST_STRING "%{TEST}"
+
+static long n_formats = 0;
+
+static char        formats[MAX_FORMATS][MAX_FORMAT_LENGTH];
+static char        format_names[MAX_FORMATS][MAX_FORMAT_LENGTH];
+static pcre       *format_exp[MAX_FORMATS];
+static pcre_extra *format_exp_extra[MAX_FORMATS];
+
+grok_t grok;
+
+/**
+ * Register an Expression.
+ */
+int
+guardian_register_expression (
+    const char   *name,
+    const char   *format)
+{
+    if (n_formats == 0) {
+        grok_init(&grok);
+    }
+    grok_pattern_add(
+        &grok,
+        name,
+        strlen(name), 
+        format,
+        strlen(format));
+
+    n_formats++;
+}

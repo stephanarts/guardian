@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,29 +27,16 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBGUARDIAN_H__
-#define __LIBGUARDIAN_H__
+#if !defined (LIBGUARDIAN_INSIDE_LIBGUARDIAN_H) && !defined(LIBGUARDIAN_COMPILATION)
+#error "Only <libguardian/libguardian.h> can be included directly, this file may disappear or change contents"
+#endif
 
-#define LIBGUARDIAN_INSIDE_LIBGUARDIAN_H
+#ifndef __GUARDIAN_EXPRESSION_H__
+#define __GUARDIAN_EXPRESSION_H__
 
-#include <time.h>
+int
+guardian_register_expression (
+    const char *name,
+    const char *format);
 
-#include <libguardian/log.h>
-#include <libguardian/error.h>
-#include <libguardian/file.h>
-#include <libguardian/timestamp.h>
-#include <libguardian/types.h>
-#include <libguardian/assert.h>
-#include <libguardian/memory.h>
-#include <libguardian/entry.h>
-#include <libguardian/source.h>
-#include <libguardian/sourceengine.h>
-#include <libguardian/sourcetype.h>
-#include <libguardian/field.h>
-#include <libguardian/plugin.h>
-#include <libguardian/expression.h>
-
-void
-libguardian_init (void);
-
-#endif /* __LIBGUARDIAN_H__ */
+#endif /* __GUARDIAN_EXPRESSION_H__ */

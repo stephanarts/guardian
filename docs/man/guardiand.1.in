@@ -45,3 +45,15 @@ Fields can be matched as followed:
 .TP 3
 .B
 %{HOST:host} %{A:a}
+.PP
+Expressions are stored in a 'NAME->EXPR' map, where the NAME must be
+unique, and can't be overridden. Expressions can reference other
+expressions, if their definition could be changed at runtime,
+this could lead to unpredictable behaviour.
+
+.SH TODO
+Refactor timestamp code to tie into a generic expression framework.
+which couunwanted behaviour of
+expressions referencing other expressions).
+.PP
+Implement entry-matching based on expression-framework.

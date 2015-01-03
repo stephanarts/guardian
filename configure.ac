@@ -177,6 +177,13 @@ AC_CHECK_HEADER(ncurses.h,
     [ AC_MSG_ERROR([Cannot find header <ncurses.h>]) ]
 )
 
+AC_CHECK_HEADER([grok.h],
+    [ AC_DEFINE([HAVE_GROK_H], [1],
+                [Define to 1 if you have the <grok.h> header file])
+    ],
+    [ AC_MSG_ERROR([Cannot find header <grok.h>]) ]
+)
+
 PKG_CHECK_MODULES([PCRE], [libpcre >= 8.0])
 AC_SUBST(PCRE_LIBS)
 AC_SUBST(PCRE_CFLAGS)
