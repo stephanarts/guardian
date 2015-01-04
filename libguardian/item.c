@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -31,57 +31,77 @@
 #include <config.h>
 #endif
 
-#ifdef HAVE_STDLIB_H
+#ifdef HAVE_SYS_SYSLOG_H
+#include <sys/syslog.h>
+#endif
+
 #include <stdlib.h>
-#endif
-
-#ifdef HAVE_STDIO_H
-#include <stdio.h>
-#endif
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
 
-#include <time.h>
+#include <stdarg.h>
 
-#include <pcre.h>
-#include <grok.h>
+#include <arpa/inet.h>
 
-#include "expression.h"
-#include "log.h"
+#include <openssl/sha.h>
 
-#define MAX_FORMATS 50
-#define MAX_FORMAT_LENGTH 20
 
-#define TEST_STRING "%{TEST}"
+#include "error.h"
+#include "types.h"
+#include "itemtype.h"
+#include "item.h"
 
-static long n_formats = 0;
-
-static char        formats[MAX_FORMATS][MAX_FORMAT_LENGTH];
-static char        format_names[MAX_FORMATS][MAX_FORMAT_LENGTH];
-static pcre       *format_exp[MAX_FORMATS];
-static pcre_extra *format_exp_extra[MAX_FORMATS];
-
-grok_t grok;
-
-/**
- * Register an Expression.
- */
-int
-guardian_register_expression (
-    const char   *name,
-    const char   *format)
+struct _GuardianItem
 {
-    if (n_formats == 0) {
-        grok_init(&grok);
-    }
-    grok_pattern_add(
-        &grok,
-        name,
-        strlen(name), 
-        format,
-        strlen(format));
+    char *name;
+    GuardianItemType type;
 
-    n_formats++;
+    int interval;
+    int active;
+    int remote;
+};
+
+GuardianItem *
+guardian_item_new (
+        const char *name,
+        GuardianItemType type,
+        int interval,
+        int active,
+        int remote,
+        GuardianError **error)
+{
+    GuardianItem *item = (GuardianItem *)malloc (sizeof (GuardianItem));
+
+    guardian_log_debug("New Item: %s", name);
+
+    return item;
+}
+
+void
+guardian_items_init ()
+{
+    guardian_item_new (
+        "cpu.load.avg[1]",
+        GUARDIAN_ITEMTYPE_DOUBLE,
+        30,
+        TRUE,
+        FALSE,
+        NULL);
+
+    guardian_item_new (
+        "cpu.load.avg[5]",
+        GUARDIAN_ITEMTYPE_DOUBLE,
+        30,
+        TRUE,
+        FALSE,
+        NULL);
+
+    guardian_item_new (
+        "cpu.load.avg[15]",
+        GUARDIAN_ITEMTYPE_DOUBLE,
+        30,
+        TRUE,
+        FALSE,
+        NULL);
+
+    //guardian_db_get_items();
 }

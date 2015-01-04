@@ -36,7 +36,4 @@ guardian_scheduler_main ( void *ctx, int n_workers);
 void
 guardian_scheduler_main_quit ( void );
 
-void
-guardian_scheduler_add_source (GuardianSource *source);
-
 #endif

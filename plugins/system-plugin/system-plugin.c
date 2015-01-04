@@ -39,14 +39,53 @@
 #include <stdio.h>
 #endif
 
+#include <openssl/sha.h>
+
+#include <string.h>
+
+#include <pcre.h>
+
+#include <errno.h>
+
+#include <sys/stat.h>
+
+#include <stdarg.h>
 #include <libguardian/libguardian.h>
 
-#include "syslog-tcp-engine.h"
-
-static GuardianSourceEngine engine;
-
-void
-syslog_tcp_engine_init()
+GuardianPlugin *
+guardian_plugin_init ()
 {
+    const char *errors = NULL;
+    int err_offset;
+    GuardianPlugin *plugin;
 
+    guardian_log_info("Initialise system plugin");
+
+    plugin = guardian_new (sizeof (GuardianPlugin), 1);
+
+    guardian_item_new (
+        "cpu.load.avg[1]",
+        GUARDIAN_ITEMTYPE_DOUBLE,
+        30,
+        TRUE,
+        FALSE,
+        NULL);
+
+    guardian_item_new (
+        "cpu.load.avg[5]",
+        GUARDIAN_ITEMTYPE_DOUBLE,
+        30,
+        TRUE,
+        FALSE,
+        NULL);
+
+    guardian_item_new (
+        "cpu.load.avg[15]",
+        GUARDIAN_ITEMTYPE_DOUBLE,
+        30,
+        TRUE,
+        FALSE,
+        NULL);
+
+    return plugin;
 }

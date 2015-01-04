@@ -3,17 +3,17 @@ plugindir = \
     $(libdir)/guardian
 
 plugin_LTLIBRARIES = \
-    httpd.la
+    system-plugin.la
 
-httpd_la_SOURCES = \
-    httpd.c
+system_plugin_la_SOURCES = \
+    system-plugin.c
 
-httpd_la_LDFLAGS =       \
+system_plugin_la_LDFLAGS =       \
     -avoid-version       \
     -module              \
     $(PLATFORM_LDFLAGS)
 
-httpd_la_CFLAGS =   \
+system_plugin_la_CFLAGS =   \
     $(PCRE_CFLAGS) \
     -std=c99
 

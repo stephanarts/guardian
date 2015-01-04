@@ -27,42 +27,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
+#ifndef __GUARDIAN_ITEMTYPE_H__
+#define __GUARDIAN_ITEMTYPE_H__
+
+typedef enum {
+    GUARDIAN_ITEMTYPE_UNKNOWN = 0,
+    GUARDIAN_ITEMTYPE_STRING,
+    GUARDIAN_ITEMTYPE_INT,
+    GUARDIAN_ITEMTYPE_DOUBLE
+} GuardianItemType;
+
 #endif
-
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-
-#ifdef HAVE_STDIO_H
-#include <stdio.h>
-#endif
-
-#include <openssl/sha.h>
-
-#include <string.h>
-
-#include <pcre.h>
-
-#include <errno.h>
-
-#include <sys/stat.h>
-
-#include <stdarg.h>
-
-#include <libguardian/libguardian.h>
-
-GuardianPlugin *
-guardian_plugin_init (void)
-{
-    const char *errors = NULL;
-    int err_offset;
-    GuardianPlugin *plugin;
-
-    guardian_log_info("Initialise syslog plugin");
-
-    plugin = guardian_new (sizeof (GuardianPlugin), 1);
-
-    return plugin;
-}

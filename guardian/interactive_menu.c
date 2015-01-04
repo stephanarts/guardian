@@ -120,6 +120,21 @@ show_interactive_menu (void)
         wmove(win, 1, 0);
         hline('-', x);
 
+        wmove(win, 1, x-4);
+        waddstr(win, "[R]");
+
+        wmove(win, 1, x-8);
+        waddstr(win, "[A]");
+
+        wmove(win, 1, x-30);
+        waddstr(win, "[Time               ]");
+
+        wmove(win, 1, x-60);
+        waddstr(win, "[Value                  ]");
+
+        wmove(win, 1, 0);
+        waddstr(win, "[Item             ]");
+
         if (time_win) {
             show_timeframe_dialog(win, 1, 5);
         }
@@ -142,13 +157,19 @@ show_interactive_menu (void)
             addch(ACS_DARROW | A_REVERSE);
             /*******/
 
-            wmove(win, 2, 0);
-            waddstr(win, "2014/11/13 12:12:34.000  - koffie ....");
-            wmove(win, 3, 0);
-            waddstr(win, "    :12:34.000  - koffie ....");
+            wmove(win, 2, 1);
+            waddstr(win,
+                "cpu.load.avg[1]   | 0.12");
+            wmove(win, 2, x-31);
+            waddstr(win,
+                "| 2015/01/04 12:23:34 | x |");
 
-            wmove(win, 4, 0);
-            waddstr(win, "2014/11/13 12:12:34.000  - koffie");
+            wmove(win, 3, 1);
+            waddstr(win,
+                "cpu.load.avg[5]   | 0.12");
+            wmove(win, 3, x-31);
+            waddstr(win,
+                "| 2015/01/04 12:23:34 | x |");
         }
 
         //waddch(win, i);

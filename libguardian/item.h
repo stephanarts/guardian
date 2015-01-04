@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -31,12 +31,18 @@
 #error "Only <libguardian/libguardian.h> can be included directly, this file may disappear or change contents"
 #endif
 
-#ifndef __GUARDIAN_EXPRESSION_H__
-#define __GUARDIAN_EXPRESSION_H__
+#ifndef __GUARDIAN_ITEM_H__
+#define __GUARDIAN_ITEM_H__
 
-int
-guardian_register_expression (
-    const char *name,
-    const char *format);
+typedef struct _GuardianItem GuardianItem;
 
-#endif /* __GUARDIAN_EXPRESSION_H__ */
+GuardianItem *
+guardian_item_new (
+        const char       *name,
+        GuardianItemType  type,
+        int               interval,
+        int               active,
+        int               remote,
+        GuardianError   **error);
+
+#endif /* __GUARDIAN_ITEM_H__ */

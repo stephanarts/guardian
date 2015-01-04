@@ -8,32 +8,20 @@ libguardian_includedir = \
 libguardian_1_0_la_SOURCES = \
     memory.c \
     assert.c \
-    file.c \
+    item.c \
     log.c \
     error.c \
-    expression.c \
-    source.c \
-    sourceengine.c \
-    sourcetype.c \
-    timestamp.c \
-    entry.c \
-    field.c \
     plugin.c \
     libguardian.c
 
 libguardian_include_HEADERS = \
     memory.h \
     assert.h \
-    file.h \
     log.h \
     types.h \
     error.h \
-    source.h \
-    sourceengine.h \
-    sourcetype.h \
-    timestamp.h \
-    entry.h \
-    field.h \
+    item.h \
+    itemtype.h \
     plugin.h \
     libguardian.h
 
@@ -55,8 +43,7 @@ libguardian_1_0_la_LIBADD = \
     $(OPENSSL_LIBS) \
     $(PCRE_LIBS) \
     $(ZMQ_LIBS) \
-    $(PTHREAD_LIBS) \
-    -lgrok
+    $(PTHREAD_LIBS)
 
 AM_CPPFLAGS = \
     -I$(top_srcdir)

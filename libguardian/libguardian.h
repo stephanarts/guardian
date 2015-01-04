@@ -36,18 +36,12 @@
 
 #include <libguardian/log.h>
 #include <libguardian/error.h>
-#include <libguardian/file.h>
-#include <libguardian/timestamp.h>
 #include <libguardian/types.h>
+#include <libguardian/itemtype.h>
+#include <libguardian/item.h>
 #include <libguardian/assert.h>
 #include <libguardian/memory.h>
-#include <libguardian/entry.h>
-#include <libguardian/source.h>
-#include <libguardian/sourceengine.h>
-#include <libguardian/sourcetype.h>
-#include <libguardian/field.h>
 #include <libguardian/plugin.h>
-#include <libguardian/expression.h>
 
 void
 libguardian_init (void);

@@ -1,3 +1,3 @@
 SUBDIRS= \
-	generator-plugin \
-    syslog-plugin
+    system-plugin \
+	generator-plugin

@@ -177,13 +177,6 @@ AC_CHECK_HEADER(ncurses.h,
     [ AC_MSG_ERROR([Cannot find header <ncurses.h>]) ]
 )
 
-AC_CHECK_HEADER([grok.h],
-    [ AC_DEFINE([HAVE_GROK_H], [1],
-                [Define to 1 if you have the <grok.h> header file])
-    ],
-    [ AC_MSG_ERROR([Cannot find header <grok.h>]) ]
-)
-
 PKG_CHECK_MODULES([PCRE], [libpcre >= 8.0])
 AC_SUBST(PCRE_LIBS)
 AC_SUBST(PCRE_CFLAGS)
@@ -227,8 +220,7 @@ guardian/Makefile
 data/Makefile
 plugins/Makefile
 plugins/generator-plugin/Makefile
-plugins/syslog-plugin/Makefile
-plugins/httpd-plugin/Makefile
+plugins/system-plugin/Makefile
 tests/Makefile
 tests/libguardian/Makefile
 tests/plugins/Makefile

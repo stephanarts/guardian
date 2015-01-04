@@ -74,7 +74,6 @@ _guardian_worker_thread (void *arg)
     int ret = 0;
     int timeout = 0;
     zmq_msg_t n_entries_message;
-    GuardianSource *source = NULL;
 
     socket = zmq_socket(_ctx, ZMQ_REQ);
     d_socket = zmq_socket(_ctx, ZMQ_REQ);
@@ -92,27 +91,9 @@ _guardian_worker_thread (void *arg)
             sleep(timeout);
             continue;
         }
-        ret = sscanf(msg, "PROCESS[%p]", &source);
+        ret = sscanf(msg, "PROCESS");
         if (ret == 1) {
             void *data;
-
-            guardian_log_info("PROCESS SOURCE\n");
-            //guardian_source_update(source);
-
-            /*
-            for (a = 0; a < 5000; ++a) {
-                data = malloc(2000);
-                strcpy(data, "1234563786543538765453\n\0");
-                zmq_msg_init_data (
-                    &n_entries_message,
-                    data,
-                    strlen(data),
-                    msg_free,
-                    NULL);
-                zmq_msg_send (&n_entries_message, d_socket, ZMQ_SNDMORE);
-            }
-            */
-
             data = malloc(sizeof(int));
             *((int *)data) = (int)0xA;
             zmq_msg_init_data (
@@ -125,7 +106,7 @@ _guardian_worker_thread (void *arg)
 
             zmq_recv(d_socket, msg, 255, 100);
 
-            sprintf(msg, "FINISH[%p]%n", source, &ret);
+            sprintf(msg, "FINISH%n", &ret);
             zmq_send(socket, msg, ret, 0);
             zmq_recv(socket, msg, 255, 100);
 

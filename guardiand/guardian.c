@@ -172,7 +172,6 @@ main (int argc, char **argv)
     GuardianSettings *settings = NULL;
 
     GuardianPlugin *plugin;
-    GuardianSource *source;
 
     while (1)
     {
@@ -319,24 +318,6 @@ main (int argc, char **argv)
             }
         }
     }
-
-    source = guardian_source_new (
-            "syslog",
-            "file:///var/log/auth.log*",
-            &error);
-    guardian_scheduler_add_source ( source );
-
-    source = guardian_source_new (
-            "syslog",
-            "file:///var/log/boot.log*",
-            &error);
-    guardian_scheduler_add_source ( source );
-
-    source = guardian_source_new (
-            "syslog",
-            "file:///var/log/syslog",
-            &error);
-    guardian_scheduler_add_source ( source );
 
 #ifdef ENABLE_DEBUG
     /** Do not allow further dynamic memory allocation */

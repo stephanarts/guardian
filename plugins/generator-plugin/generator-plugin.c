@@ -52,13 +52,6 @@
 #include <stdarg.h>
 #include <libguardian/libguardian.h>
 
-GuardianSourcetype *source_type = NULL;
-
-static void
-_plugin_engine_update_source (
-        GuardianSourceEngine *engine,
-        GuardianSource       *source );
-
 GuardianPlugin *
 guardian_plugin_init ()
 {

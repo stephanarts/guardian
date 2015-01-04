@@ -62,9 +62,6 @@
 /** Define 10 Second interval */
 #define INTERVAL 1
 
-static int n_sources = 0;
-static GuardianSource **sources = NULL;
-static char *source_state = NULL;
 void *_ctx = NULL;
 
 #define         BUFFER_LEN      1024
@@ -81,7 +78,6 @@ guardian_scheduler_main ( void *ctx, int n_workers )
     void *controller;
     void *data_processor;
     void *agent;
-    GuardianSource *source = NULL;
 
     pthread_t *workers = NULL;
 
@@ -133,36 +129,11 @@ guardian_scheduler_main ( void *ctx, int n_workers )
             if (size != -1) {
                 // Process task
                 if(!strncmp(msg, "GET-COMMAND", 11)) {
-                    source = NULL;
-                    n_sleeping = 0;
-                    for(i = 0; i < n_sources; ++i) {
-                        if (source_state[i] == 'S') {
-                            n_sleeping++;
-                        }
-                        if (source_state[i] == 'I') {
-                            source = sources[i];
-                            source_state[i] = 'R';
-                            break;
-                        }
-                    }
+                    snprintf(msg, 255, "WAIT[%d]%n", INTERVAL, &size);
+                    zmq_send(plugins, msg, size, 0);
 
-                    /* If no source available, wait */
-                    if (source == NULL) {
-                        /* If enough sources are sleeping,
-                         * mark them as idle so they can be
-                         * scheduled again.
-                         */
-                        if (n_sleeping == n_sources) {
-                            for(i = 0; i < n_sources; ++i) {
-                                source_state[i] = 'I';
-                            }
-                        }
-
-                        snprintf(msg, 255, "WAIT[%d]%n", INTERVAL, &size);
-                        zmq_send(plugins, msg, size, 0);
-                    } else {
-                        guardian_log_debug("Worker Processing Source[%d]", i);
-                        snprintf(msg, 255, "PROCESS[%p]%n", source, &size);
+                    if (0) {
+                        snprintf(msg, 255, "PROCESS%n", &size);
                         zmq_send(plugins, msg, size, 0);
                     }
                     continue;
@@ -170,18 +141,9 @@ guardian_scheduler_main ( void *ctx, int n_workers )
                 /* Check if it is a message indicating
                  * a worker thread is finished processing.
                  */
-                ret = sscanf(msg, "FINISH[%p]", &source);
+                ret = sscanf(msg, "FINISH");
                 if (ret == 1) {
                     guardian_log_debug("Worker Finished");
-                    /* Mark the source as sleeping so it
-                     * won't be rescheduled immediately.
-                     */
-                    for(i = 0; i < n_sources; ++i) {
-                        if(sources[i] == source) {
-                            source_state[i] = 'S';
-                            break;
-                        }
-                    }
                     zmq_send(plugins, "-", 1, 0);
                     continue;
                 } 
@@ -272,59 +234,3 @@ guardian_scheduler_main_quit ( )
 
     zmq_close(socket);
 }
-
-/**
- * guardian_scheduler_add_source:
- * @source: Source object
- *
- * Adds a source to be polled at regular intervals.
- */
-void
-guardian_scheduler_add_source ( GuardianSource *source)
-{
-    GuardianSource **_sources;
-    char *_source_state;
-    int i;
-
-    if (source == NULL) {
-        guardian_log_error("Can not schedule NULL source\n");
-        return;
-    }
-
-    /** If no sources are defined */
-    if (sources == NULL)
-    {
-        sources = guardian_new(sizeof(GuardianSource *), 2);
-        sources[0] = source;
-        sources[1] = NULL;
-        source_state = guardian_new(sizeof(char), 2);
-        source_state[0] = 'I';
-        source_state[1] = '\0';
-        n_sources = 1;
-        return;
-    }
-
-    /** Increase the source list */
-    _sources = guardian_new(sizeof(GuardianSource *) * (n_sources + 2), 1);
-    _source_state = guardian_new(sizeof(char) * (n_sources + 2), 1);
-
-    /** Copy all sources to the new list */
-    for(i = 0; i < n_sources; ++i)
-    {
-        _sources[i] = sources[i];
-        _source_state[i] = source_state[i];
-    }
-    _sources[i] = source;
-    _source_state[i] = 'I';
-
-    /** Free the old list */
-    free (sources);
-    free (source_state);
-
-    /** And replace it with the new one */
-    sources = _sources;
-    source_state = _source_state;
-
-    n_sources++;
-}
-
