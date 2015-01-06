@@ -43,12 +43,12 @@
 
 struct _GuardianSettings
 {
-    char *path;
+    char   *path;
 };
 
 GuardianSettings *
 guardian_settings_load (
-        const char     *path,
+        const char *path,
         GuardianError **error)
 {
     return NULL;
@@ -56,16 +56,15 @@ guardian_settings_load (
 
 const char *
 guardian_settings_get (
-        GuardianSettings *settings,
-        const char       *key )
+        GuardianSettings * settings,
+        const char *key)
 {
     return NULL;
 }
 
 void
 guardian_settings_free (
-        GuardianSettings *settings)
+        GuardianSettings * settings)
 {
 
 }
-

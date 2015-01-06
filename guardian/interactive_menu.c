@@ -55,156 +55,178 @@
 void
 show_interactive_menu (void)
 {
-    int search_win = 0;
-    int time_win = 0;
-    int i;
-    int y, x;
-    time_t t;
-    WINDOW *win = initscr();
-    start_color();
-    cbreak();
-    noecho();
-    nonl();
-    intrflush(win, FALSE);
-    curs_set(0);
+    int     search_win = 0;
+    int     time_win = 0;
+    int     i;
+    int     y,
+            x;
+    time_t  t;
+    WINDOW *win = initscr ();
+    start_color ();
+    cbreak ();
+    noecho ();
+    nonl ();
+    intrflush (win, FALSE);
+    curs_set (0);
 
-    keypad(win, TRUE);
-    while(1) {
-        werase(win);
-        getmaxyx(win, y, x);
+    keypad (win, TRUE);
+    while (1)
+    {
+        werase (win);
+        getmaxyx (win, y, x);
 
-        time(&t);
+        time (&t);
 
-        /* Check if there is enough horizontal space
-         * to draw the package name, version and date+time.
+        /*
+         * Check if there is enough horizontal space to draw the package
+         * name, version and date+time.
          */
-        if (x > strlen(PACKAGE_NAME)+strlen(PACKAGE_VERSION)+28) {
-            wmove(win, 0, 1);
-            waddstr(win, PACKAGE_NAME);
+        if (x > strlen (PACKAGE_NAME) + strlen (PACKAGE_VERSION) + 28)
+        {
+            wmove (win, 0, 1);
+            waddstr (win, PACKAGE_NAME);
 
-            wmove(win, 0, (x-24)/2);
-            attrset(A_BOLD);
-            waddnstr(win, ctime(&t), 24);
-            attrset(A_NORMAL);
+            wmove (win, 0, (x - 24) / 2);
+            attrset (A_BOLD);
+            waddnstr (win, ctime (&t), 24);
+            attrset (A_NORMAL);
 
-            wmove(win, 0, x-strlen(PACKAGE_VERSION)-1);
-            waddstr(win, PACKAGE_VERSION);
-        } else {
-            /* Check if there is enough horizontal space
-             * to draw the package name and date+time.
+            wmove (win, 0, x - strlen (PACKAGE_VERSION) - 1);
+            waddstr (win, PACKAGE_VERSION);
+        } else
+        {
+
+            /*
+             * Check if there is enough horizontal space to draw the package
+             * name and date+time.
              */
-            if (x > strlen(PACKAGE_NAME)+26) {
-                wmove(win, 0, 1);
-                waddstr(win, PACKAGE_NAME);
+            if (x > strlen (PACKAGE_NAME) + 26)
+            {
+                wmove (win, 0, 1);
+                waddstr (win, PACKAGE_NAME);
 
-                wmove(win, 0, x-25);
-                waddnstr(win, ctime(&t), 24);
-            } else {
-                /* Check if there is enough horizontal space
-                 * to draw the date+time.
+                wmove (win, 0, x - 25);
+                waddnstr (win, ctime (&t), 24);
+            } else
+            {
+
+                /*
+                 * Check if there is enough horizontal space to draw the
+                 * date+time.
                  */
-                if (x >= 24) {
-                    wmove(win, 0, (x-24)/2);
-                    waddnstr(win, ctime(&t), 24);
+                if (x >= 24)
+                {
+                    wmove (win, 0, (x - 24) / 2);
+                    waddnstr (win, ctime (&t), 24);
                 }
             }
         }
-        wmove(win, y-1, 0);
-        //waddnstr(win, "3.3k records", 12);
-        waddnstr(win, "<CONN ERROR>", 12);
+        wmove (win, y - 1, 0);
+        //waddnstr (win, "3.3k records", 12);
+        waddnstr (win, "<CONN ERROR>", 12);
 
-        wmove(win, y-1, x-5);
-        waddnstr(win, "user", 4);
+        wmove (win, y - 1, x - 5);
+        waddnstr (win, "user", 4);
 
         /* Draw a horizontal line */
-        wmove(win, 1, 0);
-        hline('-', x);
+        wmove (win, 1, 0);
+        hline ('-', x);
 
-        wmove(win, 1, x-4);
-        waddstr(win, "[R]");
+        wmove (win, 1, x - 4);
+        waddstr (win, "[R]");
 
-        wmove(win, 1, x-8);
-        waddstr(win, "[A]");
+        wmove (win, 1, x - 8);
+        waddstr (win, "[A]");
 
-        wmove(win, 1, x-30);
-        waddstr(win, "[Time               ]");
+        wmove (win, 1, x - 30);
+        waddstr (win, "[Time               ]");
 
-        wmove(win, 1, x-60);
-        waddstr(win, "[Value                  ]");
+        wmove (win, 1, x - 60);
+        waddstr (win, "[Value                  ]");
 
-        wmove(win, 1, 0);
-        waddstr(win, "[Item             ]");
+        wmove (win, 1, 0);
+        waddstr (win, "[Item             ]");
 
-        if (time_win) {
-            show_timeframe_dialog(win, 1, 5);
+        if (time_win)
+        {
+            show_timeframe_dialog (win, 1, 5);
         }
-        if (search_win) {
+        if (search_win)
+        {
             show_search_dialog (win, 1, 5);
         }
         if (time_win == search_win)
         {
             /* Draw slider */
-            wmove(win, 3, x-1);
-            vline(' '|A_REVERSE,y-4 );
+            wmove (win, 3, x - 1);
+            vline (' ' | A_REVERSE, y - 4);
 
-            wmove(win, 2, x-1);
-            addch(ACS_UARROW | A_REVERSE);
+            wmove (win, 2, x - 1);
+            addch (ACS_UARROW | A_REVERSE);
 
-            wmove(win, 3, x-1);
-            addch(' ');
+            wmove (win, 3, x - 1);
+            addch (' ');
 
-            wmove(win, y-2, x-1);
-            addch(ACS_DARROW | A_REVERSE);
+            wmove (win, y - 2, x - 1);
+            addch (ACS_DARROW | A_REVERSE);
             /*******/
 
-            wmove(win, 2, 1);
-            waddstr(win,
-                "cpu.load.avg[1]   | 0.12");
-            wmove(win, 2, x-31);
-            waddstr(win,
-                "| 2015/01/04 12:23:34 | x |");
+            wmove (win, 2, 1);
+            waddstr (win,
+                    "cpu.load.avg[1]   | 0.12");
+            wmove (win, 2, x - 31);
+            waddstr (win,
+                    "| 2015/01/04 12:23:34 | x |");
 
-            wmove(win, 3, 1);
-            waddstr(win,
-                "cpu.load.avg[5]   | 0.12");
-            wmove(win, 3, x-31);
-            waddstr(win,
-                "| 2015/01/04 12:23:34 | x |");
+            wmove (win, 3, 1);
+            waddstr (win,
+                    "cpu.load.avg[5]   | 0.12");
+            wmove (win, 3, x - 31);
+            waddstr (win,
+                    "| 2015/01/04 12:23:34 | x |");
         }
+        //waddch (win, i);
 
-        //waddch(win, i);
+        //waddch (win, i);
+        wmove (win, y, 0);
 
-        //waddch(win, i);
-        wmove(win, y, 0);
-
-        if (search_win == 1) {
-            if (search_dialog_input () != 0) {
+        if (search_win == 1)
+        {
+            if (search_dialog_input () != 0)
+            {
                 search_win = 0;
             }
-        } else {
-            if (time_win == 1) {
-                if (timeframe_dialog_input () != 0) {
+        } else
+        {
+            if (time_win == 1)
+            {
+                if (timeframe_dialog_input () != 0)
+                {
                     time_win = 0;
                 }
-            } else {
-                i = wgetch(win);
-                if (i == 'q') {
-                    wclear(win);
-                    wrefresh(win);
+            } else
+            {
+                i = wgetch (win);
+                if (i == 'q')
+                {
+                    wclear (win);
+                    wrefresh (win);
                     break;
                 }
-                if (i == 't') {
+                if (i == 't')
+                {
                     time_win = 1;
-                    wclear(win);
-                    wrefresh(win);
+                    wclear (win);
+                    wrefresh (win);
                 }
-                if (i == '/') {
+                if (i == '/')
+                {
                     search_win = 1;
-                    wclear(win);
-                    wrefresh(win);
+                    wclear (win);
+                    wrefresh (win);
                 }
             }
         }
     }
-    endwin();
+    endwin ();
 }

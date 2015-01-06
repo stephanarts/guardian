@@ -63,8 +63,6 @@
 enum {
     OPTION_VERSION = 0,
     OPTION_HELP,
-    OPTION_FILE_VERIFY,
-    OPTION_SOURCE_READ,
     OPTION_COUNT
 };
 
@@ -74,7 +72,6 @@ enum {
 static struct option long_options[] = {
     {"version",    0, 0, 'V'}, /* OPTION_VERSION */
     {"help",       0, 0, 'h'}, /* OPTION_HELP */
-    {"file-verify",0, 0, 0},   /* OPTION_FILE_VERIFY */
     {0, 0, 0, 0}
 };
 
@@ -91,16 +88,11 @@ static void
 show_usage ()
 {
     printf ("Usage: %s [options]\n"
-            "    [--file-verify <file> <hash>]\n"
-            "    [--source-read <def>]\n"
             , PACKAGE_NAME);
     printf ("\n");
     printf ("Options:\n");
     printf ("   --version  -V     Show version information\n");
     printf ("   --help     -h     Show usage information (this output)\n");
-    printf ("\n");
-    printf ("   --file-verify     Test file-verify feature\n");
-    printf ("   --source-read     Test source functionality\n");
     return;
 }
 
@@ -133,12 +125,6 @@ main (int argc, char **argv)
                         show_usage();
                         exit(0);
                         break;
-                    case OPTION_FILE_VERIFY:
-                        file_verify = 1;
-                        break;
-                    case OPTION_SOURCE_READ:
-                        source_read = 1;
-                        break;
                 }
                 break;
             case 'V':
@@ -161,35 +147,5 @@ main (int argc, char **argv)
     guardian_log_init (1);
     guardian_log_mask (GUARDIAN_LOG_DEBUG);
 
-    if (file_verify == 1) {
-        //fprintf(stderr, "Verify file: %i", argc);
-        //if (argc != 3)
-        //   exit(1); 
-        GuardianFile *f = guardian_file_new(argv[2]);
-
-        for(c = 0; c < argc; ++c) {
-            //fprintf(stderr, "%d: %s\n", c, argv[c]);
-        }
-
-        if (strlen(argv[4]) != 40)
-           exit(1); 
-
-        /* Convert ASCII SHA sum to binary 20-byte string */
-        unsigned char hash[20];
-        for(c = 0; c < 20; ++c) {
-            unsigned int n;
-            sscanf(&argv[4][c*2], "%2x", &n);
-            hash[c] = (unsigned char)n;
-        }
-
-        int i = guardian_file_verify (f, atoi(argv[3]), hash);
-
-        //fprintf(stderr, "%d\n", i);
-    }
-
-    //guardian_set_timezone_gmt_offset(POS_GMT_OFFSET);
-    //guardian_set_timezone_gmt_offset(NEG_GMT_OFFSET);
-
-    
     exit(0);
 }

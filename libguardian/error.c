@@ -44,15 +44,15 @@
 
 struct _GuardianError
 {
-    char *msg;
+    char   *msg;
 };
 
 GuardianError *
 guardian_error_new (
-        char *format, ... )
+        char *format,...)
 {
-    GuardianError *error = (GuardianError *)malloc(sizeof(GuardianError));
-    error->msg = (char *)malloc(1024);
+    GuardianError *error = (GuardianError *)malloc (sizeof (GuardianError));
+    error->msg = (char *)malloc (1024);
 
     va_list arg;
 

@@ -42,31 +42,31 @@
 static int fatal_assert = 0;
 
 void
-guardian_assert_warning ( char *msg )
+guardian_assert_warning (char *msg)
 {
     fprintf (stderr, "  WARNING: %s\n", msg);
     guardian_log_warning ("%s\n", msg);
 
-    if ( fatal_assert != 0 )
+    if (fatal_assert != 0)
     {
         raise (SIGSEGV);
     }
 }
 
 void
-guardian_assert_critical ( char *msg )
+guardian_assert_critical (char *msg)
 {
     fprintf (stderr, "  CRITICAL: %s\n", msg);
     guardian_log_critical ("%s\n", msg);
 
-    if ( fatal_assert != 0 )
+    if (fatal_assert != 0)
     {
         raise (SIGSEGV);
     }
 }
 
 void
-guardian_set_fatal_asserts ( int fatal )
+guardian_set_fatal_asserts (int fatal)
 {
     fatal_assert = fatal;
 }

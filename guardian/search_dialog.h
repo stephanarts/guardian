@@ -28,6 +28,6 @@
  */
 
 void
-show_search_dialog (WINDOW *parent, int x, int y);
+        show_search_dialog (WINDOW *parent, int x, int y);
 int
-search_dialog_input(void);
+        search_dialog_input (void);

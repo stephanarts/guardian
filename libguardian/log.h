@@ -40,30 +40,29 @@
 #define GUARDIAN_LOG_DEBUG     7
 
 void
-guardian_log_init ( int );
+        guardian_log_init (int);
 
 void
-guardian_log_mask ( int );
+        guardian_log_mask (int);
 
 void
-guardian_log_alert ( const char *format, ...);
+        guardian_log_alert (const char *format,...);
 
 void
-guardian_log_critical ( const char *format, ...);
+        guardian_log_critical (const char *format,...);
 
 void
-guardian_log_error ( const char *format, ...);
+        guardian_log_error (const char *format,...);
 
 void
-guardian_log_warning ( const char *format, ...);
+        guardian_log_warning (const char *format,...);
 
 void
-guardian_log_notice ( const char *format, ...);
+        guardian_log_notice (const char *format,...);
 
 void
-guardian_log_info ( const char *format, ...);
+        guardian_log_info (const char *format,...);
 
 void
-guardian_log_debug ( const char *format, ...);
-
+        guardian_log_debug (const char *format,...);
 #endif

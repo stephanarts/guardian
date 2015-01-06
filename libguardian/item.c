@@ -42,22 +42,25 @@
 
 #include <arpa/inet.h>
 
-#include <openssl/sha.h>
+#include <time.h>
 
 
 #include "error.h"
+#include "log.h"
 #include "types.h"
 #include "itemtype.h"
 #include "item.h"
 
 struct _GuardianItem
 {
-    char *name;
+    char   *name;
     GuardianItemType type;
 
-    int interval;
-    int active;
-    int remote;
+    int     interval;
+    int     active;
+    int     remote;
+
+    time_t  last_update;
 };
 
 GuardianItem *
@@ -69,9 +72,11 @@ guardian_item_new (
         int remote,
         GuardianError **error)
 {
-    GuardianItem *item = (GuardianItem *)malloc (sizeof (GuardianItem));
+    GuardianItem *item = (GuardianItem *) malloc (sizeof (GuardianItem));
 
-    guardian_log_debug("New Item: %s", name);
+    guardian_log_debug ("New Item: %s", name);
+
+    item->last_update = -1;
 
     return item;
 }
@@ -80,28 +85,56 @@ void
 guardian_items_init ()
 {
     guardian_item_new (
-        "cpu.load.avg[1]",
-        GUARDIAN_ITEMTYPE_DOUBLE,
-        30,
-        TRUE,
-        FALSE,
-        NULL);
+            "cpu.load.avg[1]",
+            GUARDIAN_ITEMTYPE_DOUBLE,
+            30,
+            TRUE,
+            FALSE,
+            NULL);
 
     guardian_item_new (
-        "cpu.load.avg[5]",
-        GUARDIAN_ITEMTYPE_DOUBLE,
-        30,
-        TRUE,
-        FALSE,
-        NULL);
+            "cpu.load.avg[5]",
+            GUARDIAN_ITEMTYPE_DOUBLE,
+            30,
+            TRUE,
+            FALSE,
+            NULL);
 
     guardian_item_new (
-        "cpu.load.avg[15]",
-        GUARDIAN_ITEMTYPE_DOUBLE,
-        30,
-        TRUE,
-        FALSE,
-        NULL);
+            "cpu.load.avg[15]",
+            GUARDIAN_ITEMTYPE_DOUBLE,
+            30,
+            TRUE,
+            FALSE,
+            NULL);
 
-    //guardian_db_get_items();
+    //guardian_db_get_items ();
+}
+
+int
+guardian_item_get_interval (GuardianItem * item)
+{
+    return item->interval;
+}
+
+void
+guardian_item_set_interval (
+        GuardianItem * item,
+        int interval)
+{
+    item->interval = interval;
+}
+
+time_t
+guardian_item_get_last_update (GuardianItem * item)
+{
+    return item->last_update;
+}
+
+void
+guardian_item_set_last_update (
+        GuardianItem * item,
+        time_t last_update)
+{
+    item->last_update = last_update;
 }

@@ -38,7 +38,7 @@ typedef struct _GuardianError GuardianError;
 
 GuardianError *
 guardian_error_new (
-        char *format, ...);
+        char *format,...);
 
 const char *
 guardian_error_get_msg (
@@ -46,5 +46,4 @@ guardian_error_get_msg (
 void
 guardian_error_free (
         GuardianError *error);
-
 #endif

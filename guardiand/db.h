@@ -28,10 +28,10 @@
  */
 
 void
-guardian_db_init(void);
+        guardian_db_init (void);
 
 void
-guardian_db_close(void);
+        guardian_db_close (void);
 
 void
-guardian_db_insert_entry (void);
+        guardian_db_insert_entry (void);

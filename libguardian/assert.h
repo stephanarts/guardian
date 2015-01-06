@@ -35,12 +35,11 @@
 #define __GUARDIAN_ASSERT_H__
 
 void
-guardian_assert_warning ( char *msg );
+        guardian_assert_warning (char *msg);
 
 void
-guardian_assert_critical ( char *msg );
+        guardian_assert_critical (char *msg);
 
 void
-guardian_set_fatal_asserts ( int fatal );
-
-#endif /* __GUARDIAN_ASSERT_H__ */
+        guardian_set_fatal_asserts (int fatal);
+#endif                          /* __GUARDIAN_ASSERT_H__ */

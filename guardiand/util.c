@@ -40,12 +40,12 @@
 #endif
 
 
-char *
+char   *
 guardian_strncpy (char *dst, const char *src, size_t n)
 {
-    char *s = dst;
+    char   *s = dst;
 
-    size_t i = 0;
+    size_t  i = 0;
     while (i < n && src[i] != '\0')
     {
         dst[i] = src[i];

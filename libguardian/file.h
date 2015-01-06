@@ -33,24 +33,24 @@
 typedef struct _GuardianFile GuardianFile;
 
 GuardianFile *
-guardian_file_new(const char *path);
+        guardian_file_new (const char *path);
 
 int
 guardian_file_verify (
-        GuardianFile *file,
+        GuardianFile * file,
         size_t st_size,
         const unsigned char *hash);
 
 int
 guardian_file_get_hash (
-        GuardianFile *file,
-        size_t *st_size,
+        GuardianFile * file,
+        size_t * st_size,
         unsigned char **hash);
 
 int
 guardian_file_read (
-        GuardianFile *file,
+        GuardianFile * file,
         size_t size,
-        void   *buffer,
+        void *buffer,
         GuardianError **error);
 #endif

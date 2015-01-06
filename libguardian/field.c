@@ -50,29 +50,29 @@
 #include "sourcetype.h"
 #include "field.h"
 
-static size_t          n_fields;
+static size_t n_fields;
 static GuardianField **fields;
 
 struct _GuardianFieldEntry
 {
     GuardianEntry *entry;
-    int            len;
-    char          *data;
+    int     len;
+    char   *data;
 };
 
 struct _GuardianField
 {
-    char                *name;
-    comparison_fn_t      comp_func;
+    char   *name;
+    comparison_fn_t comp_func;
 
     GuardianFieldEntry **base;
-    size_t               nmemb;
+    size_t  nmemb;
 
-    pthread_mutex_t	 mutex;
-}; 
+    pthread_mutex_t mutex;
+};
 
 static int
-_guardian_field_compare_name ( const GuardianField *a, const GuardianField *b )
+_guardian_field_compare_name (const GuardianField * a, const GuardianField * b)
 {
     return strcmp (a->name, b->name);
 }
@@ -80,11 +80,11 @@ _guardian_field_compare_name ( const GuardianField *a, const GuardianField *b )
 GuardianField *
 guardian_field_register (
         char *name,
-        comparison_fn_t comp_func )
+        comparison_fn_t comp_func)
 {
-    int i;
-    GuardianField **_fields = (GuardianField **)(malloc (sizeof(GuardianField *)*n_fields+1));
-    GuardianField *field = (GuardianField *)malloc (sizeof(GuardianField));
+    int     i;
+    GuardianField **_fields = (GuardianField **) (malloc (sizeof (GuardianField *) * n_fields + 1));
+    GuardianField *field = (GuardianField *) malloc (sizeof (GuardianField));
     field->name = name;
     field->comp_func = comp_func;
 
@@ -119,15 +119,15 @@ guardian_field_register (
  * @Return: the corresponding GuardianField, or NULL.
  */
 GuardianField *
-guardian_field_lookup ( const char *name )
+guardian_field_lookup (const char *name)
 {
-    int i_max = n_fields - 1;
-    int i_min = 0;
-    int i_mid;
-    int r;
+    int     i_max = n_fields - 1;
+    int     i_min = 0;
+    int     i_mid;
+    int     r;
     GuardianField *ptr;
 
-    while (i_max >= i_min )
+    while (i_max >= i_min)
     {
         i_mid = (i_min + i_max) / 2;
 
@@ -166,19 +166,19 @@ guardian_field_lookup ( const char *name )
  */
 void
 guardian_field_add_entry (
-        GuardianField *field,
-        GuardianEntry *entry,
-        size_t         len,
-        char          *data )
+        GuardianField * field,
+        GuardianEntry * entry,
+        size_t len,
+        char *data)
 {
     GuardianFieldEntry **entries;
-    GuardianFieldEntry *f_entry = (GuardianFieldEntry *)malloc (sizeof (GuardianFieldEntry));
-    int i = 0;
+    GuardianFieldEntry *f_entry = (GuardianFieldEntry *) malloc (sizeof (GuardianFieldEntry));
+    int     i = 0;
 
     /** Initialise the field_entry object */
     f_entry->entry = entry;
     f_entry->len = len;
-    f_entry->data = (char *)malloc(len*sizeof(char));
+    f_entry->data = (char *)malloc (len * sizeof (char));
     strncpy (f_entry->data, data, len);
 
     /** Lock the field */
@@ -194,7 +194,7 @@ guardian_field_add_entry (
 
     for (; i < field->nmemb; ++i)
     {
-        entries[i+1] = field->base[i];
+        entries[i + 1] = field->base[i];
     }
 
     free (field->base);

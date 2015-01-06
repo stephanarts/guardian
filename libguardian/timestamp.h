@@ -35,24 +35,23 @@
 #define __GUARDIAN_TIMESTAMP_H__
 
 int
-guardian_timestamp_init(void);
+        guardian_timestamp_init (void);
 
 int
 guardian_register_timestamp (
-    const char *format,
-    const char *name);
+        const char *format,
+        const char *name);
 
 int
 guardian_find_timestamp (
-    char   *buffer,
-    size_t *len,
-    int     hint);
+        char *buffer,
+        size_t * len,
+        int hint);
 
 int
 guardian_extract_timestamp (
-    const char *buffer,
-    size_t      len,
-    int         hint,
-    struct tm  *timeptr);
-
-#endif /* __GUARDIAN_TIMESTAMP_H__ */
+        const char *buffer,
+        size_t len,
+        int hint,
+        struct tm *timeptr);
+#endif                          /* __GUARDIAN_TIMESTAMP_H__ */

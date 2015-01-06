@@ -2,10 +2,10 @@ bin_PROGRAMS = guardian
 
 guardian_SOURCES = \
     guardian.c \
-    shell.c \
-    interactive_menu.c \
-    search_dialog.c \
-    timeframe_dialog.c
+    shell.c shell.h \
+    interactive_menu.c interactive_menu.h \
+    search_dialog.c search_dialog.h \
+    timeframe_dialog.c timeframe_dialog.h
 
 guardian_LDADD = \
     $(PCRE_LIBS) \

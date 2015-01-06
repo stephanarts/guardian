@@ -3,6 +3,7 @@
 *.la
 *.log
 *.trs
+*.BAK
 .*.swp
 .deps
 .libs

@@ -60,7 +60,8 @@
 
 static void *_ctx = NULL;
 
-static void msg_free (void *data, void *hint)
+static void
+msg_free (void *data, void *hint)
 {
     free (data);
 }
@@ -68,67 +69,70 @@ static void msg_free (void *data, void *hint)
 static void *
 _guardian_worker_thread (void *arg)
 {
-    char msg[256];
-    void *socket;
-    void *d_socket;
-    int ret = 0;
-    int timeout = 0;
+    char    msg[256];
+    void   *socket;
+    void   *d_socket;
+    int     ret = 0;
+    int     timeout = 0;
     zmq_msg_t n_entries_message;
 
-    socket = zmq_socket(_ctx, ZMQ_REQ);
-    d_socket = zmq_socket(_ctx, ZMQ_REQ);
-    zmq_connect(socket, "inproc://workers");
-    zmq_connect(d_socket, "inproc://data-processor");
-    while(1) {
-        //printf(".");
-        zmq_send(socket, "GET-COMMAND\n\0", 13, 0);
-        zmq_recv(socket, msg, 255, 100);
+    socket = zmq_socket (_ctx, ZMQ_REQ);
+    d_socket = zmq_socket (_ctx, ZMQ_REQ);
+    zmq_connect (socket, "inproc://workers");
+    zmq_connect (d_socket, "inproc://data-processor");
+    while (1)
+    {
+        //printf (".");
+        zmq_send (socket, "GET-COMMAND\n\0", 13, 0);
+        zmq_recv (socket, msg, 255, 100);
 
-        //guardian_log_info("..'%s'\n", msg);
-        ret = sscanf(msg, "WAIT[%d]", &timeout);
-        if (ret == 1) {
-            guardian_log_info("WORKER SLEEP\n");
-            sleep(timeout);
+        //guardian_log_info ("..'%s'\n", msg);
+        ret = sscanf (msg, "WAIT[%d]", &timeout);
+        if (ret == 1)
+        {
+            guardian_log_info ("WORKER SLEEP\n");
+            sleep (timeout);
             continue;
         }
-        ret = sscanf(msg, "PROCESS");
-        if (ret == 1) {
-            void *data;
-            data = malloc(sizeof(int));
+        ret = sscanf (msg, "PROCESS");
+        if (ret == 1)
+        {
+            void   *data;
+            data = malloc (sizeof (int));
             *((int *)data) = (int)0xA;
             zmq_msg_init_data (
-                &n_entries_message,
-                data,
-                sizeof(int),
-                msg_free,
-                NULL);
+                    &n_entries_message,
+                    data,
+                    sizeof (int),
+                    msg_free,
+                    NULL);
             zmq_msg_send (&n_entries_message, d_socket, 0);
 
-            zmq_recv(d_socket, msg, 255, 100);
+            zmq_recv (d_socket, msg, 255, 100);
 
-            sprintf(msg, "FINISH%n", &ret);
-            zmq_send(socket, msg, ret, 0);
-            zmq_recv(socket, msg, 255, 100);
+            sprintf (msg, "FINISH%n", &ret);
+            zmq_send (socket, msg, ret, 0);
+            zmq_recv (socket, msg, 255, 100);
 
-            guardian_log_info("PROCESS SOURCE DONE\n");
+            guardian_log_info ("PROCESS SOURCE DONE\n");
         }
     }
-    pthread_exit(NULL);
+    pthread_exit (NULL);
 }
 
 
 int
 guardian_worker_thread_new (
-        pthread_t *thread,
+        pthread_t * thread,
         void *ctx)
 {
-    if(_ctx == NULL)
+    if (_ctx == NULL)
         _ctx = ctx;
     pthread_create (
-        thread,
-        NULL,
-        _guardian_worker_thread,
-        NULL);
+            thread,
+            NULL,
+            _guardian_worker_thread,
+            NULL);
 
     return 0;
 }

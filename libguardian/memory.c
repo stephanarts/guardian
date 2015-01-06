@@ -36,21 +36,22 @@
 
 static int allow_malloc = 1;
 
-void *
-guardian_new ( size_t nmemb, size_t size)
+void   *
+guardian_new (size_t nmemb, size_t size)
 {
+
 #ifdef ENABLE_ASSERT
-    if ( allow_malloc != 1 )
+    if (allow_malloc != 1)
     {
         guardian_assert_critical ("Dynamic memory allocation is not allowed");
     }
-#endif /* ENABLE_ASSERT */
+#endif                          /* ENABLE_ASSERT */
 
     return calloc (nmemb, size);
 }
 
 void
-guardian_set_allow_malloc ( int allow )
+guardian_set_allow_malloc (int allow)
 {
     allow_malloc = allow;
 }

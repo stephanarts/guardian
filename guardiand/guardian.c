@@ -72,7 +72,8 @@
 #include "scheduler.h"
 #include "db.h"
 
-enum {
+enum
+{
     OPTION_VERSION = 0,
     OPTION_VERBOSE,
     OPTION_HELP,
@@ -83,9 +84,9 @@ enum {
  * Command-line options *
  ************************/
 static struct option long_options[] = {
-    {"version", 0, 0, 'V'}, /* OPTION_VERSION */
-    {"help",    0, 0, 'h'}, /* OPTION_HELP    */
-    {"fatal-warnings", 0, 0, 0}, /* OPTION_FATAL_WARNINGS */
+    {"version", 0, 0, 'V'},     /* OPTION_VERSION */
+    {"help", 0, 0, 'h'},        /* OPTION_HELP    */
+    {"fatal-warnings", 0, 0, 0},/* OPTION_FATAL_WARNINGS */
     {0, 0, 0, 0}
 };
 
@@ -118,18 +119,18 @@ process_signal (int s)
 {
     switch (s)
     {
-        case SIGINT:
-            /**
-             * Let's ignore further instances of SIGINT.
-             */
-            signal (SIGINT, SIG_IGN);
-            guardian_scheduler_main_quit ();
-            break;
-        case SIGTERM:
-            guardian_scheduler_main_quit ();
-            break;
-        default:
-            break;
+    case SIGINT:
+        /**
+         * Let's ignore further instances of SIGINT.
+         */
+        signal (SIGINT, SIG_IGN);
+        guardian_scheduler_main_quit ();
+        break;
+    case SIGTERM:
+        guardian_scheduler_main_quit ();
+        break;
+    default:
+        break;
     }
     return;
 }
@@ -144,27 +145,27 @@ process_signal (int s)
 int
 main (int argc, char **argv)
 {
-    int option_index = 0;
-    int c = 0;
-    int verbosity = 0;
-    int log_level = 0;
+    int     option_index = 0;
+    int     c = 0;
+    int     verbosity = 0;
+    int     log_level = 0;
     GuardianError *error = NULL;
 
-    DIR *plugin_dir = NULL;
+    DIR    *plugin_dir = NULL;
     struct dirent *dirp;
-    int i = 0;
+    int     i = 0;
 
-    int n_workers = 2;
+    int     n_workers = 2;
 
-    char plugin_path[1024];
+    char    plugin_path[1024];
 
     struct sigaction sa;
 
-    void *ctx = zmq_ctx_new();
+    void   *ctx = zmq_ctx_new ();
 
     sa.sa_handler = process_signal;
     sa.sa_flags = SA_RESTART;
-    sigemptyset(&sa.sa_mask);
+    sigemptyset (&sa.sa_mask);
 
     sigaction (SIGINT, &sa, NULL);
     sigaction (SIGTERM, &sa, NULL);
@@ -176,79 +177,81 @@ main (int argc, char **argv)
     while (1)
     {
         c = getopt_long (argc, argv, "vVh",
-                    long_options, &option_index);
+                long_options, &option_index);
         if (c == -1)
             break;
 
         switch (c)
         {
-            case 0:
-                switch (option_index)
-                {
-                    case OPTION_VERSION:
-                        show_version();
-                        exit(0);
-                        break;
-                    case OPTION_HELP:
-                        show_usage();
-                        exit(0);
-                        break;
-                    case OPTION_FATAL_WARNINGS:
-                        guardian_set_fatal_asserts ( TRUE );
-                        break;
-                }
-                break;
-            case 'V':
+        case 0:
+            switch (option_index)
+            {
+            case OPTION_VERSION:
                 show_version ();
-                exit(0);
+                exit (0);
                 break;
-            case 'h':
-                show_usage();
-                exit(0);
+            case OPTION_HELP:
+                show_usage ();
+                exit (0);
                 break;
-            case 'v':
-                verbosity = verbosity + 1;
+            case OPTION_FATAL_WARNINGS:
+                guardian_set_fatal_asserts (TRUE);
                 break;
-            default:
-                fprintf(stderr, "Try '%s --help' for more information\n", PACKAGE_NAME);
-                exit(1);
-                break;
+            }
+            break;
+        case 'V':
+            show_version ();
+            exit (0);
+            break;
+        case 'h':
+            show_usage ();
+            exit (0);
+            break;
+        case 'v':
+            verbosity = verbosity + 1;
+            break;
+        default:
+            fprintf (stderr, "Try '%s --help' for more information\n", PACKAGE_NAME);
+            exit (1);
+            break;
         }
     }
 
     if (verbosity == 0)
     {
+
 #ifdef ENABLE_DEBUG
         guardian_log_init (1);
 #else
         guardian_log_init (0);
-#endif /* ENABLE_DEBUG */
+#endif                          /* ENABLE_DEBUG */
+
         switch (log_level)
         {
-            default:
+        default:
+
 #ifdef ENABLE_DEBUG
-                guardian_log_mask (GUARDIAN_LOG_DEBUG);
-                guardian_log_info ("Set logging level to 'DEBUG'");
+            guardian_log_mask (GUARDIAN_LOG_DEBUG);
+            guardian_log_info ("Set logging level to 'DEBUG'");
 #else
-                guardian_log_mask (log_level);
-                guardian_log_info ("Set logging level to '...'");
-#endif /* ENABLE_DEBUG */
+            guardian_log_mask (log_level);
+            guardian_log_info ("Set logging level to '...'");
+#endif                          /* ENABLE_DEBUG */
         }
-    }
-    else
+    } else
     {
         guardian_log_init (1);
 
         switch (verbosity)
         {
-            case 1:
-                guardian_log_mask (GUARDIAN_LOG_INFO);
-                guardian_log_info ("Set logging level to 'INFO'");
-                break;
-            case 2:
-                guardian_log_mask (GUARDIAN_LOG_DEBUG);
-                guardian_log_info ("Set logging level to 'DEBUG'");
-                break;
+        case 1:
+            guardian_log_mask (GUARDIAN_LOG_INFO);
+            guardian_log_info ("Set logging level to 'INFO'");
+            break;
+        case 2:
+            guardian_log_mask (GUARDIAN_LOG_DEBUG);
+            guardian_log_info ("Set logging level to 'DEBUG'");
+            break;
         }
     }
 
@@ -261,14 +264,14 @@ main (int argc, char **argv)
     /**
      * Load settings from file
      */
-    settings = guardian_settings_load (SYSCONFDIR"/guardian.conf", NULL);
+    settings = guardian_settings_load (SYSCONFDIR "/guardian.conf", NULL);
 
     guardian_settings_get (settings, "key");
-    
+
     /**
      * Load all plugins from PLUGINDIR
      */
-    plugin_dir = opendir (PLUGINDIR);   
+    plugin_dir = opendir (PLUGINDIR);
     if (plugin_dir != NULL)
     {
         while ((dirp = readdir (plugin_dir)) != NULL)
@@ -277,8 +280,7 @@ main (int argc, char **argv)
             if (i < 0)
             {
                 /* An error occurred */
-            }
-            else
+            } else
             {
                 if (i > 1023)
                 {
@@ -286,32 +288,30 @@ main (int argc, char **argv)
                     guardian_log_warning (
                             "Can not load plugin, "
                             "plugin-path exceeds 1024 bytes");
-                }
-                else
+                } else
                 {
                     /**
                      * Only load .so files, the rest can't be a plugin.
                      */
-                    if (strcmp (&plugin_path[i-3], ".so") == 0)
+                    if (strcmp (&plugin_path[i - 3], ".so") == 0)
                     {
                         plugin = guardian_plugin_load (
                                 plugin_path,
-                                &error );
+                                &error);
 
-                        if ( plugin == NULL && error)
+                        if (plugin == NULL && error)
                         {
                             guardian_log_warning (
                                     "%s",
                                     guardian_error_get_msg (error));
                             guardian_error_free (error);
                             error = NULL;
-                        }
-                        else
+                        } else
                         {
-                            guardian_log_info(
+                            guardian_log_info (
                                     "Load plugin: %s\n",
                                     plugin_path);
-                            //guardian_plugin_register_types ( plugin );
+                            //guardian_plugin_register_types (plugin);
                         }
                     }
                 }
@@ -321,17 +321,17 @@ main (int argc, char **argv)
 
 #ifdef ENABLE_DEBUG
     /** Do not allow further dynamic memory allocation */
-    guardian_set_allow_malloc(FALSE);
-#endif /* ENABLE_DEBUG */
+    guardian_set_allow_malloc (FALSE);
+#endif                          /* ENABLE_DEBUG */
 
-    guardian_db_init();
+    guardian_db_init ();
 
     /** Start the main loop */
-    guardian_scheduler_main ( ctx, n_workers );
+    guardian_scheduler_main (ctx, n_workers);
 
-    guardian_db_close();
+    guardian_db_close ();
 
-    //zmq_ctx_term(ctx);
+    //zmq_ctx_term (ctx);
 
     exit (0);
 }

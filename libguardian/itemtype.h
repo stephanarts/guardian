@@ -30,11 +30,11 @@
 #ifndef __GUARDIAN_ITEMTYPE_H__
 #define __GUARDIAN_ITEMTYPE_H__
 
-typedef enum {
+typedef enum
+{
     GUARDIAN_ITEMTYPE_UNKNOWN = 0,
     GUARDIAN_ITEMTYPE_STRING,
     GUARDIAN_ITEMTYPE_INT,
     GUARDIAN_ITEMTYPE_DOUBLE
-} GuardianItemType;
-
+}       GuardianItemType;
 #endif

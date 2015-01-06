@@ -44,33 +44,31 @@
 static int syslog_opened = 0;
 
 void
-guardian_log_init ( int perror )
+guardian_log_init (int perror)
 {
-    if ( syslog_opened == 1 )
+    if (syslog_opened == 1)
     {
         guardian_assert_critical ("Syslog already initialised");
     }
-
-    if ( perror == 1 )
+    if (perror == 1)
     {
-        openlog(PACKAGE_NAME, LOG_PID | LOG_PERROR, LOG_DAEMON);
-    }
-    else
+        openlog (PACKAGE_NAME, LOG_PID | LOG_PERROR, LOG_DAEMON);
+    } else
     {
-        openlog(PACKAGE_NAME, LOG_PID, LOG_DAEMON);
+        openlog (PACKAGE_NAME, LOG_PID, LOG_DAEMON);
     }
 
     syslog_opened = 1;
 }
 
 void
-guardian_log_mask ( int mask )
+guardian_log_mask (int mask)
 {
-    setlogmask (LOG_UPTO(mask));
+    setlogmask (LOG_UPTO (mask));
 }
 
 void
-guardian_log_alert ( const char *format, ... )
+guardian_log_alert (const char *format,...)
 {
     va_list arg;
 
@@ -82,7 +80,7 @@ guardian_log_alert ( const char *format, ... )
 }
 
 void
-guardian_log_critical ( const char *format, ... )
+guardian_log_critical (const char *format,...)
 {
     va_list arg;
 
@@ -94,7 +92,7 @@ guardian_log_critical ( const char *format, ... )
 }
 
 void
-guardian_log_error ( const char *format, ... )
+guardian_log_error (const char *format,...)
 {
     va_list arg;
 
@@ -106,7 +104,7 @@ guardian_log_error ( const char *format, ... )
 }
 
 void
-guardian_log_warning ( const char *format, ... )
+guardian_log_warning (const char *format,...)
 {
     va_list arg;
 
@@ -118,7 +116,7 @@ guardian_log_warning ( const char *format, ... )
 }
 
 void
-guardian_log_notice ( const char *format, ... )
+guardian_log_notice (const char *format,...)
 {
     va_list arg;
 
@@ -130,7 +128,7 @@ guardian_log_notice ( const char *format, ... )
 }
 
 void
-guardian_log_info ( const char *format, ... )
+guardian_log_info (const char *format,...)
 {
     va_list arg;
 
@@ -142,7 +140,7 @@ guardian_log_info ( const char *format, ... )
 }
 
 void
-guardian_log_debug ( const char *format, ... )
+guardian_log_debug (const char *format,...)
 {
     va_list arg;
 

@@ -36,5 +36,4 @@
 
 #define FALSE 0
 #define TRUE  1
-
-#endif /* __GUARDIAN_TYPES_H__ */
+#endif                          /* __GUARDIAN_TYPES_H__ */

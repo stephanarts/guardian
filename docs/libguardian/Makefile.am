@@ -1,4 +1,4 @@
-EXTRA_DIST = libguardian.conf html
+EXTRA_DIST = libguardian.conf 
 
 docdir = $(datadir)/docs/libguardian/
 

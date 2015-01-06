@@ -10,6 +10,6 @@
 #include <libguardian/libguardian.h>
 
 void
-libguardian_init ( void )
+libguardian_init (void)
 {
 }

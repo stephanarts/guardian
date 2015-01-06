@@ -52,21 +52,25 @@
 
 #include "shell.h"
 
-static int  silent_shell = 0;
-static int  shell_open = 0;
-static int  line_nr = 0;
+static int silent_shell = 0;
+static int shell_open = 0;
+static int line_nr = 0;
 static char prompt[100];
 
 static char *
-print_prompt(EditLine *el)
+print_prompt (EditLine * el)
 {
-    if (silent_shell == 1) {
-        sprintf(prompt, "");
-    } else {
-        if (shell_open == 1) {
-            sprintf(prompt, " ");
-        } else {
-            sprintf(prompt, "%d> ", line_nr);
+    if (silent_shell == 1)
+    {
+        sprintf (prompt, "");
+    } else
+    {
+        if (shell_open == 1)
+        {
+            sprintf (prompt, " ");
+        } else
+        {
+            sprintf (prompt, "%d> ", line_nr);
         }
     }
     return prompt;
@@ -77,43 +81,41 @@ show_shell (int silent)
 {
     EditLine *el = NULL;
     Tokenizer *t = NULL;
-    int n_tokens = 0;
+    int     n_tokens = 0;
     const char **tokens = NULL;
 
     silent_shell = silent;
 
     /*
-     * Separators:
-     *   <tab> 
-     *   <newline>
-     *   <space>
+     * Separators: <tab> <newline> <space>
      */
-    t = tok_init(NULL);
+    t = tok_init (NULL);
 
-    el = el_init(
-        "guardian",
-        stdin,
-        stdout,
-        stderr);
+    el = el_init (
+            "guardian",
+            stdin,
+            stdout,
+            stderr);
 
-    el_set(el,EL_PROMPT, print_prompt);
+    el_set (el, EL_PROMPT, print_prompt);
 
-    if (silent == 0) {
-        fprintf(stderr, "+------------------------------------+\n");
-        fprintf(stderr, "| Guardian Interactive Shell         |\n");
-        fprintf(stderr, "| Copyright 2012-2014 - Stephan Arts |\n");
-        fprintf(stderr, "| Licensed under the BSD License     |\n");
-        fprintf(stderr, "+------------------------------------+\n");
+    if (silent == 0)
+    {
+        fprintf (stderr, "+------------------------------------+\n");
+        fprintf (stderr, "| Guardian Interactive Shell         |\n");
+        fprintf (stderr, "| Copyright 2012-2014 - Stephan Arts |\n");
+        fprintf (stderr, "| Licensed under the BSD License     |\n");
+        fprintf (stderr, "+------------------------------------+\n");
     }
+    while (1)
+    {
 
-    while(1) {
-
-        el_gets(el, NULL);
+        el_gets (el, NULL);
 
         shell_open = 1;
 
-        const LineInfo *li = el_line(el);
-        int i = tok_line (
+        const LineInfo *li = el_line (el);
+        int     i = tok_line (
                 t,
                 li,
                 &n_tokens,
@@ -121,42 +123,44 @@ show_shell (int silent)
                 NULL,
                 NULL);
 
-        if (i == 0) {
+        if (i == 0)
+        {
 
             /*
-            printf("---\n");
-            for (i = 0;  i < n_tokens; ++i) {
-                printf(" > %s\n", tokens[i]);
-            }
-            printf("---\n");
-            */
+             * printf("---\n"); for (i = 0;  i < n_tokens; ++i) { printf(" >
+             * %s\n", tokens[i]); } printf("---\n");
+             */
 
-            tok_reset(t);
+            tok_reset (t);
             line_nr++;
             shell_open = 0;
 
             /* EXIT */
-            if (n_tokens == 1 && 0 == strcmp(tokens[0], "exit")) {
+            if (n_tokens == 1 && 0 == strcmp (tokens[0], "exit"))
+            {
                 break;
             }
-
             /* Search */
-            if (!strcmp(tokens[0], "Q") || !strcmp(tokens[0], "query")) {
-                printf("Search...\n");
+            if (!strcmp (tokens[0], "Q") || !strcmp (tokens[0], "query"))
+            {
+                printf ("Search...\n");
             }
-
             /* Set */
-            if (!strcmp(tokens[0], "set")) {
-                printf("Set...\n");
-                if (n_tokens == 1) {
-                    printf("ERR: no key/value\n");
+            if (!strcmp (tokens[0], "set"))
+            {
+                printf ("Set...\n");
+                if (n_tokens == 1)
+                {
+                    printf ("ERR: no key/value\n");
                     continue;
                 }
-                printf("A");
+                printf ("A");
             }
-        } else {
-            if (i < 0) {
-                tok_reset(t);
+        } else
+        {
+            if (i < 0)
+            {
+                tok_reset (t);
                 line_nr++;
                 shell_open = 0;
             }

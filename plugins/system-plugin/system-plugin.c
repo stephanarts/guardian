@@ -39,53 +39,51 @@
 #include <stdio.h>
 #endif
 
-#include <openssl/sha.h>
-
 #include <string.h>
 
 #include <pcre.h>
 
 #include <errno.h>
 
+#include <time.h>
+
 #include <sys/stat.h>
 
 #include <stdarg.h>
 #include <libguardian/libguardian.h>
 
+#define PLUGIN_NAME "system-plugin"
+
 GuardianPlugin *
 guardian_plugin_init ()
 {
-    const char *errors = NULL;
-    int err_offset;
-    GuardianPlugin *plugin;
+    const char      *errors = NULL;
+    GuardianPlugin  *plugin;
+    GuardianItem    *item = NULL;
 
     guardian_log_info("Initialise system plugin");
 
     plugin = guardian_new (sizeof (GuardianPlugin), 1);
 
-    guardian_item_new (
+    item = guardian_item_new (
         "cpu.load.avg[1]",
         GUARDIAN_ITEMTYPE_DOUBLE,
         30,
         TRUE,
         FALSE,
         NULL);
-
-    guardian_item_new (
-        "cpu.load.avg[5]",
-        GUARDIAN_ITEMTYPE_DOUBLE,
-        30,
-        TRUE,
-        FALSE,
-        NULL);
-
-    guardian_item_new (
-        "cpu.load.avg[15]",
-        GUARDIAN_ITEMTYPE_DOUBLE,
-        30,
-        TRUE,
-        FALSE,
-        NULL);
+    if (item == NULL) {
+        guardian_log_error(
+                "Plugin '%s': Could not create Item '%s'.",
+                PLUGIN_NAME,
+                "cpu.load.avg[1]");
+    }
 
     return plugin;
+}
+
+static void
+guardian_plugin_item_update (
+        GuardianItem *item)
+{
 }

@@ -40,10 +40,9 @@ guardian_settings_load (
 const char *
 guardian_settings_get (
         GuardianSettings *,
-        const char *key );
+        const char *key);
 
 void
 guardian_settings_free (
         GuardianSettings *);
-
 #endif

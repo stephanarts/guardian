@@ -28,6 +28,6 @@
  */
 
 void
-show_timeframe_dialog (WINDOW *parent, int x, int y);
+        show_timeframe_dialog (WINDOW *parent, int x, int y);
 int
-timeframe_dialog_input(void);
+        timeframe_dialog_input (void);

@@ -30,7 +30,6 @@
 #ifndef __GUARDIAN_UTIL_H__
 #define __GUARDIAN_UTIL_H__
 
-char *
-guardian_strncpy (char *dst, const char *src, size_t n);
-
+char   *
+        guardian_strncpy (char *dst, const char *src, size_t n);
 #endif

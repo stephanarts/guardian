@@ -52,64 +52,64 @@
 #include "plugin.h"
 
 void
-guardian_plugin_register_types ( GuardianPlugin *plugin )
+guardian_plugin_register_types (GuardianPlugin *plugin)
 {
-    if ( plugin->register_types != NULL )
+    if (plugin->register_types != NULL)
     {
-        plugin->register_types ( plugin );
+        plugin->register_types (plugin);
     }
 }
 
 void
 guardian_plugin_extract_fields (
         GuardianPlugin *plugin,
-        const char *entry )
+        const char *entry)
 {
-    if ( plugin->extract_fields != NULL )
+    if (plugin->extract_fields != NULL)
     {
-        plugin->extract_fields ( plugin, entry );
+        plugin->extract_fields (plugin, entry);
     }
 }
 
 GuardianPlugin *
 guardian_plugin_load (
         char *path,
-        GuardianError **error )
+        GuardianError **error)
 {
-    void *handle = NULL;
+    void   *handle = NULL;
     GuardianPlugin *plugin;
-    int error_sv;
-    char error_msg[200];
-    char *ld_error = NULL;
+    int     error_sv;
+    char    error_msg[200];
+    char   *ld_error = NULL;
 
-    GuardianPlugin *(*_plugin_init)(void);
+    GuardianPlugin *(*_plugin_init) (void);
 
-    handle = dlopen (path, RTLD_NOW );
+    handle = dlopen (path, RTLD_NOW);
     error_sv = errno;
 
-    if ( handle )
+    if (handle)
     {
         /**
          * Clear error string (if any)
          */
-        dlerror();
+        dlerror ();
 
         /**
          * Retrieve the init function, do not call it yet
          */
-        _plugin_init = ((GuardianPlugin *(*)())dlsym (handle, "guardian_plugin_init"));
+        _plugin_init = ((GuardianPlugin *(*) ())dlsym (handle, "guardian_plugin_init"));
 
         /**
          * Find out if anything goes wrong
          */
-        ld_error = dlerror();
+        ld_error = dlerror ();
         if (ld_error == NULL)
         {
             /**
              * Call the initialisor, and create the plugin-object
              */
-            plugin = _plugin_init();
-            if ( plugin != NULL )
+            plugin = _plugin_init ();
+            if (plugin != NULL)
             {
                 plugin->handle = handle;
 
@@ -117,11 +117,11 @@ guardian_plugin_load (
                 return plugin;
             }
         }
+    } else
+    {
+        ld_error = dlerror ();
     }
-    else {
-        ld_error = dlerror();
-    }
-    if ( error )
+    if (error)
     {
         /**
          * If something went wrong during the symbol-lookup proces.
@@ -129,17 +129,15 @@ guardian_plugin_load (
         if (ld_error != NULL)
         {
             *error = guardian_error_new ("DLOPEN: Can not load plugin: '%s'", ld_error);
-        }
-        else
+        } else
         {
             /**
              * If something went wrong during the dlopen() process
              */
-            if ( strerror_r (error_sv, error_msg, 200) == 0)
+            if (strerror_r (error_sv, error_msg, 200) == 0)
             {
                 *error = guardian_error_new ("Can not load plugin: '%s: %s'", path, error_msg);
-            }
-            else
+            } else
             {
                 /**
                  * If something else went wrong...
@@ -148,24 +146,23 @@ guardian_plugin_load (
             }
         }
     }
-
     return NULL;
 }
 
 void
 guardian_plugin_push_entry (
         GuardianPlugin *plugin,
-        const char *host, 
+        const char *host,
         const char *source,
         const char *timestamp,
         const char *entry)
 {
-    char msg[256];
+    char    msg[256];
 }
 
 void
 guardian_plugin_free (
-	GuardianPlugin *plugin)
+        GuardianPlugin *plugin)
 {
 
 }

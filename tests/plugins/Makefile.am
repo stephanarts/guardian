@@ -1,12 +1,9 @@
 EXTRA_DIST = $(TESTS)
 
 TESTS = \
-    missing-plugin.test \
-    httpd-plugin.test \
-    syslog-plugin.test
+    missing-plugin.test
 
-XFAIL_TESTS = \
-    httpd-plugin.test
+XFAIL_TESTS =
 
 check_PROGRAMS = plugin-loader
 

@@ -72,10 +72,11 @@
 #include "shell.h"
 
 #define SEARCH_BUFFER_SIZE 50
-char search_buffer[SEARCH_BUFFER_SIZE];
-int  search_cursor = 0;
+char    search_buffer[SEARCH_BUFFER_SIZE];
+int     search_cursor = 0;
 
-enum {
+enum
+{
     OPTION_VERSION = 0,
     OPTION_VERBOSE,
     OPTION_HELP,
@@ -89,12 +90,12 @@ enum {
  * Command-line options *
  ************************/
 static struct option long_options[] = {
-    {"version", 0, 0, 'V'},      /* OPTION_VERSION */
-    {"help",    0, 0, 'h'},      /* OPTION_HELP    */
-    {"fatal-warnings", 0, 0, 0}, /* OPTION_FATAL_WARNINGS */
-    {"host",    0, 0, 'H'},      /* OPTION_HOST    */
-    {"port",    0, 0, 'P'},      /* OPTION_PORT    */
-    {"silent",  0, 0, 's'},      /* OPTION_SILENT  */
+    {"version", 0, 0, 'V'},     /* OPTION_VERSION */
+    {"help", 0, 0, 'h'},        /* OPTION_HELP    */
+    {"fatal-warnings", 0, 0, 0},/* OPTION_FATAL_WARNINGS */
+    {"host", 0, 0, 'H'},        /* OPTION_HOST    */
+    {"port", 0, 0, 'P'},        /* OPTION_PORT    */
+    {"silent", 0, 0, 's'},      /* OPTION_SILENT  */
     {0, 0, 0, 0}
 };
 
@@ -140,80 +141,80 @@ show_usage ()
 int
 main (int argc, char **argv)
 {
-    int option_index = 0;
-    int c = 0;
-    int verbosity = 0;
-    int silent = 0;
+    int     option_index = 0;
+    int     c = 0;
+    int     verbosity = 0;
+    int     silent = 0;
 
     while (1)
     {
         c = getopt_long (argc, argv, "vVhiHPs",
-                    long_options, &option_index);
+                long_options, &option_index);
         if (c == -1)
             break;
 
         switch (c)
         {
-            case 0:
-                switch (option_index)
-                {
-                    case OPTION_VERSION:
-                        show_version();
-                        exit(0);
-                        break;
-                    case OPTION_HELP:
-                        show_usage();
-                        exit(0);
-                        break;
-                    case OPTION_FATAL_WARNINGS:
-                        break;
-                    case OPTION_HOST:
-                        break;
-                    case OPTION_PORT:
-                        break;
-                    case OPTION_SILENT:
-                        silent = 1;
-                        break;
-                }
-                break;
-            case 'V':
+        case 0:
+            switch (option_index)
+            {
+            case OPTION_VERSION:
                 show_version ();
-                exit(0);
+                exit (0);
                 break;
-            case 'h':
-                show_usage();
-                exit(0);
+            case OPTION_HELP:
+                show_usage ();
+                exit (0);
                 break;
-            case 'v':
-                verbosity = verbosity + 1;
+            case OPTION_FATAL_WARNINGS:
                 break;
-            case 'i':
-                show_interactive_menu();
-                exit(0);
+            case OPTION_HOST:
                 break;
-            case 'H':
-            case 'P':
+            case OPTION_PORT:
                 break;
-            case 's':
+            case OPTION_SILENT:
                 silent = 1;
                 break;
-            default:
-                fprintf(stderr, "Try '%s --help' for more information\n", argv[0]);
-                exit (1);
-                break;
+            }
+            break;
+        case 'V':
+            show_version ();
+            exit (0);
+            break;
+        case 'h':
+            show_usage ();
+            exit (0);
+            break;
+        case 'v':
+            verbosity = verbosity + 1;
+            break;
+        case 'i':
+            show_interactive_menu ();
+            exit (0);
+            break;
+        case 'H':
+        case 'P':
+            break;
+        case 's':
+            silent = 1;
+            break;
+        default:
+            fprintf (stderr, "Try '%s --help' for more information\n", argv[0]);
+            exit (1);
+            break;
         }
     }
 
-    int no_linger = 0;
-    void *ctx = zmq_ctx_new();
-    void *server = zmq_socket(ctx, ZMQ_REQ);
+    int     no_linger = 0;
+    void   *ctx = zmq_ctx_new ();
+    void   *server = zmq_socket (ctx, ZMQ_REQ);
 
-    zmq_connect(server, "tcp://0.0.0.0:5678");
-    
-    zmq_setsockopt(server, ZMQ_LINGER, &no_linger, sizeof(no_linger));
+    zmq_connect (server, "tcp://0.0.0.0:5678");
+
+    zmq_setsockopt (server, ZMQ_LINGER, &no_linger, sizeof (no_linger));
     zmq_close (server);
 
-    show_shell(silent);
+    show_shell (silent);
 
-    exit(0);
+    exit (0);
 }

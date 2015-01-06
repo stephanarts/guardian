@@ -51,40 +51,41 @@
 void
 show_timeframe_dialog (WINDOW *parent, int x, int y)
 {
-    WINDOW *win = subwin(parent, 5, 20, y, x); 
-    wborder(win, 0, 0, 0, 0, 0, 0, 0, 0);
-    wmove(win, 0, 2);
-    waddstr(win, "[ Timeframe ]");
+    WINDOW *win = subwin (parent, 5, 20, y, x);
+    wborder (win, 0, 0, 0, 0, 0, 0, 0, 0);
+    wmove (win, 0, 2);
+    waddstr (win, "[ Timeframe ]");
 
-    wmove(win, 1, 3);
-    waddstr(win, "1 hour");
-    wmove(win, 2, 1);
-    waddstr(win, "> 2 hours");
-    wmove(win, 3, 3);
-    waddstr(win, "8 hours");
+    wmove (win, 1, 3);
+    waddstr (win, "1 hour");
+    wmove (win, 2, 1);
+    waddstr (win, "> 2 hours");
+    wmove (win, 3, 3);
+    waddstr (win, "8 hours");
 
-    wmove(win, 4, 18);
-    waddch(win, 'v');
+    wmove (win, 4, 18);
+    waddch (win, 'v');
 }
 
 int
-timeframe_dialog_input(void)
+timeframe_dialog_input (void)
 {
-    int i = getch();
-    switch (i) {
+    int     i = getch ();
+    switch (i)
+    {
         /* Close window on ENTER */
-        case KEY_ENTER:
-        case '\r':
-        case '\n':
-            return 1;
-            break;
+    case KEY_ENTER:
+    case '\r':
+    case '\n':
+        return 1;
+        break;
         /* Reserve up and down for autocomplete (or something) */
-        case KEY_UP:
-        case KEY_DOWN:
-            break;
-        case KEY_RIGHT:
-        case KEY_LEFT:
-            break;
+    case KEY_UP:
+    case KEY_DOWN:
+        break;
+    case KEY_RIGHT:
+    case KEY_LEFT:
+        break;
     }
     return 0;
 }

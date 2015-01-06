@@ -52,11 +52,11 @@
 
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
-#endif /* HAVE_ZLIB_H */
+#endif                          /* HAVE_ZLIB_H */
 
 #ifdef HAVE_BZLIB_H
 #include <bzlib.h>
-#endif /* HAVE_BZLIB_H */
+#endif                          /* HAVE_BZLIB_H */
 
 
 #include <openssl/sha.h>
@@ -68,29 +68,30 @@
 
 struct _GuardianFile
 {
-    char *path;
-    FILE *stream;
+    char   *path;
+    FILE   *stream;
 
     /* Cached values to determine log rotation */
     struct timespec st_mtim;
-    ino_t st_ino;
-    off_t st_pos;
-    off_t st_size;
+    ino_t   st_ino;
+    off_t   st_pos;
+    off_t   st_size;
 };
 
 
 /** Allow DATA_BUFFER_SIZE to be overridden with compile-flags */
+
 #ifndef DATA_BUFFER_SIZE
 #define DATA_BUFFER_SIZE 1024
 #endif
 
 GuardianFile *
-guardian_file_new(const char *path)
+guardian_file_new (const char *path)
 {
-    GuardianFile *file = (GuardianFile *)guardian_new(1, sizeof(GuardianFile));
+    GuardianFile *file = (GuardianFile *) guardian_new (1, sizeof (GuardianFile));
 
-    file->path = guardian_new(1, strlen(path)+1);
-    strncpy(file->path, path, strlen(path));
+    file->path = guardian_new (1, strlen (path) + 1);
+    strncpy (file->path, path, strlen (path));
 
     file->stream = NULL;
 
@@ -99,65 +100,63 @@ guardian_file_new(const char *path)
 
 int
 guardian_file_verify (
-        GuardianFile *file,
+        GuardianFile * file,
         size_t st_size,
         const unsigned char *hash)
 {
     SHA_CTX sha_ctx;
 
-    int fd;
+    int     fd;
     struct stat buffer;
-    int error_sv;
+    int     error_sv;
 
-    char data_buffer[DATA_BUFFER_SIZE];
-    char *str_ptr = &data_buffer[0];
-    char *end_ptr = &data_buffer[DATA_BUFFER_SIZE-1];
-    char *ptr;
+    char    data_buffer[DATA_BUFFER_SIZE];
+    char   *str_ptr = &data_buffer[0];
+    char   *end_ptr = &data_buffer[DATA_BUFFER_SIZE - 1];
+    char   *ptr;
 
     unsigned char file_hash[20];
-    size_t _size;
-    int i = 0;
+    size_t  _size;
+    int     i = 0;
 
-    FILE *stream = NULL;
+    FILE   *stream = NULL;
 
     /**
      * Use a separate stream,
      * file->stream is reserved for read operations.
      */
-    stream = fopen(file->path, "r");
+    stream = fopen (file->path, "r");
 
     if (stream == NULL)
     {
         error_sv = errno;
         guardian_log_warning (
-            "Can not open file: %s:'%s'",
-            file->path,
-            strerror (error_sv));
+                "Can not open file: %s:'%s'",
+                file->path,
+                strerror (error_sv));
         return -1;
     }
-
     /* Read file statistics */
     fd = fileno (stream);
     fstat (fd, &buffer);
 
-    /* If the file is smaller then expected,
-     * it can't be the file we are looking for.
+    /*
+     * If the file is smaller then expected, it can't be the file we are
+     * looking for.
      */
     if (buffer.st_size < st_size)
     {
-        fclose(stream);
+        fclose (stream);
         return 2;
     }
-
     SHA1_Init (&sha_ctx);
 
     while (i < st_size)
     {
-        if (i+DATA_BUFFER_SIZE < st_size)
+        if (i + DATA_BUFFER_SIZE < st_size)
         {
             _size = fread (data_buffer, 1, DATA_BUFFER_SIZE, stream);
-        }
-        else
+        } else
         {
             _size = fread (data_buffer, 1, st_size - i, stream);
         }
@@ -168,51 +167,49 @@ guardian_file_verify (
 
     SHA1_Final ((unsigned char *)file_hash, &sha_ctx);
 
-    fclose(stream);
+    fclose (stream);
 
-    if(memcmp(file_hash, hash, 20))
+    if (memcmp (file_hash, hash, 20))
     {
         return 3;
     }
-
     return 0;
 }
 
 int
 guardian_file_get_hash (
-        GuardianFile *file,
-        size_t *st_size,
+        GuardianFile * file,
+        size_t * st_size,
         unsigned char **hash)
 {
     SHA_CTX sha_ctx;
 
-    int fd;
+    int     fd;
     struct stat buffer;
-    int error_sv;
+    int     error_sv;
 
-    char data_buffer[DATA_BUFFER_SIZE];
+    char    data_buffer[DATA_BUFFER_SIZE];
 
-    int i = 0;
-    size_t _size;
+    int     i = 0;
+    size_t  _size;
 
-    FILE *stream = NULL;
-    
+    FILE   *stream = NULL;
+
     /**
      * Use a separate stream,
      * file->stream is reserved for read operations.
      */
-    stream = fopen(file->path, "r");
+    stream = fopen (file->path, "r");
 
     if (stream == NULL)
     {
         error_sv = errno;
         guardian_log_warning (
-            "Can not open file: %s:'%s'",
-            file->path,
-            strerror (error_sv));
+                "Can not open file: %s:'%s'",
+                file->path,
+                strerror (error_sv));
         return -1;
     }
-
     /* Read file statistics */
     fd = fileno (stream);
     fstat (fd, &buffer);
@@ -223,11 +220,10 @@ guardian_file_get_hash (
 
     while (i < buffer.st_size)
     {
-        if (i+DATA_BUFFER_SIZE < buffer.st_size)
+        if (i + DATA_BUFFER_SIZE < buffer.st_size)
         {
             _size = fread (data_buffer, 1, DATA_BUFFER_SIZE, stream);
-        }
-        else
+        } else
         {
             _size = fread (data_buffer, 1, buffer.st_size - i, stream);
         }
@@ -238,121 +234,134 @@ guardian_file_get_hash (
 
     SHA1_Final ((unsigned char *)(*hash), &sha_ctx);
 
-    fclose(stream);
+    fclose (stream);
 
     return 0;
 }
 
 int
 guardian_file_read (
-        GuardianFile *file,
+        GuardianFile * file,
         size_t size,
-        void   *buffer,
-        GuardianError **error) {
+        void *buffer,
+        GuardianError **error)
+{
 
-    int fd;
+    int     fd;
     struct stat st_buffer;
-    size_t s = 0;
-    int error_sv;
+    size_t  s = 0;
+    int     error_sv;
 
-    /* If there is no stream, open one file for reading.
+    /*
+     * If there is no stream, open one file for reading.
      */
-    if (file->stream == NULL) {
-        file->stream = fopen(file->path, "r");
+    if (file->stream == NULL)
+    {
+        file->stream = fopen (file->path, "r");
 
-        /* Check if a stream could be opened.
+        /*
+         * Check if a stream could be opened.
          */
-        if (file->stream == NULL) {
-            /* If a pointer is provided to store
-             * an error object, put it there.
-             * Otherwise, log the error directly
-             * from the library.
+        if (file->stream == NULL)
+        {
+
+            /*
+             * If a pointer is provided to store an error object, put it
+             * there. Otherwise, log the error directly from the library.
              */
-            if (error) {
+            if (error)
+            {
                 *error = guardian_error_new (
-                    "Can not open file: %s:'%s'",
-                    file->path,
-                    strerror (error_sv));
-            } else {
+                        "Can not open file: %s:'%s'",
+                        file->path,
+                        strerror (error_sv));
+            } else
+            {
                 guardian_log_error (
-                    "Can not open file: %s:'%s'",
-                    file->path,
-                    strerror (error_sv));
+                        "Can not open file: %s:'%s'",
+                        file->path,
+                        strerror (error_sv));
             }
             return -1;
         }
 
-        /* Stat the file, this is needed to determine
-         * log-file rotation. But it can also be used
-         * for other things.
+        /*
+         * Stat the file, this is needed to determine log-file rotation. But
+         * it can also be used for other things.
          */
         fd = fileno (file->stream);
         fstat (fd, &st_buffer);
 
-        file->st_ino  = st_buffer.st_ino;   /* Inode */
-        file->st_size = st_buffer.st_size;  /* Size  */
-        file->st_mtim = st_buffer.st_mtim;  /* Modification-time */
-        file->st_pos  = 0;
+        file->st_ino = st_buffer.st_ino;        /* Inode */
+        file->st_size = st_buffer.st_size;      /* Size  */
+        file->st_mtim = st_buffer.st_mtim;      /* Modification-time */
+        file->st_pos = 0;
     }
-
     /* Read from the file */
     s = fread (buffer, 1, size, file->stream);
-    if (s < size) {
+    if (s < size)
+    {
 
-        /* If the EOF flag is set, check if the file is rotated
-         * or if we are simply waiting for data.
+        /*
+         * If the EOF flag is set, check if the file is rotated or if we are
+         * simply waiting for data.
          */
-        if (feof(file->stream)) {
-            clearerr(file->stream);
+        if (feof (file->stream))
+        {
+            clearerr (file->stream);
 
-            fd = open(file->path, O_RDONLY);
+            fd = open (file->path, O_RDONLY);
             fstat (fd, &st_buffer);
-            close(fd);
+            close (fd);
 
-            /* If the file is rotated, close the stream
-             * and open a new one on the rotated file.
+            /*
+             * If the file is rotated, close the stream and open a new one on
+             * the rotated file.
              */
-            if (st_buffer.st_ino != file->st_ino) {
-                /* TODO:
-                 * Find a better way to log this.
+            if (st_buffer.st_ino != file->st_ino)
+            {
+
+                /*
+                 * TODO: Find a better way to log this.
                  */
                 guardian_log_info (
                         "File INODE changed, "
                         "log-rotation expected. Opening new stream.");
 
-                fclose(file->stream);
+                fclose (file->stream);
 
-                file->stream = fopen(file->path, "r");
-                if (file->stream == NULL) {
+                file->stream = fopen (file->path, "r");
+                if (file->stream == NULL)
+                {
                     error_sv = errno;
 
-                    if (error) {
+                    if (error)
+                    {
                         *error = guardian_error_new (
+                                "Can not open file: %s:'%s'",
+                                file->path,
+                                strerror (error_sv));
+                    }
+                    guardian_log_error (
                             "Can not open file: %s:'%s'",
                             file->path,
                             strerror (error_sv));
-                    }
-                    guardian_log_error (
-                        "Can not open file: %s:'%s'",
-                        file->path,
-                        strerror (error_sv));
 
                     return -1;
                 }
-
                 fd = fileno (file->stream);
                 fstat (fd, &st_buffer);
 
-                file->st_ino  = st_buffer.st_ino;
+                file->st_ino = st_buffer.st_ino;
                 file->st_size = st_buffer.st_size;
                 file->st_mtim = st_buffer.st_mtim;
-                file->st_pos  = 0;
+                file->st_pos = 0;
             }
         }
-        if (ferror(file->stream)) {
-            guardian_log_warning("An error occurred while reading file.");
+        if (ferror (file->stream))
+        {
+            guardian_log_warning ("An error occurred while reading file.");
         }
     }
-
     return s;
 }

@@ -223,6 +223,8 @@ plugins/generator-plugin/Makefile
 plugins/system-plugin/Makefile
 tests/Makefile
 tests/libguardian/Makefile
+tests/guardian/Makefile
+tests/guardiand/Makefile
 tests/plugins/Makefile
 docs/Makefile
 docs/man/Makefile

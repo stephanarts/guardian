@@ -33,7 +33,7 @@
 #ifndef comparison_fn_t
 typedef int (*__compar_fn_t) (__const void *, __const void *);
 typedef __compar_fn_t comparison_fn_t;
-#endif 
+#endif
 
 typedef struct _GuardianFieldEntry GuardianFieldEntry;
 
@@ -42,16 +42,15 @@ typedef struct _GuardianField GuardianField;
 GuardianField *
 guardian_field_register (
         char *name,
-        comparison_fn_t comp_func );
+        comparison_fn_t comp_func);
 
 GuardianField *
-guardian_field_lookup ( const char *name );
+        guardian_field_lookup (const char *name);
 
 void
 guardian_field_add_entry (
-        GuardianField *field,
-        GuardianEntry *entry,
-        size_t         len,
-        char          *data );
-
+        GuardianField * field,
+        GuardianEntry * entry,
+        size_t len,
+        char *data);
 #endif

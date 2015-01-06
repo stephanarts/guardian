@@ -44,6 +44,5 @@
 #include <libguardian/plugin.h>
 
 void
-libguardian_init (void);
-
-#endif /* __LIBGUARDIAN_H__ */
+        libguardian_init (void);
+#endif                          /* __LIBGUARDIAN_H__ */

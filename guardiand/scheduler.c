@@ -62,48 +62,48 @@
 /** Define 10 Second interval */
 #define INTERVAL 1
 
-void *_ctx = NULL;
+void   *_ctx = NULL;
 
 #define         BUFFER_LEN      1024
-char            buffer[BUFFER_LEN];
+char    buffer[BUFFER_LEN];
 
 void
-guardian_scheduler_main ( void *ctx, int n_workers )
+guardian_scheduler_main (void *ctx, int n_workers)
 {
-    int i = 0;
-    int n_sleeping = 0;
-    int no_linger = 0;
-    int ret = 0;
-    void *plugins;
-    void *controller;
-    void *data_processor;
-    void *agent;
+    int     i = 0;
+    int     n_sleeping = 0;
+    int     no_linger = 0;
+    int     ret = 0;
+    void   *plugins;
+    void   *controller;
+    void   *data_processor;
+    void   *agent;
 
     pthread_t *workers = NULL;
 
-    if (_ctx != NULL) {
+    if (_ctx != NULL)
+    {
         return;
     }
-
     _ctx = ctx;
 
-    plugins    = zmq_socket(ctx, ZMQ_REP);
-    controller = zmq_socket(ctx, ZMQ_ROUTER);
-    data_processor = zmq_socket(ctx, ZMQ_REP);
-    agent = zmq_socket(ctx, ZMQ_ROUTER);
+    plugins = zmq_socket (ctx, ZMQ_REP);
+    controller = zmq_socket (ctx, ZMQ_ROUTER);
+    data_processor = zmq_socket (ctx, ZMQ_REP);
+    agent = zmq_socket (ctx, ZMQ_ROUTER);
 
-    zmq_bind(plugins,    "inproc://workers");
-    zmq_bind(controller, "inproc://controller");
-    zmq_bind(data_processor, "inproc://data-processor");
-    zmq_bind(agent, "tcp://127.0.0.1:5678");
+    zmq_bind (plugins, "inproc://workers");
+    zmq_bind (controller, "inproc://controller");
+    zmq_bind (data_processor, "inproc://data-processor");
+    zmq_bind (agent, "tcp://127.0.0.1:5678");
 
-    workers = guardian_new (sizeof(pthread_t), n_workers);
+    workers = guardian_new (sizeof (pthread_t), n_workers);
 
     for (i = 0; i < n_workers; ++i)
     {
         guardian_worker_thread_new (
-            &workers[i],
-            _ctx);
+                &workers[i],
+                _ctx);
     }
 
     /**
@@ -114,50 +114,59 @@ guardian_scheduler_main ( void *ctx, int n_workers )
      */
     while (1)
     {
-        char msg [256];
-        zmq_pollitem_t items [] = {
-            { plugins, 0, ZMQ_POLLIN, 0 },
-            { controller, 0, ZMQ_POLLIN, 0 },
-            { data_processor, 0, ZMQ_POLLIN, 0 },
-            { agent, 0, ZMQ_POLLIN, 0 },
+        char    msg[256];
+        zmq_pollitem_t items[] = {
+            {plugins, 0, ZMQ_POLLIN, 0},
+            {controller, 0, ZMQ_POLLIN, 0},
+            {data_processor, 0, ZMQ_POLLIN, 0},
+            {agent, 0, ZMQ_POLLIN, 0},
         };
-        zmq_poll (items, 3, -1);
+        zmq_poll (items, 4, -1);
 
         /* Scheduling of worker threads */
-        if (items [0].revents & ZMQ_POLLIN) {
-            int size = zmq_recv (plugins, msg, 255, 0);
-            if (size != -1) {
-                // Process task
-                if(!strncmp(msg, "GET-COMMAND", 11)) {
-                    snprintf(msg, 255, "WAIT[%d]%n", INTERVAL, &size);
-                    zmq_send(plugins, msg, size, 0);
+        if (items[0].revents & ZMQ_POLLIN)
+        {
+            int     size = zmq_recv (plugins, msg, 255, 0);
+            if (size != -1)
+            {
+                /* Process task */
+                if (!strncmp (msg, "GET-COMMAND", 11))
+                {
+                    snprintf (msg, 255, "WAIT[%d]%n", INTERVAL, &size);
+                    zmq_send (plugins, msg, size, 0);
 
-                    if (0) {
-                        snprintf(msg, 255, "PROCESS%n", &size);
-                        zmq_send(plugins, msg, size, 0);
+                    if (0)
+                    {
+                        snprintf (msg, 255, "PROCESS%n", &size);
+                        zmq_send (plugins, msg, size, 0);
                     }
                     continue;
                 }
-                /* Check if it is a message indicating
-                 * a worker thread is finished processing.
+
+                /*
+                 * Check if it is a message indicating a worker thread is
+                 * finished processing.
                  */
-                ret = sscanf(msg, "FINISH");
-                if (ret == 1) {
-                    guardian_log_debug("Worker Finished");
-                    zmq_send(plugins, "-", 1, 0);
+                ret = sscanf (msg, "FINISH");
+                if (ret == 1)
+                {
+                    guardian_log_debug ("Worker Finished");
+                    zmq_send (plugins, "-", 1, 0);
                     continue;
-                } 
-                guardian_log_debug("Send 'a': '%s'", msg);
-                zmq_send(plugins, "a", 1, 0);
+                }
+                guardian_log_debug ("Send 'a': '%s'", msg);
+                zmq_send (plugins, "a", 1, 0);
             }
         }
-
         /* Listen to Controller socket for STOP message */
-        if (items [1].revents & ZMQ_POLLIN) {
-            int size = zmq_recv (controller, msg, 255, 0);
-            if (size != -1) {
-                if(strncmp(msg, "STOP", 4)) {
-                    guardian_log_debug("Terminating main loop");
+        if (items[1].revents & ZMQ_POLLIN)
+        {
+            int     size = zmq_recv (controller, msg, 255, 0);
+            if (size != -1)
+            {
+                if (strncmp (msg, "STOP", 4))
+                {
+                    guardian_log_debug ("Terminating main loop");
 
                     /** TODO:
                      * Use another mechanism to properly end threads.
@@ -165,72 +174,73 @@ guardian_scheduler_main ( void *ctx, int n_workers )
 
                     for (i = 0; i < n_workers; ++i)
                     {
-                        pthread_cancel(workers[i]);
-                        pthread_join(workers[i], NULL);
+                        pthread_cancel (workers[i]);
+                        pthread_join (workers[i], NULL);
                     }
                     break;
                 }
             }
         }
-
         /* Put data in a database */
-        if (items [2].revents & ZMQ_POLLIN) {
+        if (items[2].revents & ZMQ_POLLIN)
+        {
 
-            while (1) {
+            while (1)
+            {
                 /* Every message-part is a log-entry */
                 zmq_msg_t message;
                 zmq_msg_init (&message);
                 zmq_msg_recv (&message, data_processor, 0);
 
-                //guardian_db_insert_entry();
+                //guardian_db_insert_entry ();
 
-                //t = zmq_msg_size(&message);
+                //t = zmq_msg_size (&message);
 
-                zmq_msg_close(&message); 
+                zmq_msg_close (&message);
 
-                if (!zmq_msg_more (&message)) {
+                if (!zmq_msg_more (&message))
+                {
                     break;
                 }
             }
 
-            zmq_send(data_processor, "0", 1, 0);
+            zmq_send (data_processor, "0", 1, 0);
         }
-
         /* Put data in a database */
-        if (items [3].revents & ZMQ_POLLIN) {
+        if (items[3].revents & ZMQ_POLLIN)
+        {
             zmq_msg_t message;
             zmq_msg_init (&message);
             zmq_msg_recv (&message, agent, 0);
 
-            zmq_msg_close(&message); 
+            zmq_msg_close (&message);
 
-            zmq_send(agent, "0", 1, 0);
+            zmq_send (agent, "0", 1, 0);
         }
     }
 
-    zmq_setsockopt(controller, ZMQ_LINGER, &no_linger, sizeof(no_linger));
+    zmq_setsockopt (controller, ZMQ_LINGER, &no_linger, sizeof (no_linger));
     zmq_close (controller);
-    zmq_setsockopt(plugins, ZMQ_LINGER, &no_linger, sizeof(no_linger));
+    zmq_setsockopt (plugins, ZMQ_LINGER, &no_linger, sizeof (no_linger));
     zmq_close (plugins);
 
     _ctx = NULL;
 }
 
 void
-guardian_scheduler_main_quit ( )
+guardian_scheduler_main_quit ()
 {
-    void *socket = zmq_socket(_ctx, ZMQ_REQ);
-    int ret = 0;
+    void   *socket = zmq_socket (_ctx, ZMQ_REQ);
+    int     ret = 0;
 
-    guardian_log_debug("Terminating %s", PACKAGE_NAME);
+    guardian_log_debug ("Terminating %s", PACKAGE_NAME);
 
-    zmq_connect(socket, "inproc://controller");
+    zmq_connect (socket, "inproc://controller");
 
-    ret = zmq_send(socket, "STOP", 4, 0);
+    ret = zmq_send (socket, "STOP", 4, 0);
     if (ret == -1)
     {
-        guardian_log_error("Failed to send termination message");
+        guardian_log_error ("Failed to send termination message");
     }
-
-    zmq_close(socket);
+    zmq_close (socket);
 }
