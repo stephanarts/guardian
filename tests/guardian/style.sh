@@ -2,12 +2,13 @@
 
 TEMP_FILENAME=`mktemp`
 
-CODE=../../libguardian/*.c
-HEADERS=../../libguardian/*.h
+CODE=$SOURCE_DIR/guardian/*.c
+HEADERS=$SOURCE_DIR/guardian/*.h
 
 INDENT_PARAMS='-bacc -bl -bc -i4 -pcs -nut -bbb -di8 -nlp -ci8'
 INDENT_PARAMS="$INDENT_PARAMS -TGuardianError"
 INDENT_PARAMS="$INDENT_PARAMS -TGuardianPlugin"
+INDENT_PARAMS="$INDENT_PARAMS -TWINDOW"
 
 RET=0
 
