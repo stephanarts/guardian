@@ -56,10 +56,10 @@ GuardianPlugin *
 guardian_plugin_init ()
 {
     const char *errors = NULL;
-    int err_offset;
+    int     err_offset;
     GuardianPlugin *plugin;
 
-    guardian_log_info("Initialise generator plugin");
+    guardian_log_info ("Initialise generator plugin");
 
     plugin = guardian_new (sizeof (GuardianPlugin), 1);
 

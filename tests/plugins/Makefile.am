@@ -1,12 +1,16 @@
 EXTRA_DIST = $(TESTS)
 
 TESTS = \
-    missing-plugin.test
+    style.sh \
+    missing-plugin.sh
+
+TEST_EXTENSIONS = .sh
+SH_LOG_COMPILER = $(SH)
+AM_TESTS_ENVIRONMENT = SOURCE_DIR='$(top_srcdir)'; export SOURCE_DIR;
 
 XFAIL_TESTS =
 
 check_PROGRAMS = plugin-loader
-
 
 plugin_loader_LDADD = \
     $(top_builddir)/libguardian/libguardian-$(LIBGUARDIAN_VERSION_API).la \
