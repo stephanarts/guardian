@@ -7,6 +7,7 @@ HEADERS=$SOURCE_DIR/libguardian/*.h
 
 INDENT_PARAMS='-bacc -bl -bc -i4 -pcs -nut -bbb -di8 -nlp -ci8'
 INDENT_PARAMS="$INDENT_PARAMS -TGuardianError"
+INDENT_PARAMS="$INDENT_PARAMS -TGuardianItem"
 INDENT_PARAMS="$INDENT_PARAMS -TGuardianPlugin"
 
 RET=0

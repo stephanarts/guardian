@@ -45,26 +45,25 @@ guardian_item_new (
         int remote,
         GuardianError **error);
 
-int
-        guardian_item_get_interval (GuardianItem * item);
+int     guardian_item_get_interval (GuardianItem *item);
 
 void
 guardian_item_set_interval (
-        GuardianItem * item,
+        GuardianItem *item,
         int interval);
-int
-        guardian_item_get_active (GuardianItem * item);
+
+int     guardian_item_get_active (GuardianItem *item);
 
 void
 guardian_item_set_active (
-        GuardianItem * item,
+        GuardianItem *item,
         int active);
 
 time_t
-guardian_item_get_last_update (GuardianItem * item);
+guardian_item_get_last_update (GuardianItem *item);
 
 void
 guardian_item_set_last_update (
-        GuardianItem * item,
+        GuardianItem *item,
         time_t last_update);
 #endif                          /* __GUARDIAN_ITEM_H__ */

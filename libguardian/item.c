@@ -72,7 +72,7 @@ guardian_item_new (
         int remote,
         GuardianError **error)
 {
-    GuardianItem *item = (GuardianItem *) malloc (sizeof (GuardianItem));
+    GuardianItem *item = (GuardianItem *)malloc (sizeof (GuardianItem));
 
     guardian_log_debug ("New Item: %s", name);
 
@@ -112,28 +112,28 @@ guardian_items_init ()
 }
 
 int
-guardian_item_get_interval (GuardianItem * item)
+guardian_item_get_interval (GuardianItem *item)
 {
     return item->interval;
 }
 
 void
 guardian_item_set_interval (
-        GuardianItem * item,
+        GuardianItem *item,
         int interval)
 {
     item->interval = interval;
 }
 
 time_t
-guardian_item_get_last_update (GuardianItem * item)
+guardian_item_get_last_update (GuardianItem *item)
 {
     return item->last_update;
 }
 
 void
 guardian_item_set_last_update (
-        GuardianItem * item,
+        GuardianItem *item,
         time_t last_update)
 {
     item->last_update = last_update;
