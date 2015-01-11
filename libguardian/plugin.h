@@ -40,14 +40,18 @@ typedef struct _GuardianPlugin GuardianPlugin;
 struct _GuardianPlugin
 {
     void   *handle;             /* dlopen handle */
-    void    (*register_types) (GuardianPlugin *);
-    void    (*extract_fields) (GuardianPlugin *, const char *entry);
+    void    (*update_items) (void);
+    time_t  (*get_update_time) (void);
 };
 
 GuardianPlugin *
 guardian_plugin_load (
         char *path,
         GuardianError **);
+
+GuardianPlugin *
+guardian_plugin_new (
+        void);
 
 void
 guardian_plugin_push_entry (

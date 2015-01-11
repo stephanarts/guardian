@@ -123,7 +123,7 @@ _guardian_worker_thread (void *arg)
 
 int
 guardian_worker_thread_new (
-        pthread_t * thread,
+        pthread_t *thread,
         void *ctx)
 {
     if (_ctx == NULL)

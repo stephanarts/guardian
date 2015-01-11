@@ -54,6 +54,12 @@
 
 #define PLUGIN_NAME "system-plugin"
 
+static void register_system_items (void);
+static void _update_items (void);
+static time_t _get_update_time (void);
+
+time_t  last_update;
+
 GuardianPlugin *
 guardian_plugin_init ()
 {
@@ -63,22 +69,12 @@ guardian_plugin_init ()
 
     guardian_log_info ("Initialise system plugin");
 
-    plugin = guardian_new (sizeof (GuardianPlugin), 1);
+    plugin = guardian_plugin_new ();
+    plugin->update_items = _update_items;
+    plugin->get_update_time = _get_update_time;
 
-    item = guardian_item_new (
-            "cpu.load.avg[1]",
-            GUARDIAN_ITEMTYPE_DOUBLE,
-            30,
-            TRUE,
-            FALSE,
-            NULL);
-    if (item == NULL)
-    {
-        guardian_log_error (
-                "Plugin '%s': Could not create Item '%s'.",
-                PLUGIN_NAME,
-                "cpu.load.avg[1]");
-    }
+    register_system_items ();
+
     return plugin;
 }
 
@@ -92,4 +88,42 @@ static void
 guardian_plugin_rescan_items (void)
 {
 
+}
+
+static void
+register_system_items (void)
+{
+    GuardianItem *item = NULL;
+
+    item = guardian_item_register (
+            "system.uptime",
+            GUARDIAN_ITEMTYPE_INT,
+            60,
+            TRUE,
+            FALSE,
+            NULL);
+
+    if (item == NULL)
+    {
+        guardian_log_error (
+                "Plugin '%s': Could not create Item '%s'.",
+                PLUGIN_NAME,
+                "system.uptime");
+    }
+}
+
+static void
+_update_items (void)
+{
+    time_t  new_time;
+
+    time (&new_time);
+
+    last_update = new_time;
+}
+
+static time_t
+_get_update_time (void)
+{
+    return last_update;
 }

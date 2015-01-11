@@ -2,6 +2,7 @@ EXTRA_DIST = $(TESTS)
 
 TESTS = \
     style.sh \
+    system-plugin.sh \
     missing-plugin.sh
 
 TEST_EXTENSIONS = .sh

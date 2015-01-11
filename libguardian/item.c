@@ -64,7 +64,7 @@ struct _GuardianItem
 };
 
 GuardianItem *
-guardian_item_new (
+guardian_item_register (
         const char *name,
         GuardianItemType type,
         int interval,
@@ -82,32 +82,16 @@ guardian_item_new (
 }
 
 void
+guardian_item_unregister (
+        GuardianItem *item)
+{
+
+}
+
+
+void
 guardian_items_init ()
 {
-    guardian_item_new (
-            "cpu.load.avg[1]",
-            GUARDIAN_ITEMTYPE_DOUBLE,
-            30,
-            TRUE,
-            FALSE,
-            NULL);
-
-    guardian_item_new (
-            "cpu.load.avg[5]",
-            GUARDIAN_ITEMTYPE_DOUBLE,
-            30,
-            TRUE,
-            FALSE,
-            NULL);
-
-    guardian_item_new (
-            "cpu.load.avg[15]",
-            GUARDIAN_ITEMTYPE_DOUBLE,
-            30,
-            TRUE,
-            FALSE,
-            NULL);
-
     //guardian_db_get_items ();
 }
 

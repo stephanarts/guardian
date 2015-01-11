@@ -43,33 +43,16 @@
 #include <dlfcn.h>
 #endif
 
+#include <time.h>
+
 #include <string.h>
 #include <errno.h>
 
 #include <zmq.h>
 
 #include "error.h"
+#include "memory.h"
 #include "plugin.h"
-
-void
-guardian_plugin_register_types (GuardianPlugin *plugin)
-{
-    if (plugin->register_types != NULL)
-    {
-        plugin->register_types (plugin);
-    }
-}
-
-void
-guardian_plugin_extract_fields (
-        GuardianPlugin *plugin,
-        const char *entry)
-{
-    if (plugin->extract_fields != NULL)
-    {
-        plugin->extract_fields (plugin, entry);
-    }
-}
 
 GuardianPlugin *
 guardian_plugin_load (
@@ -147,6 +130,17 @@ guardian_plugin_load (
         }
     }
     return NULL;
+}
+
+GuardianPlugin *
+guardian_plugin_new (void)
+{
+    GuardianPlugin *plugin = guardian_new (sizeof (GuardianPlugin), 1);
+
+    plugin->update_items = NULL;
+    plugin->get_update_time = NULL;
+
+    return plugin;
 }
 
 void

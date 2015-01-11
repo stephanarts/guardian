@@ -66,33 +66,53 @@ main (int argc, char **argv)
     char *plugin_path = malloc (200);
     GuardianError *error = NULL;
 
-    char buffer[BUFFER_SIZE];
-
     if (argc < 2)
     {
         fprintf (stderr, "No plugin-name provided\n");
         return 1;
     }
 
-    read (stdin, buffer, BUFFER_SIZE);
+    sprintf (
+            plugin_path,
+            "%s/%s/%s%s.so",
+            PLUGINDIR,
+            argv[1],
+            PLUGINSUBDIR,
+            argv[1]);
 
-    sprintf (plugin_path, "%s/%s/%s%s.so", PLUGINDIR, argv[1], PLUGINSUBDIR, argv[1]);
+    fprintf(stderr, "Loading plugin: %s\n", plugin_path);
 
     int fd = open(plugin_path, O_RDONLY);
     if (fd == -1) {
         fprintf(stderr, "Open Failed");
+        exit(1);
     }
-
-    fprintf(stderr, "Loading plugin: %s\n", plugin_path);
 
     plugin = guardian_plugin_load ( plugin_path, &error );
-    if (plugin)
-    {
-        fprintf(stderr, "Plugin %s Loaded\n", argv[1]);
-    }
-    else
+    if (plugin == NULL)
     {
         fprintf(stderr, "%s\n", guardian_error_get_msg (error));
+        exit(1);
+    }
+
+    fprintf(stderr, "Plugin %s Loaded\n", argv[1]);
+    if (plugin->update_items == NULL) {
+        fprintf(stderr, "update_items not set\n");
+        exit(1);
+    }
+
+    if (plugin->get_update_time == NULL) {
+        fprintf(stderr, "get_update_time not set\n");
+        exit(1);
+    }
+
+    if (plugin->get_update_time() != 0) {
+        exit(1);
+    }
+
+    plugin->update_items();
+
+    if (plugin->get_update_time() == 0) {
         exit(1);
     }
 

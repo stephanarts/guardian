@@ -29,5 +29,5 @@
 
 int
 guardian_worker_thread_new (
-        pthread_t * thread,
+        pthread_t *thread,
         void *ctx);

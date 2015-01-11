@@ -37,13 +37,17 @@
 typedef struct _GuardianItem GuardianItem;
 
 GuardianItem *
-guardian_item_new (
+guardian_item_register (
         const char *name,
         GuardianItemType type,
         int interval,
         int active,
         int remote,
         GuardianError **error);
+
+void
+guardian_item_unregister (
+        GuardianItem *item);
 
 int     guardian_item_get_interval (GuardianItem *item);
 
@@ -59,8 +63,7 @@ guardian_item_set_active (
         GuardianItem *item,
         int active);
 
-time_t
-guardian_item_get_last_update (GuardianItem *item);
+time_t  guardian_item_get_last_update (GuardianItem *item);
 
 void
 guardian_item_set_last_update (
