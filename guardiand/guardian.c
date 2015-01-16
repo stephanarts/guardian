@@ -72,6 +72,13 @@
 #include "scheduler.h"
 #include "db.h"
 
+#ifndef MAX_PLUGINS
+#define MAX_PLUGINS 4
+#endif
+
+static GuardianPlugin *_plugins[MAX_PLUGINS];
+static int n_plugins = 0;
+
 enum
 {
     OPTION_VERSION = 0,
@@ -171,8 +178,6 @@ main (int argc, char **argv)
     sigaction (SIGTERM, &sa, NULL);
 
     GuardianSettings *settings = NULL;
-
-    GuardianPlugin *plugin;
 
     while (1)
     {
@@ -276,6 +281,13 @@ main (int argc, char **argv)
     {
         while ((dirp = readdir (plugin_dir)) != NULL)
         {
+            if (n_plugins == MAX_PLUGINS)
+            {
+                guardian_log_warning (
+                        "Max plugins reached (%d), "
+                        "can not load more plugins.");
+                break;
+            }
             i = snprintf (plugin_path, 1024, "%s/%s", PLUGINDIR, dirp->d_name);
             if (i < 0)
             {
@@ -295,11 +307,11 @@ main (int argc, char **argv)
                      */
                     if (strcmp (&plugin_path[i - 3], ".so") == 0)
                     {
-                        plugin = guardian_plugin_load (
+                        _plugins[n_plugins] = guardian_plugin_load (
                                 plugin_path,
                                 &error);
 
-                        if (plugin == NULL && error)
+                        if (_plugins[n_plugins] == NULL && error)
                         {
                             guardian_log_warning (
                                     "%s",
@@ -312,6 +324,7 @@ main (int argc, char **argv)
                                     "Load plugin: %s\n",
                                     plugin_path);
                             //guardian_plugin_register_types (plugin);
+                            n_plugins++;
                         }
                     }
                 }
