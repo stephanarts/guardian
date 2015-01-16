@@ -5,7 +5,7 @@ TEMP_FILENAME=`mktemp`
 CODE=$SOURCE_DIR/guardiand/*.c
 HEADERS=$SOURCE_DIR/guardiand/*.h
 
-INDENT_PARAMS='-bacc -bl -ta -bc -i4 -pcs -nut -bbb -di8 -nlp -ci8'
+INDENT_PARAMS='-bacc -bad -bl -ta -bc -i4 -pcs -nut -bbb -di8 -nlp -ci8'
 INDENT_PARAMS="$INDENT_PARAMS -TGuardianError"
 INDENT_PARAMS="$INDENT_PARAMS -TGuardianPlugin"
 

@@ -9,6 +9,7 @@ libguardian_1_0_la_SOURCES = \
     memory.c \
     assert.c \
     item.c \
+    value.c \
     log.c \
     error.c \
     plugin.c \
@@ -21,6 +22,7 @@ libguardian_include_HEADERS = \
     types.h \
     error.h \
     item.h \
+    value.h \
     itemtype.h \
     plugin.h \
     libguardian.h

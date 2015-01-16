@@ -36,89 +36,100 @@
 #endif
 
 #include <stdlib.h>
-#include <string.h>
-
-#include <stdarg.h>
-
-#include <arpa/inet.h>
 
 #include <time.h>
 
-
 #include "error.h"
+#include "assert.h"
 #include "log.h"
-#include "types.h"
+#include "memory.h"
 #include "itemtype.h"
 #include "item.h"
+#include "value.h"
 
-struct _GuardianItem
+struct _GuardianValue
 {
-    char   *name;
-    GuardianItemType type;
+    GuardianItem *item;
 
-    double  interval;
-    int     active;
-    int     remote;
+    time_t  timestamp;
 
-    time_t  last_update;
+    union
+    {
+        char   *str;
+        double  d;
+        int     i;
+    }       value;
 };
 
-GuardianItem *
-guardian_item_register (
-        const char *name,
-        GuardianItemType type,
-        double interval,
-        int active,
-        int remote,
-        GuardianError **error)
-{
-    GuardianItem *item = (GuardianItem *)malloc (sizeof (GuardianItem));
-
-    guardian_log_debug ("New Item: %s", name);
-
-    item->last_update = -1;
-
-    return item;
-}
-
-void
-guardian_item_unregister (
+GuardianValue *
+guardian_value_new (
         GuardianItem *item)
 {
+    if (item == NULL)
+    {
+        guardian_assert_critical ("item = NULL");
+    }
+    GuardianValue *value = guardian_new (sizeof (GuardianValue), 1);
 
+    value->item = item;
+
+    return value;
 }
 
+void
+guardian_value_set_string (
+        GuardianValue *val,
+        char *str,
+        time_t time)
+{
+    val->value.str = str;
+    val->timestamp = time;
+}
 
 void
-guardian_items_init ()
+guardian_value_set_int (
+        GuardianValue *val,
+        int i,
+        time_t time)
 {
-    //guardian_db_get_items ();
+    val->value.i = i;
+    val->timestamp = time;
+}
+
+void
+guardian_value_set_double (
+        GuardianValue *val,
+        double d,
+        time_t time)
+{
+    val->value.d = d;
+    val->timestamp = time;
+}
+
+char   *
+guardian_value_get_string (
+        GuardianValue *val)
+{
+    return val->value.str;
+}
+
+int
+guardian_value_get_int (
+        GuardianValue *val)
+{
+    return val->value.i;
 }
 
 double
-guardian_item_get_interval (GuardianItem *item)
+guardian_value_get_double (
+        GuardianValue *val)
 {
-    return item->interval;
-}
-
-void
-guardian_item_set_interval (
-        GuardianItem *item,
-        double interval)
-{
-    item->interval = interval;
+    return val->value.d;
 }
 
 time_t
-guardian_item_get_last_update (GuardianItem *item)
+guardian_value_get_time (
+        GuardianValue *val)
 {
-    return item->last_update;
-}
-
-void
-guardian_item_set_last_update (
-        GuardianItem *item,
-        time_t last_update)
-{
-    item->last_update = last_update;
+    return val->timestamp;
 }

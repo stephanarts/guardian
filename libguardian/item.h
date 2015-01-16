@@ -40,7 +40,7 @@ GuardianItem *
 guardian_item_register (
         const char *name,
         GuardianItemType type,
-        int interval,
+        double interval,
         int active,
         int remote,
         GuardianError **error);
@@ -49,12 +49,12 @@ void
 guardian_item_unregister (
         GuardianItem *item);
 
-int     guardian_item_get_interval (GuardianItem *item);
+double  guardian_item_get_interval (GuardianItem *item);
 
 void
 guardian_item_set_interval (
         GuardianItem *item,
-        int interval);
+        double interval);
 
 int     guardian_item_get_active (GuardianItem *item);
 

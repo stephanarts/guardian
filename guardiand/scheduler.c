@@ -60,7 +60,7 @@
 #include "db.h"
 
 /** Define 10 Second interval */
-#define INTERVAL 1
+#define INTERVAL 10
 
 void   *_ctx = NULL;
 

@@ -134,6 +134,27 @@ AC_CHECK_HEADER(sys/syslog.h,
     ]
 )
 
+dnl *** Check for sys/param.h
+dnl ***************************
+dnl ***
+dnl *** Required for __FREEBSD__ define
+dnl ***
+dnl ***************************
+AC_CHECK_HEADER(sys/param.h,
+    [ AC_DEFINE([HAVE_SYS_PARAM_H], [1],
+                [Define to 1 if you have the <sys/param.h> header file])
+    ]
+)
+
+dnl *** Check for utmpx.h
+dnl ***************************
+AC_CHECK_HEADER(utmpx.h,
+    [ AC_DEFINE([HAVE_UTMPX_H], [1],
+                [Define to 1 if you have the <utmpx.h> header file])
+    ]
+)
+
+
 dnl *** Check for pthread.h
 dnl ***************************
 AC_CHECK_HEADER(pthread.h,
@@ -210,6 +231,15 @@ AC_ARG_ENABLE(debug,
 	            [Define to 1 if you have enabled debugging])
 	]
 )
+
+AC_ARG_ENABLE(gen-plugin,
+    [  --enable-gen-plugin    enable generator-plugin],
+    [ AC_DEFINE([WITH_GENERATOR_PLUGIN], [1],
+                [])
+      with_generator_plugin=1
+    ]
+)
+AM_CONDITIONAL([WITH_GENERATOR_PLUGIN], [test "$with_generator_plugin" -eq 1])
 
 AC_OUTPUT([
 Makefile

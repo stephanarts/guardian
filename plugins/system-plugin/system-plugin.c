@@ -39,6 +39,14 @@
 #include <stdio.h>
 #endif
 
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+
+#ifdef HAVE_UTMPX_H
+#include <utmpx.h>
+#endif
+
 #include <string.h>
 
 #include <pcre.h>
@@ -54,11 +62,21 @@
 
 #define PLUGIN_NAME "system-plugin"
 
+enum
+{
+    ITEM_SYSTEM_UPTIME = 0,
+    ITEM_COUNT
+};
+
+
+static GuardianItem *items[ITEM_COUNT];
+static GuardianValue *update_cache[ITEM_COUNT];
+
 static void register_system_items (void);
 static void _update_items (void);
 static time_t _get_update_time (void);
 
-time_t  last_update;
+time_t  last_update_time;
 
 GuardianPlugin *
 guardian_plugin_init ()
@@ -93,9 +111,7 @@ guardian_plugin_rescan_items (void)
 static void
 register_system_items (void)
 {
-    GuardianItem *item = NULL;
-
-    item = guardian_item_register (
+    items[ITEM_SYSTEM_UPTIME] = guardian_item_register (
             "system.uptime",
             GUARDIAN_ITEMTYPE_INT,
             60,
@@ -103,7 +119,7 @@ register_system_items (void)
             FALSE,
             NULL);
 
-    if (item == NULL)
+    if (items[ITEM_SYSTEM_UPTIME] == NULL)
     {
         guardian_log_error (
                 "Plugin '%s': Could not create Item '%s'.",
@@ -116,14 +132,52 @@ static void
 _update_items (void)
 {
     time_t  new_time;
-
+    time_t  uptime;
     time (&new_time);
 
-    last_update = new_time;
+    GuardianValue *value = guardian_value_new (items[ITEM_SYSTEM_UPTIME]);
+
+    time_t  item_time = guardian_item_get_last_update (
+            items[ITEM_SYSTEM_UPTIME]);
+
+    double  t = difftime (item_time, new_time);
+    if (t >= guardian_item_get_interval (
+                    items[ITEM_SYSTEM_UPTIME]))
+    {
+
+#if 0
+
+#ifdef __FREEBSD__
+        clock_gettime (CLOCK_UPTIME, &uptime);
+#endif                          /* __FREEBSD__ */
+
+#endif
+
+#ifdef HAVE_UTMPX_H
+        struct utmpx *ent;
+        while ((ent = getutxent ()))
+        {
+            if (ent->ut_type == BOOT_TIME)
+            {
+                uptime = difftime (ent->ut_tv.tv_sec, new_time);
+
+                guardian_value_set_int (
+                        value,
+                        (int)uptime,
+                        new_time);
+            }
+        }
+#endif                          /* HAVE_UTMPX_H */
+
+        guardian_item_set_last_update (
+                items[ITEM_SYSTEM_UPTIME],
+                new_time);
+    }
+    last_update_time = new_time;
 }
 
 static time_t
 _get_update_time (void)
 {
-    return last_update;
+    return last_update_time;
 }

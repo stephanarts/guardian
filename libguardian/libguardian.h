@@ -39,6 +39,7 @@
 #include <libguardian/types.h>
 #include <libguardian/itemtype.h>
 #include <libguardian/item.h>
+#include <libguardian/value.h>
 #include <libguardian/assert.h>
 #include <libguardian/memory.h>
 #include <libguardian/plugin.h>

@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,8 +27,51 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-void    guardian_db_init (void);
 
-void    guardian_db_close (void);
+#if !defined (LIBGUARDIAN_INSIDE_LIBGUARDIAN_H) && !defined(LIBGUARDIAN_COMPILATION)
+#error "Only <libguardian/libguardian.h> can be included directly, this file may disappear or change contents"
+#endif
 
-void    guardian_db_insert_entry (void);
+#ifndef __GUARDIAN_VALUE_H__
+#define __GUARDIAN_VALUE_H__
+
+typedef struct _GuardianValue GuardianValue;
+
+GuardianValue *
+guardian_value_new (
+        GuardianItem *item);
+
+time_t
+guardian_value_get_time (
+        GuardianValue *val);
+
+double
+guardian_value_get_double (
+        GuardianValue *val);
+
+int
+guardian_value_get_int (
+        GuardianValue *val);
+
+char   *
+guardian_value_get_string (
+        GuardianValue *val);
+
+void
+guardian_value_set_double (
+        GuardianValue *val,
+        double d,
+        time_t time);
+
+void
+guardian_value_set_int (
+        GuardianValue *val,
+        int i,
+        time_t time);
+
+void
+guardian_value_set_string (
+        GuardianValue *val,
+        char *str,
+        time_t time);
+#endif

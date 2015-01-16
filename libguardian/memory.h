@@ -34,9 +34,7 @@
 #ifndef __GUARDIAN_MEMORY_H__
 #define __GUARDIAN_MEMORY_H__
 
-void   *
-        guardian_new (size_t nmemb, size_t size);
+void   *guardian_new (size_t nmemb, size_t size);
 
-void
-        guardian_set_allow_malloc (int allow);
+void    guardian_set_allow_malloc (int allow);
 #endif                          /* __GUARDIAN_MEMORY_H__ */
