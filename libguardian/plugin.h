@@ -61,8 +61,6 @@ guardian_plugin_push_entry (
         const char *timestamp,
         const char *entry);
 
-void    guardian_plugin_register_types (GuardianPlugin *);
-
 void
 guardian_plugin_extract_fields (
         GuardianPlugin *,

@@ -45,11 +45,13 @@
 #include <time.h>
 
 
+#include "assert.h"
 #include "error.h"
 #include "log.h"
 #include "types.h"
 #include "itemtype.h"
 #include "item.h"
+#include "memory.h"
 
 struct _GuardianItem
 {
@@ -63,6 +65,28 @@ struct _GuardianItem
     time_t  last_update;
 };
 
+static GuardianItem *_items = NULL;
+static size_t _n_max_items = 0;
+static size_t _n_items = 0;
+
+
+void
+guardian_items_init (
+        size_t n_max_items)
+{
+    if (_items != NULL)
+    {
+        guardian_assert_critical (
+                "items already initialized!");
+        return;
+    }
+    _items = guardian_new (
+            sizeof (GuardianItem),
+            n_max_items);
+
+    _n_max_items = n_max_items;
+}
+
 GuardianItem *
 guardian_item_register (
         const char *name,
@@ -72,7 +96,22 @@ guardian_item_register (
         int remote,
         GuardianError **error)
 {
-    GuardianItem *item = (GuardianItem *)malloc (sizeof (GuardianItem));
+    GuardianItem *item = NULL;
+
+    /**
+     * Check if the item-registry has space for a new
+     * entry.
+     */
+    if (_n_max_items == _n_items)
+    {
+        guardian_log_error (
+                "Max items reached (%d)",
+                _n_max_items);
+        return NULL;
+    }
+    item = &_items[_n_items];
+
+    _n_items++;
 
     guardian_log_debug ("New Item: %s", name);
 
@@ -88,17 +127,12 @@ guardian_item_unregister (
 
 }
 
-
 void
-guardian_items_init ()
+guardian_item_get_interval (
+        GuardianItem *item,
+        double *interval)
 {
-    //guardian_db_get_items ();
-}
-
-double
-guardian_item_get_interval (GuardianItem *item)
-{
-    return item->interval;
+    (*interval) = item->interval;
 }
 
 void
@@ -109,10 +143,12 @@ guardian_item_set_interval (
     item->interval = interval;
 }
 
-time_t
-guardian_item_get_last_update (GuardianItem *item)
+void
+guardian_item_get_last_update (
+        GuardianItem *item,
+        time_t *last_update)
 {
-    return item->last_update;
+    (*last_update) = item->last_update;
 }
 
 void

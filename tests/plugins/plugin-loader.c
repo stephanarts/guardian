@@ -72,6 +72,11 @@ main (int argc, char **argv)
         return 1;
     }
 
+    /*
+     * Allow 10 items, this should be configurable via the command-line.
+     */
+    guardian_items_init (10);
+
     sprintf (
             plugin_path,
             "%s/%s/%s%s.so",

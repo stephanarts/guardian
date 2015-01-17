@@ -132,17 +132,25 @@ static void
 _update_items (void)
 {
     time_t  new_time;
+    time_t  item_time;
     time_t  uptime;
+    double  t;
+    double  i;
+
     time (&new_time);
 
     GuardianValue *value = guardian_value_new (items[ITEM_SYSTEM_UPTIME]);
 
-    time_t  item_time = guardian_item_get_last_update (
-            items[ITEM_SYSTEM_UPTIME]);
+    guardian_item_get_last_update (
+            items[ITEM_SYSTEM_UPTIME],
+            &item_time);
+    guardian_item_get_interval (
+            items[ITEM_SYSTEM_UPTIME],
+            &i);
 
-    double  t = difftime (item_time, new_time);
-    if (t >= guardian_item_get_interval (
-                    items[ITEM_SYSTEM_UPTIME]))
+    t = difftime (item_time, new_time);
+
+    if (t >= i)
     {
 
 #if 0

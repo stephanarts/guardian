@@ -265,13 +265,17 @@ main (int argc, char **argv)
      */
     libguardian_init ();
 
-
     /**
      * Load settings from file
      */
     settings = guardian_settings_load (SYSCONFDIR "/guardian.conf", NULL);
 
     guardian_settings_get (settings, "key");
+
+    /**
+     * Maximum 10 items (Development value).
+     */
+    guardian_items_init (10);
 
     /**
      * Load all plugins from PLUGINDIR
