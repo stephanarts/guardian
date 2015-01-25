@@ -51,6 +51,7 @@
 #include <openssl/sha.h>
 
 #include "shell.h"
+#include "client.h"
 
 static int silent_shell = 0;
 static int shell_open = 0;
@@ -58,7 +59,7 @@ static int line_nr = 0;
 static char prompt[100];
 
 static char *
-print_prompt (EditLine * el)
+_print_prompt (EditLine * el)
 {
     if (silent_shell == 1)
     {
@@ -97,7 +98,7 @@ show_shell (int silent)
             stdout,
             stderr);
 
-    el_set (el, EL_PROMPT, print_prompt);
+    el_set (el, EL_PROMPT, _print_prompt);
 
     if (silent == 0)
     {
@@ -135,6 +136,11 @@ show_shell (int silent)
             line_nr++;
             shell_open = 0;
 
+            if (n_tokens == 0)
+            {
+                continue;
+            }
+
             /* EXIT */
             if (n_tokens == 1 && 0 == strcmp (tokens[0], "exit"))
             {
@@ -155,6 +161,35 @@ show_shell (int silent)
                     continue;
                 }
                 printf ("A");
+            }
+            /* Connect */
+            if (!strcmp (tokens[0], "connect"))
+            {
+                /* Interactive Connect */
+                switch (n_tokens)
+                {
+                case 1:        /* Interactive connect */
+                    printf ("Interactive connect is not yet supported\n"
+                            "Use connect <connect-uri>\n");
+                    break;
+                case 2:        /* connect-string */
+                    if (client_connect_pass (
+                            "tcp://127.0.0.1:1234",
+                            "sys",
+                            "password") == 0)
+                    {
+                        printf ("Connected\n");
+                    } else
+                    {
+                        printf ("Connection failed\n");
+                    }
+                    break;
+                default:       /* error */
+                    printf ("Connect requires an argument.\n"
+                            "\nconnect <connect-uri>\n");
+                    break;
+                }
+                continue;
             }
         } else
         {

@@ -95,7 +95,7 @@ guardian_scheduler_main (void *ctx, int n_workers)
     zmq_bind (plugins, "inproc://workers");
     zmq_bind (controller, "inproc://controller");
     zmq_bind (data_processor, "inproc://data-processor");
-    zmq_bind (agent, "tcp://127.0.0.1:5678");
+    zmq_bind (agent, "tcp://127.0.0.1:1234");
 
     workers = guardian_new (sizeof (pthread_t), n_workers);
 
@@ -209,20 +209,55 @@ guardian_scheduler_main (void *ctx, int n_workers)
         /* Put data in a database */
         if (items[3].revents & ZMQ_POLLIN)
         {
-            zmq_msg_t message;
-            zmq_msg_init (&message);
-            zmq_msg_recv (&message, agent, 0);
+            printf("GOT AGENT DATA\n");
+            while (1)
+            {
+                zmq_msg_t message;
+                zmq_msg_init (&message);
+                zmq_msg_recv (&message, agent, 0);
 
-            zmq_msg_close (&message);
+                zmq_msg_close (&message);
 
+                if (!zmq_msg_more (&message))
+                {
+                    break;
+                }
+
+            }
+            /* BUG: USE ZMQ_MSG_SEND */
+            printf("SEND AGENT DATA\n");
             zmq_send (agent, "0", 1, 0);
+            printf("...\n");
         }
     }
 
-    zmq_setsockopt (controller, ZMQ_LINGER, &no_linger, sizeof (no_linger));
+    zmq_setsockopt (
+            controller,
+            ZMQ_LINGER,
+            &no_linger,
+            sizeof (no_linger));
     zmq_close (controller);
-    zmq_setsockopt (plugins, ZMQ_LINGER, &no_linger, sizeof (no_linger));
+
+    zmq_setsockopt (
+            plugins,
+            ZMQ_LINGER,
+            &no_linger,
+            sizeof (no_linger));
     zmq_close (plugins);
+
+    zmq_setsockopt (
+            agent,
+            ZMQ_LINGER,
+            &no_linger,
+            sizeof (no_linger));
+    zmq_close (agent);
+
+    zmq_setsockopt (
+            data_processor,
+            ZMQ_LINGER,
+            &no_linger,
+            sizeof (no_linger));
+    zmq_close (data_processor);
 
     _ctx = NULL;
 }

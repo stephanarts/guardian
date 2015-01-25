@@ -27,24 +27,23 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBGUARDIAN_H__
-#define __LIBGUARDIAN_H__
+#if !defined (LIBGUARDIAN_INSIDE_LIBGUARDIAN_H) && !defined(LIBGUARDIAN_COMPILATION)
+#error "Only <libguardian/libguardian.h> can be included directly, this file may disappear or change contents"
+#endif
 
-#define LIBGUARDIAN_INSIDE_LIBGUARDIAN_H
+#ifndef __GUARDIAN_METRIC_H__
+#define __GUARDIAN_METRIC_H__
 
-#include <time.h>
-
-#include <libguardian/log.h>
-#include <libguardian/error.h>
-#include <libguardian/types.h>
-#include <libguardian/itemtype.h>
-#include <libguardian/item.h>
-#include <libguardian/metric.h>
-#include <libguardian/value.h>
-#include <libguardian/assert.h>
-#include <libguardian/memory.h>
-#include <libguardian/plugin.h>
+typedef struct _GuardianMetric GuardianMetric;
 
 void
-        libguardian_init (void);
-#endif                          /* __LIBGUARDIAN_H__ */
+guardian_metric_init (
+        size_t n_max_items);
+
+GuardianMetric *
+guardian_metric_register (
+        const char *name,
+        GuardianItemType type,
+        GuardianError **error);
+
+#endif /** __GUARDIAN_METRIC_H__ **/

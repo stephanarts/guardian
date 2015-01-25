@@ -2,6 +2,7 @@ bin_PROGRAMS = guardian
 
 guardian_SOURCES = \
     guardian.c \
+    client.c client.h \
     shell.c shell.h \
     interactive_menu.c interactive_menu.h \
     search_dialog.c search_dialog.h \

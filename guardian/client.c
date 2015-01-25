@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,24 +27,82 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBGUARDIAN_H__
-#define __LIBGUARDIAN_H__
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
-#define LIBGUARDIAN_INSIDE_LIBGUARDIAN_H
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
+#endif
 
 #include <time.h>
 
-#include <libguardian/log.h>
-#include <libguardian/error.h>
-#include <libguardian/types.h>
-#include <libguardian/itemtype.h>
-#include <libguardian/item.h>
-#include <libguardian/metric.h>
-#include <libguardian/value.h>
-#include <libguardian/assert.h>
-#include <libguardian/memory.h>
-#include <libguardian/plugin.h>
+#include <curses.h>
+
+#include <unistd.h>
+#include <string.h>
+
+#include <zmq.h>
+
+#include "client.h"
+
+static void *_ctx = NULL;
+static void *_socket = NULL;
+
+int
+client_connect_pass (
+        const char *uri,
+        const char *user,
+        const char *password)
+{
+    char    msg[256];
+
+    if (_ctx == NULL)
+    {
+        _ctx = zmq_ctx_new ();
+    }
+
+    if (_socket == NULL)
+    {
+        _socket = zmq_socket (_ctx, ZMQ_REQ);
+        zmq_connect (
+                _socket,
+                uri);
+        printf("SEND\n");
+        zmq_send (
+                _socket,
+                "connect user/pass",
+                17,
+                0);
+        printf("RECV\n");
+        zmq_recv (
+                _socket,
+                msg,
+                255,
+                100);
+        return 0;
+    }
+
+    return 1;
+}
 
 void
-        libguardian_init (void);
-#endif                          /* __LIBGUARDIAN_H__ */
+client_disconnect (
+        void)
+{
+
+}
+
+void
+client_send_cmd (
+        const char *str,
+        size_t len,
+        char **resp,
+        size_t *r_len)
+{
+
+}

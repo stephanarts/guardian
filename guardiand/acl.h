@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,24 +27,12 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBGUARDIAN_H__
-#define __LIBGUARDIAN_H__
-
-#define LIBGUARDIAN_INSIDE_LIBGUARDIAN_H
-
-#include <time.h>
-
-#include <libguardian/log.h>
-#include <libguardian/error.h>
-#include <libguardian/types.h>
-#include <libguardian/itemtype.h>
-#include <libguardian/item.h>
-#include <libguardian/metric.h>
-#include <libguardian/value.h>
-#include <libguardian/assert.h>
-#include <libguardian/memory.h>
-#include <libguardian/plugin.h>
+#ifndef __GUARDIAN_ACL_H__
+#define __GUARDIAN_ACL_H__
 
 void
-        libguardian_init (void);
-#endif                          /* __LIBGUARDIAN_H__ */
+guardian_acl_set (
+        const char *acl,
+        GuardianError *err);
+
+#endif

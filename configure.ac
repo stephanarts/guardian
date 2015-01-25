@@ -232,15 +232,6 @@ AC_ARG_ENABLE(debug,
 	]
 )
 
-AC_ARG_ENABLE(gen-plugin,
-    [  --enable-gen-plugin    enable generator-plugin],
-    [ AC_DEFINE([WITH_GENERATOR_PLUGIN], [1],
-                [])
-      with_generator_plugin=1
-    ]
-)
-AM_CONDITIONAL([WITH_GENERATOR_PLUGIN], [test "$with_generator_plugin" -eq 1])
-
 AC_OUTPUT([
 Makefile
 po/Makefile.in
@@ -248,6 +239,7 @@ libguardian/Makefile
 guardiand/Makefile
 guardian/Makefile
 data/Makefile
+data/schema/Makefile
 plugins/Makefile
 plugins/generator-plugin/Makefile
 plugins/system-plugin/Makefile

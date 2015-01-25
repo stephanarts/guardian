@@ -111,6 +111,18 @@ main (int argc, char **argv)
         exit(1);
     }
 
+    GuardianItem *item = guardian_item_register (
+            "system.uptime",
+            GUARDIAN_ITEMTYPE_INT,
+            60,
+            TRUE,
+            FALSE,
+            NULL);
+    if (item == NULL) {
+        fprintf(stderr, "bah\n");
+    }
+
+
     if (plugin->get_update_time() != 0) {
         exit(1);
     }

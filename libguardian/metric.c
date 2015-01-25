@@ -50,51 +50,24 @@
 #include "log.h"
 #include "types.h"
 #include "itemtype.h"
-#include "item.h"
+#include "metric.h"
 #include "memory.h"
 
-#define GUARDIAN_ITEM_NAME_SIZE 128
+#define METRIC_NAME_SIZE 128
 
-struct _GuardianItem
+struct _GuardianMetric
 {
-    char    name[GUARDIAN_ITEM_NAME_SIZE];
+    char    name[METRIC_NAME_SIZE];
 
     GuardianItemType type;
-
-    double  interval;
-    int     active;
-    int     remote;
-
-    time_t  last_update;
 };
 
-static GuardianItem *_items = NULL;
+static GuardianMetric *_items = NULL;
 static size_t _n_max_items = 0;
 static size_t _n_items = 0;
 
-static GuardianItem **_i_items_name = NULL;
-
-static int
-_item_name_compare (const void *p1, const void *p2)
-{
-    const GuardianItem *a = (const GuardianItem *)p1;
-    const GuardianItem *b = (const GuardianItem *)p2;
-
-    return strcmp (a->name, b->name);
-}
-
-static int
-_item_name_find (const void *p1, const void *p2)
-{
-    const char *a = (const char *)p1;
-    const GuardianItem *b = *(const GuardianItem **)p2;
-
-    return strcmp (a, b->name);
-}
-
-
 void
-guardian_items_init (
+guardian_metric_init (
         size_t n_max_items)
 {
     if (_items != NULL)
@@ -104,29 +77,19 @@ guardian_items_init (
         return;
     }
     _items = guardian_new (
-            sizeof (GuardianItem),
-            n_max_items);
-
-    _i_items_name = guardian_new (
-            sizeof (GuardianItem *),
+            sizeof (GuardianMetric),
             n_max_items);
 
     _n_max_items = n_max_items;
 }
 
-GuardianItem *
-guardian_item_register (
+GuardianMetric *
+guardian_metric_register (
         const char *name,
         GuardianItemType type,
-        double interval,
-        int active,
-        int remote,
         GuardianError **error)
 {
-    GuardianItem s_item;
-    GuardianItem *item = NULL;
-
-    strcpy (s_item.name, name);
+    GuardianMetric *item = NULL;
 
     /**
      * Check if the item-registry has space for a new
@@ -141,70 +104,12 @@ guardian_item_register (
     }
     item = &_items[_n_items];
 
-    if (bsearch (
-                    &s_item,
-                    &_i_items_name,
-                    _n_items,
-                    sizeof (GuardianItem *),
-                    _item_name_compare) != NULL)
-    {
-        guardian_log_error (
-                "Duplicate entry '%s'.",
-                name);
-        return NULL;
-    }
-    _i_items_name[_n_items] = item;
-
-    qsort (
-            &_i_items_name,
-            _n_items + 1,
-            sizeof (GuardianItem *),
-            _item_name_compare);
-
     _n_items++;
 
     guardian_log_debug ("New Item: %s", name);
 
-    item->last_update = -1;
+    strncpy (item->name, name, METRIC_NAME_SIZE);
+    item->type = type;
 
     return item;
-}
-
-void
-guardian_item_unregister (
-        GuardianItem *item)
-{
-
-}
-
-void
-guardian_item_get_interval (
-        GuardianItem *item,
-        double *interval)
-{
-    (*interval) = item->interval;
-}
-
-void
-guardian_item_set_interval (
-        GuardianItem *item,
-        double interval)
-{
-    item->interval = interval;
-}
-
-void
-guardian_item_get_last_update (
-        GuardianItem *item,
-        time_t *last_update)
-{
-    (*last_update) = item->last_update;
-}
-
-void
-guardian_item_set_last_update (
-        GuardianItem *item,
-        time_t last_update)
-{
-    item->last_update = last_update;
 }

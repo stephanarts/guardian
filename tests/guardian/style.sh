@@ -16,7 +16,7 @@ RET=0
 for f in $CODE
 do
     indent $f $TEMP_FILENAME $INDENT_PARAMS
-    diff $f $TEMP_FILENAME
+    diff -u $f $TEMP_FILENAME
     if test $? -ne 0
     then
         RET=1

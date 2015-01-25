@@ -1,0 +1,97 @@
+-- BEGIN --
+
+PRAGMA foreign_keys = ON;
+
+BEGIN TRANSACTION;
+
+-- TABLE USERS --
+-----------------
+CREATE TABLE 'USERS'
+(
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(16) UNIQUE NOT NULL,
+    password VARCHAR(128) NOT NULL
+);
+
+-- TABLE HOSTS --
+-----------------
+CREATE TABLE 'HOSTS'
+(
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(128) UNIQUE
+);
+CREATE INDEX i_host_id ON HOSTS(id);
+
+
+-- TABLE METRICS --
+-------------------
+CREATE TABLE 'METRICS'
+(
+    id INTEGER PRIMARY KEY,
+    host_id INTEGER NOT NULL,
+    name VARCHAR(128) NOT NULL,
+    type VARCHAR(20) NOT NULL,
+
+    FOREIGN KEY(host_id) REFERENCES HOSTS(id),
+    UNIQUE (host_id, name),
+    CHECK
+    (
+        type = "INTEGER" OR
+        type = "STRING" OR
+        type = "DOUBLE"
+    )
+);
+CREATE INDEX i_metrics_id ON METRICS(id);
+CREATE INDEX i_metrics_name ON METRICS(name);
+
+-- TABLE VALUES_STRING --
+-------------------------
+CREATE TABLE 'VALUES_STRING'
+(
+    id INTEGER PRIMARY KEY,
+    metric_id INTEGER NOT NULL,
+    value VARCHAR(124),
+
+    FOREIGN KEY(metric_id) REFERENCES METRICS(id)
+);
+
+-- TABLE VALUES_INTEGER --
+--------------------------
+CREATE TABLE 'VALUES_INTEGER'
+(
+    id INTEGER PRIMARY KEY,
+    metric_id INTEGER NOT NULL,
+    value INTEGER,
+    FOREIGN KEY(metric_id) REFERENCES METRICS(id)
+);
+
+-- TABLE VALUES_DOUBLE --
+-------------------------
+CREATE TABLE 'VALUES_DOUBLE'
+(
+    id INTEGER PRIMARY KEY,
+    metric_id INTEGER NOT NULL,
+    value DOUBLE,
+
+    FOREIGN KEY(metric_id) REFERENCES METRICS(id)
+);
+
+-- TABLE ACL --
+---------------
+CREATE TABLE 'ACL'
+(
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    rule VARCHAR(128) NOT NULL,
+
+    FOREIGN KEY(user_id) REFERENCES USERS(id)
+);
+
+CREATE INDEX i_acl_user_id ON ACL(user_id);
+
+INSERT INTO 'USERS'(name,password) VALUES ('sys', 'test');
+INSERT INTO 'ACL'(user_id, rule) VALUES (1, 'GRANT READ,WRITE *');
+
+COMMIT;
+
+-- END --

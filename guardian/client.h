@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,24 +27,24 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBGUARDIAN_H__
-#define __LIBGUARDIAN_H__
+#ifndef __CLIENT_H__
+#define __CLIENT_H__
 
-#define LIBGUARDIAN_INSIDE_LIBGUARDIAN_H
-
-#include <time.h>
-
-#include <libguardian/log.h>
-#include <libguardian/error.h>
-#include <libguardian/types.h>
-#include <libguardian/itemtype.h>
-#include <libguardian/item.h>
-#include <libguardian/metric.h>
-#include <libguardian/value.h>
-#include <libguardian/assert.h>
-#include <libguardian/memory.h>
-#include <libguardian/plugin.h>
+int
+client_connect_pass (
+        const char *uri,
+        const char *user,
+        const char *password);
 
 void
-        libguardian_init (void);
-#endif                          /* __LIBGUARDIAN_H__ */
+client_disconnect (
+        void);
+
+void
+client_send_cmd (
+        const char *str,
+        size_t len,
+        char **resp,
+        size_t *r_len);
+
+#endif
