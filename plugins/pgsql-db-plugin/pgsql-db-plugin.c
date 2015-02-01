@@ -27,6 +27,86 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-void    guardian_db_init (void);
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
-void    guardian_db_close (void);
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
+#endif
+
+#include <openssl/sha.h>
+
+#include <string.h>
+
+#include <pcre.h>
+
+#include <errno.h>
+
+#include <sys/stat.h>
+
+#include <libguardian/libguardian.h>
+
+static void
+_pgsql_db_set (
+        const char *key,
+        const char *value);
+
+static void
+_pgsql_db_connect (
+        void);
+
+static void
+_pgsql_db_disconnect (
+        void);
+
+GuardianPlugin *
+guardian_plugin_init ()
+{
+    const char *errors = NULL;
+    int     err_offset;
+    GuardianPluginDB *plugin;
+
+    guardian_log_info ("Initialise PostgreSQL plugin");
+
+    plugin = guardian_new (sizeof (GuardianPluginDB), 1);
+
+    plugin->schema_version = 1;
+
+    /* Copy the name */
+    strncpy(plugin->db_name, "pgsql", 20);
+
+    /* DB */
+    plugin->db.set        = _pgsql_db_set;
+    plugin->db.connect    = _pgsql_db_connect;
+    plugin->db.disconnect = _pgsql_db_disconnect;
+
+    /* Roles */
+    //plugin->roles.add = _pgsql_add_role;
+
+    return (GuardianPlugin *)plugin;
+}
+
+static void
+_pgsql_db_set (
+        const char *key,
+        const char *value)
+{
+
+}
+
+static void
+_pgsql_db_connect (
+        void)
+{
+}
+
+static void
+_pgsql_db_disconnect (
+        void)
+{
+}

@@ -73,7 +73,7 @@
 #include "db.h"
 
 #ifndef MAX_PLUGINS
-#define MAX_PLUGINS 4
+#define MAX_PLUGINS 10
 #endif
 
 static GuardianPlugin *_plugins[MAX_PLUGINS];
@@ -116,6 +116,8 @@ show_usage ()
     printf ("   --help     -h     Show usage information (this output)\n");
     printf ("              -v     Show verbose output\n");
     printf ("              -vv    Show very-verbose output\n");
+    printf ("\n");
+    printf ("   --init-db         Initialize DB schema\n");
     printf ("\n");
     printf ("   --fatal-warnings  Make all warnings fatal\n");
     return;
@@ -340,6 +342,59 @@ main (int argc, char **argv)
     /** Do not allow further dynamic memory allocation */
     guardian_set_allow_malloc (FALSE);
 #endif                          /* ENABLE_DEBUG */
+
+    for (i = 0; i < n_plugins; ++i)
+    {
+        if (_plugins[i]->type == GUARDIAN_PLUGIN_DB)
+        {
+            printf("{%s}\n", ((GuardianPluginDB *)_plugins[i])->db_name);
+            if (strcmp(
+                    ((GuardianPluginDB *)_plugins[i])->db_name,
+                    "sqlite3") == 0)
+            {
+                ((GuardianPluginDB *)_plugins[i])->db.connect();
+    
+                error = NULL;
+                ((GuardianPluginDB *)_plugins[i])->ns.add(
+                        "aa",
+                        "sys",
+                        &error);
+                ((GuardianPluginDB *)_plugins[i])->ns.add(
+                        "aa",
+                        "sarts",
+                        &error);
+                ((GuardianPluginDB *)_plugins[i])->ns.add(
+                        "aa",
+                        "tomcat",
+                        &error);
+
+                ((GuardianPluginDB *)_plugins[i])->ns.add(
+                        "aa",
+                        "httpd",
+                        &error);
+                ((GuardianPluginDB *)_plugins[i])->ns.add(
+                        "aa",
+                        "oracle",
+                        &error);
+
+                if (error != NULL)
+                {
+                    guardian_log_warning (
+                            "%s\n",
+                            guardian_error_get_msg (error));
+                }
+
+                ((GuardianPluginDB *)_plugins[i])->ns.list(
+                        "aa",
+                        NULL,
+                        NULL,
+                        &error);
+
+                ((GuardianPluginDB *)_plugins[i])->db.disconnect();
+                break;
+            }
+        }
+    }
 
     guardian_db_init ();
 

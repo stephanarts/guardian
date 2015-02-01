@@ -27,6 +27,24 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-void    guardian_db_init (void);
+#include <config.h>
 
-void    guardian_db_close (void);
+#include <stdlib.h>
+
+#include <stdio.h>
+
+#include <sqlite3.h>
+
+#include <libguardian/libguardian.h>
+
+#include "role.h"
+#include "db.h"
+
+void
+guardian_role_get (
+        const char *role,
+        GuardianError *err)
+{
+
+}
+

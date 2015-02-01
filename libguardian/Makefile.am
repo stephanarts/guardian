@@ -13,6 +13,7 @@ libguardian_1_0_la_SOURCES = \
     log.c \
     error.c \
     plugin.c \
+    plugin-db.c \
     libguardian.c
 
 libguardian_include_HEADERS = \
@@ -25,6 +26,7 @@ libguardian_include_HEADERS = \
     value.h \
     itemtype.h \
     plugin.h \
+    plugin-db.h \
     libguardian.h
 
 libguardian_1_0_la_CFLAGS =               \

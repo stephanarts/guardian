@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,41 +27,57 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
+#if !defined (LIBGUARDIAN_INSIDE_LIBGUARDIAN_H) && !defined(LIBGUARDIAN_COMPILATION)
+#error "Only <libguardian/libguardian.h> can be included directly, this file may disappear or change contents"
 #endif
 
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
+#ifndef __GUARDIAN_PLUGIN_DB_H__
+#define __GUARDIAN_PLUGIN_DB_H__
 
-#ifdef HAVE_STDIO_H
-#include <stdio.h>
-#endif
+typedef struct _GuardianPluginDB GuardianPluginDB;
 
-#include <openssl/sha.h>
-
-#include <string.h>
-
-#include <pcre.h>
-
-#include <errno.h>
-
-#include <sys/stat.h>
-
-#include <stdarg.h>
-#include <libguardian/libguardian.h>
-
-GuardianPlugin *
-guardian_plugin_init ()
+struct _GuardianPluginDB
 {
-    const char *errors = NULL;
-    int     err_offset;
-    GuardianPlugin *plugin;
+    GuardianPlugin plugin;
 
-    guardian_log_info ("Initialise generator plugin");
+    char db_name[20];
 
-    plugin = guardian_new (sizeof (GuardianPlugin), 1);
+    int schema_version;
 
-    return plugin;
-}
+    struct
+    {
+        void (*set) (const char *key, const char *value);
+        void (*connect) (void);
+        void (*disconnect) (void);
+    } db;
+
+    /* Roles */
+    struct
+    {
+        void (*add)(const char *, GuardianError **);
+    } roles;
+
+    /* Namespace */
+    struct
+    {
+        int (*add)(
+                const char *host,
+                const char *ns,
+                GuardianError **);
+        int (*list)(
+                const char *host,
+                char **,
+                int *,
+                GuardianError **);
+    } ns;
+
+    /* ACL */
+    struct
+    {
+        void (*add)(const char *, GuardianError **);
+    } acl;
+
+};
+
+
+#endif                          /* __GUARDIAN_PLUGIN_DB_H__ */

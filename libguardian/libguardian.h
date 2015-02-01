@@ -44,6 +44,7 @@
 #include <libguardian/assert.h>
 #include <libguardian/memory.h>
 #include <libguardian/plugin.h>
+#include <libguardian/plugin-db.h>
 
 void
         libguardian_init (void);

@@ -1,2 +1,3 @@
 SUBDIRS= \
-    system-plugin
+    sqlite3-db-plugin \
+    pgsql-db-plugin

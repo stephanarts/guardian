@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2012 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,6 +27,40 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-void    guardian_db_init (void);
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
-void    guardian_db_close (void);
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
+#endif
+
+#ifdef HAVE_DLFCN_H
+#include <dlfcn.h>
+#endif
+
+#include <time.h>
+
+#include <string.h>
+#include <errno.h>
+
+#include <zmq.h>
+
+#include "error.h"
+#include "memory.h"
+#include "plugin.h"
+#include "plugin-db.h"
+
+GuardianPluginDB *
+guardian_plugin_db_new (void)
+{
+    GuardianPlugin *plugin = guardian_new (sizeof (GuardianPluginDB), 1);
+
+    plugin->type = GUARDIAN_PLUGIN_DB;
+
+    return (GuardianPluginDB *)plugin;
+}

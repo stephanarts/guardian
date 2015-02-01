@@ -33,52 +33,12 @@
 
 #include <stdio.h>
 
-#include <sqlite3.h>
-
-static sqlite3 *_db;
-
 void
 guardian_db_init (void)
 {
-    int     ret = sqlite3_open ("/tmp/quardian.db", &_db);
-    if (ret != SQLITE_OK)
-    {
-        guardian_log_error ("Could not open database");
-        return;
-    }
-    ret = sqlite3_exec (
-            _db,
-            "create table 'entries'('msg' varchar(255));",
-            NULL,
-            NULL,
-            NULL);
-    if (ret != SQLITE_OK)
-    {
-        //guardian_log_error (_db);
-        return;
-    }
 }
 
 void
 guardian_db_close (void)
 {
-    sqlite3_close (_db);
-}
-
-void
-guardian_db_insert_entry (void)
-{
-    //guardian_log_debug ("INSERT ENTRY");
-
-    int     ret = sqlite3_exec (
-            _db,
-            "insert into entries (msg) values('aaaa');",
-            NULL,
-            NULL,
-            NULL);
-    if (ret != SQLITE_OK)
-    {
-        guardian_log_error (sqlite3_errmsg (_db));
-        return;
-    }
 }

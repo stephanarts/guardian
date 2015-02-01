@@ -34,12 +34,20 @@
 #ifndef __GUARDIAN_PLUGIN_H__
 #define __GUARDIAN_PLUGIN_H__
 
+typedef enum
+{
+    GUARDIAN_PLUGIN_DB
+} PluginType;
+
 
 typedef struct _GuardianPlugin GuardianPlugin;
 
 struct _GuardianPlugin
 {
     void   *handle;             /* dlopen handle */
+    PluginType type;
+    char    name[20];
+
     void    (*update_items) (void);
     time_t  (*get_update_time) (void);
 };
@@ -53,16 +61,4 @@ GuardianPlugin *
 guardian_plugin_new (
         void);
 
-void
-guardian_plugin_push_entry (
-        GuardianPlugin *,
-        const char *host,
-        const char *source,
-        const char *timestamp,
-        const char *entry);
-
-void
-guardian_plugin_extract_fields (
-        GuardianPlugin *,
-        const char *entry);
 #endif                          /* __GUARDIAN_PLUGIN_H__ */

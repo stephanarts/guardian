@@ -30,14 +30,6 @@ Run in verbose mode
 Show version information
 .TP 3
 .B
--P  --port
-Provide Guardian Server Port
-.TP 3
-.B
--H  --host
-Provide Guardian Server Host
-.TP 3
-.B
 -i  --interactive
 Interactive Menu
 .TP 3
@@ -53,6 +45,11 @@ Set config parameter for command-line util.
 .B
 exit
 Close the shell.
+.TP 3
+.B
+connect user[:password][@host[:port]]
+Connect to a server, if ommitted, host defaults to localhost,
+port defaults to 1234.
 
 .
 .SH BUGS

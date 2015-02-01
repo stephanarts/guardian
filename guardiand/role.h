@@ -27,6 +27,12 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-void    guardian_db_init (void);
+#ifndef __GUARDIAN_ROLE_H__
+#define __GUARDIAN_ROLE_H__
 
-void    guardian_db_close (void);
+void
+guardian_role_get (
+        const char *role,
+        GuardianError *err);
+
+#endif

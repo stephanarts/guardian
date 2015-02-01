@@ -1,0 +1,25 @@
+
+plugindir = \
+    $(libdir)/guardian
+
+plugin_LTLIBRARIES = \
+    sqlite3-db-plugin.la
+
+sqlite3_db_plugin_la_SOURCES = \
+    sqlite3-db-plugin.c
+
+sqlite3_db_plugin_la_LDFLAGS =       \
+    -avoid-version       \
+    -module              \
+    $(PLATFORM_LDFLAGS)
+
+sqlite3_db_plugin_la_LIBADD = \
+    $(SQLITE3_LIBS)
+
+sqlite3_db_plugin_la_CFLAGS =   \
+    $(PCRE_CFLAGS) \
+    $(SQLITE3_CFLAGS) \
+    -std=c99
+
+AM_CPPFLAGS = \
+    -I$(top_srcdir)

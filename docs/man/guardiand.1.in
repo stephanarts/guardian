@@ -15,6 +15,13 @@ guardiand [
 Display command usage information
 .TP 3
 .B
+--init-db
+Initialize Database according to schema specified in
+.B
+${prefix}/share/guardian/schema.
+This currently only works for the SQLITE backend.
+.TP 3
+.B
 -v --verbose
 Run in verbose mode
 .TP 3
@@ -23,37 +30,3 @@ Run in verbose mode
 Show version information
 .SH BUGS
 It doesn't work yet.
-.SH DESIGN This section describes some ramblings about the design.
-SourceEngines register which source-types they support.
-Each source-type can have a default source-engine. This can be set 
-in a config-file. A Source-Engine processes the source and calls the
-\'_new_entry\' callback function. For each entry it processes.
-It is also possible to call \'_new_entries\' on a number of entries at
-once, this could possibly speed up the parsing.
-The source-engine can save the state of a source if that is relevant.
-This could be usefull when parsing log-files.
-.PP
-Field definitions are specified with as regular expressions as followed:
-.TP 3
-.B
-(?<NAME>EXPRESSION)
-For example
-.IR
-(?<HOST>\\\\d)
-.PP
-Fields can be matched as followed:
-.TP 3
-.B
-%{HOST:host} %{A:a}
-.PP
-Expressions are stored in a 'NAME->EXPR' map, where the NAME must be
-unique, and can't be overridden. Expressions can reference other
-expressions, if their definition could be changed at runtime,
-this could lead to unpredictable behaviour.
-
-.SH TODO
-Refactor timestamp code to tie into a generic expression framework.
-which couunwanted behaviour of
-expressions referencing other expressions).
-.PP
-Implement entry-matching based on expression-framework.
