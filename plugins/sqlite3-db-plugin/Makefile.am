@@ -6,7 +6,12 @@ plugin_LTLIBRARIES = \
     sqlite3-db-plugin.la
 
 sqlite3_db_plugin_la_SOURCES = \
-    sqlite3-db-plugin.c
+    plugin.c \
+    db.c db.h \
+    host.c host.h \
+    ns.c ns.h \
+    metric.c metric.h \
+    value.c value.h
 
 sqlite3_db_plugin_la_LDFLAGS =       \
     -avoid-version       \

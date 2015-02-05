@@ -51,11 +51,14 @@ struct _GuardianPluginDB
         void (*disconnect) (void);
     } db;
 
-    /* Roles */
+    /* Host */
     struct
     {
-        void (*add)(const char *, GuardianError **);
-    } roles;
+        int (*add)(
+                const char *host,
+                const char *name,
+                GuardianError **);
+    } host;
 
     /* Namespace */
     struct
@@ -71,11 +74,26 @@ struct _GuardianPluginDB
                 GuardianError **);
     } ns;
 
-    /* ACL */
+    /* Metric */
     struct
     {
-        void (*add)(const char *, GuardianError **);
-    } acl;
+        int (*add)(
+                const char *host,
+                const char *ns,
+                const char *name,
+                GuardianError **);
+    } metric;
+
+    struct
+    {
+        int (*publish)(
+                const char *host,
+                const char *ns,
+                const char *metric,
+                const char *value,
+                const time_t ts,
+                GuardianError **);
+    } value;
 
 };
 

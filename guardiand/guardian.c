@@ -359,28 +359,11 @@ main (int argc, char **argv)
                         "aa",
                         "sys",
                         &error);
-                ((GuardianPluginDB *)_plugins[i])->ns.add(
-                        "aa",
-                        "sarts",
-                        &error);
-                ((GuardianPluginDB *)_plugins[i])->ns.add(
-                        "aa",
-                        "tomcat",
-                        &error);
-
-                ((GuardianPluginDB *)_plugins[i])->ns.add(
-                        "aa",
-                        "httpd",
-                        &error);
-                ((GuardianPluginDB *)_plugins[i])->ns.add(
-                        "aa",
-                        "oracle",
-                        &error);
 
                 if (error != NULL)
                 {
                     guardian_log_warning (
-                            "%s\n",
+                            "Add: %s\n",
                             guardian_error_get_msg (error));
                 }
 
@@ -389,6 +372,25 @@ main (int argc, char **argv)
                         NULL,
                         NULL,
                         &error);
+
+                ((GuardianPluginDB *)_plugins[i])->metric.add(
+                        "aa",
+                        "sys",
+                        "cpu.load.avg[1]",
+                        &error);
+
+                ((GuardianPluginDB *)_plugins[i])->metric.add(
+                        "aa",
+                        "sys",
+                        "cpu.load.avg[5]",
+                        &error);
+
+                ((GuardianPluginDB *)_plugins[i])->metric.add(
+                        "aa",
+                        "sys",
+                        "cpu.load.avg[15]",
+                        &error);
+                
 
                 ((GuardianPluginDB *)_plugins[i])->db.disconnect();
                 break;

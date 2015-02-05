@@ -53,115 +53,12 @@
 
 #include <libguardian/libguardian.h>
 
-static sqlite3 *_sqlite3_db = NULL;
+#include "plugin.h"
+#include "db.h"
+#include "host.h"
+#include "ns.h"
 
-static int
-_sqlite3_get_hostid (
-        const char *name,
-        GuardianError **error);
-
-static void
-_sqlite3_db_set (
-        const char *key,
-        const char *value);
-
-static void
-_sqlite3_db_connect (
-        void);
-
-static void
-_sqlite3_db_disconnect (
-        void);
-
-static void
-_sqlite3_add_role (
-        const char *name,
-        GuardianError **error);
-
-static int
-_sqlite3_ns_add (
-        const char *host,
-        const char *name,
-        GuardianError **error);
-
-static int 
-_sqlite3_ns_list (
-        const char *host,
-        char **nss,
-        int *len,
-        GuardianError **error);
-
-GuardianPlugin *
-guardian_plugin_init ()
-{
-    const char *errors = NULL;
-    int     err_offset;
-    GuardianPluginDB *plugin;
-
-    guardian_log_info ("Initialise SQLite3 plugin");
-
-    plugin = guardian_new (sizeof (GuardianPluginDB), 1);
-
-    plugin->schema_version = 1;
-
-    /* Copy the name */
-    strncpy(plugin->db_name, "sqlite3", 20);
-
-    /* DB */
-    plugin->db.set        = _sqlite3_db_set;
-    plugin->db.connect    = _sqlite3_db_connect;
-    plugin->db.disconnect = _sqlite3_db_disconnect;
-
-    /* Roles */
-    plugin->roles.add = _sqlite3_add_role;
-
-    /* Namespace */
-    plugin->ns.add = _sqlite3_ns_add;
-    plugin->ns.list = _sqlite3_ns_list;
-
-    /* ACL */
-    //plugin->acl.add = _sqlite3_acl_add;
-
-    return (GuardianPlugin *)plugin;
-}
-
-static void
-_sqlite3_db_set (
-        const char *key,
-        const char *value)
-{
-
-}
-
-static void
-_sqlite3_db_connect (
-        void)
-{
-    if (_sqlite3_db == NULL)
-    {
-        fprintf(stderr, "OPEN DB");
-        sqlite3_open (
-                "/tmp/guardian.db",
-                &_sqlite3_db);
-    }
-}
-
-static void
-_sqlite3_db_disconnect (
-        void)
-{
-    sqlite3_close (_sqlite3_db);
-}
-
-static void
-_sqlite3_add_role (
-        const char *name,
-        GuardianError **error)
-{
-
-}
-
-static int 
+int 
 _sqlite3_ns_add (
         const char *host,
         const char *name,
@@ -174,9 +71,12 @@ _sqlite3_ns_add (
     int host_id;
     GuardianError *call_error = NULL;
 
+    sqlite3 *db = _sqlite3_db_get();
+
     host_id = _sqlite3_get_hostid ( host, &call_error);
     if (host_id == -1)
     {
+        *error = call_error;
         return -1;
     }
 
@@ -189,11 +89,20 @@ _sqlite3_ns_add (
             name);
 
     ret = sqlite3_prepare_v2 (
-            _sqlite3_db,
+            db,
             query,
             -1,
             &handle,
             NULL);
+    if (ret != SQLITE_OK)
+    {
+        errmsg = sqlite3_errmsg (db);
+        *error = guardian_error_new (
+                "%s",
+                errmsg);
+        return -1;
+    }
+
     do
     {
         ret = sqlite3_step (handle);
@@ -204,7 +113,7 @@ _sqlite3_ns_add (
         case SQLITE_INTERRUPT:
         case SQLITE_SCHEMA:
         case SQLITE_CORRUPT:
-            errmsg = sqlite3_errmsg (_sqlite3_db);
+            errmsg = sqlite3_errmsg (db);
             *error = guardian_error_new (
                     "%s",
                     errmsg);
@@ -214,7 +123,7 @@ _sqlite3_ns_add (
         case SQLITE_DONE:
             break;
         default:
-            errmsg = sqlite3_errmsg (_sqlite3_db);
+            errmsg = sqlite3_errmsg (db);
             *error = guardian_error_new (
                     "%s",
                     errmsg);
@@ -223,10 +132,12 @@ _sqlite3_ns_add (
             break;
     }
 
+    sqlite3_finalize(handle);
+
     return 0;
 }
 
-static int
+int
 _sqlite3_ns_list (
         const char *host,
         char **nss,
@@ -239,6 +150,8 @@ _sqlite3_ns_list (
     const char *errmsg;
     int host_id;
     GuardianError *call_error = NULL;
+
+    sqlite3 *db = _sqlite3_db_get();
 
     host_id = _sqlite3_get_hostid ( host, &call_error);
     if (host_id == -1)
@@ -255,7 +168,7 @@ _sqlite3_ns_list (
             host_id);
 
     ret = sqlite3_prepare_v2 (
-            _sqlite3_db,
+            db,
             query,
             -1,
             &handle,
@@ -270,7 +183,7 @@ _sqlite3_ns_list (
             case SQLITE_INTERRUPT:
             case SQLITE_SCHEMA:
             case SQLITE_CORRUPT:
-                errmsg = sqlite3_errmsg (_sqlite3_db);
+                errmsg = sqlite3_errmsg (db);
                 *error = guardian_error_new (
                         "%s",
                         errmsg);
@@ -278,7 +191,7 @@ _sqlite3_ns_list (
                 return -1;
                 break;
             default:
-                errmsg = sqlite3_errmsg (_sqlite3_db);
+                errmsg = sqlite3_errmsg (db);
                 *error = guardian_error_new (
                         "%s",
                         errmsg);
@@ -304,9 +217,10 @@ _sqlite3_ns_list (
     return 0;
 }
 
-static int
-_sqlite3_get_hostid (
+int
+_sqlite3_get_nsid (
         const char *host,
+        const char *ns,
         GuardianError **error)
 {
     char query[128];
@@ -314,19 +228,39 @@ _sqlite3_get_hostid (
     int ret;
     const char *errmsg;
     int host_id;
+    int ns_id;
+    GuardianError *call_error = NULL;
+
+    sqlite3 *db = _sqlite3_db_get();
+
+    host_id = _sqlite3_get_hostid ( host, &call_error);
+    if (host_id == -1)
+    {
+        *error = call_error;
+        return -1;
+    }
 
     snprintf (
             query,
             128,
-            "SELECT id FROM 'HOSTS' WHERE name='%s';",
-            host);
+            "SELECT id FROM 'NAMESPACE' WHERE name='%s' AND host_id=%d;",
+            ns,
+            host_id);
 
     ret = sqlite3_prepare_v2 (
-            _sqlite3_db,
+            db,
             query,
             -1,
             &handle,
             NULL);
+    if (ret != SQLITE_OK)
+    {
+        errmsg = sqlite3_errmsg (db);
+        *error = guardian_error_new (
+                "%s",
+                errmsg);
+        return -1;
+    }
 
     do
     {
@@ -338,7 +272,8 @@ _sqlite3_get_hostid (
         case SQLITE_INTERRUPT:
         case SQLITE_SCHEMA:
         case SQLITE_CORRUPT:
-            errmsg = sqlite3_errmsg (_sqlite3_db);
+        default:
+            errmsg = sqlite3_errmsg (db);
             *error = guardian_error_new (
                     "%s",
                     errmsg);
@@ -346,11 +281,12 @@ _sqlite3_get_hostid (
             return -1;
             break;
         case SQLITE_ROW:
-            host_id = sqlite3_column_int (handle, 0);
+            ns_id = sqlite3_column_int (handle, 0);
             break;
         case SQLITE_DONE:
             *error = guardian_error_new (
-                    "Host '%s' not found.",
+                    "Namespace '%s' for host '%s' not found.",
+                    ns,
                     host);
             sqlite3_finalize(handle);
             return -1;
@@ -363,7 +299,7 @@ _sqlite3_get_hostid (
         case SQLITE_INTERRUPT:
         case SQLITE_SCHEMA:
         case SQLITE_CORRUPT:
-            errmsg = sqlite3_errmsg (_sqlite3_db);
+            errmsg = sqlite3_errmsg (db);
             *error = guardian_error_new (
                     "%s",
                     errmsg);
@@ -372,8 +308,8 @@ _sqlite3_get_hostid (
             break;
         case SQLITE_ROW:
             *error = guardian_error_new (
-                    "Multiple entries of host '%s'.\n",
-                    host);
+                    "Multiple entries of namespace '%s'.\n",
+                    ns);
             sqlite3_finalize(handle);
             return -1;
             break;
@@ -382,6 +318,7 @@ _sqlite3_get_hostid (
             break;
     }
 
-    return host_id;
+    printf(">>%d\n", ns_id);
+    return ns_id;
 }
 

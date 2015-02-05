@@ -14,15 +14,6 @@ CREATE TABLE 'GENERIC'
 );
 INSERT INTO 'GENERIC'(name,value) VALUES ('SCHEMA-VERSION', '1.0');
 
--- TABLE USERS --
------------------
-CREATE TABLE 'USERS'
-(
-    id INTEGER PRIMARY KEY,
-    name VARCHAR(16) UNIQUE NOT NULL,
-    password VARCHAR(128) NOT NULL
-);
-
 -- TABLE HOSTS --
 -----------------
 CREATE TABLE 'HOSTS'
@@ -50,12 +41,12 @@ CREATE TABLE 'NAMESPACE'
 CREATE TABLE 'METRICS'
 (
     id INTEGER PRIMARY KEY,
-    host_id INTEGER NOT NULL,
+    ns_id INTEGER NOT NULL,
     name VARCHAR(128) NOT NULL,
     type VARCHAR(20) NOT NULL,
 
-    FOREIGN KEY(host_id) REFERENCES HOSTS(id),
-    UNIQUE (host_id, name),
+    FOREIGN KEY(ns_id) REFERENCES NAMESPACE(id),
+    UNIQUE (ns_id, name),
     CHECK
     (
         type = "INTEGER" OR
@@ -66,56 +57,21 @@ CREATE TABLE 'METRICS'
 CREATE INDEX i_metrics_id ON METRICS(id);
 CREATE INDEX i_metrics_name ON METRICS(name);
 
--- TABLE VALUES_STRING --
--------------------------
-CREATE TABLE 'VALUES_STRING'
-(
-    id INTEGER PRIMARY KEY,
-    metric_id INTEGER NOT NULL,
-    value VARCHAR(124),
-
-    FOREIGN KEY(metric_id) REFERENCES METRICS(id)
-);
-
 -- TABLE VALUES_INTEGER --
 --------------------------
 CREATE TABLE 'VALUES_INTEGER'
 (
     id INTEGER PRIMARY KEY,
     metric_id INTEGER NOT NULL,
-    value INTEGER,
-    FOREIGN KEY(metric_id) REFERENCES METRICS(id)
-);
-
--- TABLE VALUES_DOUBLE --
--------------------------
-CREATE TABLE 'VALUES_DOUBLE'
-(
-    id INTEGER PRIMARY KEY,
-    metric_id INTEGER NOT NULL,
-    value DOUBLE,
+    value INTEGER NOT NULL,
+    timestamp DATETIME NOT NULL,
 
     FOREIGN KEY(metric_id) REFERENCES METRICS(id)
 );
+CREATE INDEX i_values_integer_ts ON VALUES_INTEGER(timestamp);
 
--- TABLE ACL --
----------------
-CREATE TABLE 'ACL'
-(
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    rule VARCHAR(128) NOT NULL,
-
-    FOREIGN KEY(user_id) REFERENCES USERS(id)
-);
-
-CREATE INDEX i_acl_user_id ON ACL(user_id);
-
-INSERT INTO 'USERS'(name,password) VALUES ('sys', 'test');
 INSERT INTO 'HOSTS'(name) VALUES ('localhost');
 INSERT INTO 'NAMESPACE'(name, host_id) VALUES ('sys', 1);
-
-INSERT INTO 'ACL'(user_id, rule) VALUES (1, 'GRANT READ,WRITE *');
 
 COMMIT;
 
