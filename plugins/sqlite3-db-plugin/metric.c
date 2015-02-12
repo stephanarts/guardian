@@ -61,8 +61,7 @@
 
 int
 _sqlite3_metric_add (
-        const char *host,
-        const char *ns,
+        void *ns_ptr,
         const char *name,
         GuardianError **error)
 {
@@ -75,7 +74,7 @@ _sqlite3_metric_add (
 
     sqlite3 *db = _sqlite3_db_get();
 
-    ns_id = _sqlite3_get_nsid (host, ns, &call_error);
+    ns_id = _sqlite3_ns_getid (ns_ptr, &call_error);
     if (ns_id == -1)
     {
         *error = call_error;

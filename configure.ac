@@ -243,7 +243,6 @@ data/schema/Makefile
 plugins/Makefile
 plugins/sqlite3-db-plugin/Makefile
 plugins/pgsql-db-plugin/Makefile
-plugins/system-plugin/Makefile
 tests/Makefile
 tests/libguardian/Makefile
 tests/guardian/Makefile

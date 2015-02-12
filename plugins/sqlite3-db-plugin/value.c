@@ -56,36 +56,52 @@
 #include "plugin.h"
 #include "db.h"
 #include "host.h"
+#include "metric.h"
 #include "ns.h"
-
-#define HOSTNAME_MAXLEN 255
-
-struct _Host
-{
-    int host_id;
-    char name[HOSTNAME_MAXLEN+1];
-};
-
-Host _hosts[10];
+#include "value.h"
 
 int
-_sqlite3_get_hostid (
+_sqlite3_value_publish (
         const char *host,
+        const char *ns,
+        const char *metric,
+        const char *value,
+        const time_t ts,
         GuardianError **error)
 {
     char query[128];
     sqlite3_stmt *handle = NULL;
     int ret;
     const char *errmsg;
+    int ns_id;
     int host_id;
+    int metric_id;
+    GuardianError *call_error = NULL;
 
     sqlite3 *db = _sqlite3_db_get();
 
+    host_id = _sqlite3_get_hostid (host, &call_error);
+    if (host_id == -1)
+    {
+        *error = call_error;
+        return -1;
+    }
+
+    ns_id = _sqlite3_get_nsid (host, ns, &call_error);
+    if (ns_id == -1)
+    {
+        *error = call_error;
+        return -1;
+    }
+
+/*
     snprintf (
             query,
             128,
-            "SELECT id FROM 'HOSTS' WHERE name='%s';",
-            host);
+            "INSERT INTO 'METRICS'(ns_id,name,type) "
+            "VALUES(%d,\"%s\",\"INTEGER\");",
+            ns_id,
+            name);
 
     ret = sqlite3_prepare_v2 (
             db,
@@ -112,6 +128,15 @@ _sqlite3_get_hostid (
         case SQLITE_INTERRUPT:
         case SQLITE_SCHEMA:
         case SQLITE_CORRUPT:
+            errmsg = sqlite3_errmsg (db);
+            *error = guardian_error_new (
+                    "%s",
+                    errmsg);
+            sqlite3_finalize(handle);
+            return -1;
+            break;
+        case SQLITE_DONE:
+            break;
         default:
             errmsg = sqlite3_errmsg (db);
             *error = guardian_error_new (
@@ -120,64 +145,10 @@ _sqlite3_get_hostid (
             sqlite3_finalize(handle);
             return -1;
             break;
-        case SQLITE_ROW:
-            host_id = sqlite3_column_int (handle, 0);
-            break;
-        case SQLITE_DONE:
-            *error = guardian_error_new (
-                    "Host '%s' not found.",
-                    host);
-            sqlite3_finalize(handle);
-            return -1;
-            break;
     }
 
-    ret = sqlite3_step (handle);
-    switch (ret)
-    {
-        case SQLITE_INTERRUPT:
-        case SQLITE_SCHEMA:
-        case SQLITE_CORRUPT:
-            errmsg = sqlite3_errmsg (db);
-            *error = guardian_error_new (
-                    "%s",
-                    errmsg);
-            sqlite3_finalize(handle);
-            return -1;
-            break;
-        case SQLITE_ROW:
-            *error = guardian_error_new (
-                    "Multiple entries of host '%s'.\n",
-                    host);
-            sqlite3_finalize(handle);
-            return -1;
-            break;
-        case SQLITE_DONE:
-            sqlite3_finalize(handle);
-            break;
-    }
-
-    printf(">>%d\n", host_id);
-    return host_id;
-}
-
-int
-_sqlite3_host_get (
-        const char *name,
-        void **host_ptr,
-        GuardianError **error)
-{
-    strncpy(_hosts[0].name, name, HOSTNAME_MAXLEN);
-    _hosts[0].host_id = 2;
-    (*host_ptr) = &_hosts[0];
+    sqlite3_finalize(handle);
+*/
 
     return 0;
-}
-
-int
-_sqlite3_host_getid (
-        Host *host,
-        GuardianError **error)
-{
-    return host->host_id;
 }

@@ -171,6 +171,8 @@ main (int argc, char **argv)
     struct sigaction sa;
 
     void   *ctx = zmq_ctx_new ();
+    void   *host_ptr = NULL;
+    void   *ns_ptr = NULL;
 
     sa.sa_handler = process_signal;
     sa.sa_flags = SA_RESTART;
@@ -354,10 +356,20 @@ main (int argc, char **argv)
             {
                 ((GuardianPluginDB *)_plugins[i])->db.connect();
     
-                error = NULL;
-                ((GuardianPluginDB *)_plugins[i])->ns.add(
+                ((GuardianPluginDB *)_plugins[i])->host.get(
                         "aa",
+                        &host_ptr,
+                        &error);
+
+                ((GuardianPluginDB *)_plugins[i])->ns.add(
                         "sys",
+                        host_ptr,
+                        &error);
+
+                ((GuardianPluginDB *)_plugins[i])->ns.get(
+                        "sys",
+                        host_ptr,
+                        &ns_ptr,
                         &error);
 
                 if (error != NULL)
@@ -367,30 +379,30 @@ main (int argc, char **argv)
                             guardian_error_get_msg (error));
                 }
 
+                /*
                 ((GuardianPluginDB *)_plugins[i])->ns.list(
                         "aa",
                         NULL,
                         NULL,
                         &error);
+                */
 
+                /*
                 ((GuardianPluginDB *)_plugins[i])->metric.add(
-                        "aa",
-                        "sys",
+                        ns_ptr,
                         "cpu.load.avg[1]",
                         &error);
 
                 ((GuardianPluginDB *)_plugins[i])->metric.add(
-                        "aa",
-                        "sys",
+                        ns_ptr,
                         "cpu.load.avg[5]",
                         &error);
 
                 ((GuardianPluginDB *)_plugins[i])->metric.add(
-                        "aa",
-                        "sys",
+                        ns_ptr,
                         "cpu.load.avg[15]",
                         &error);
-                
+                */
 
                 ((GuardianPluginDB *)_plugins[i])->db.disconnect();
                 break;

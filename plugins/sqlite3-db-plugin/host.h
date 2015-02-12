@@ -27,7 +27,16 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+typedef struct _Host Host;
+
 int
-_sqlite3_get_hostid (
+_sqlite3_host_get (
         const char *host,
+        void **host_ptr,
+        GuardianError **);
+
+int
+_sqlite3_host_getid (
+        Host *host,
         GuardianError **error);
+

@@ -58,10 +58,20 @@
 #include "host.h"
 #include "ns.h"
 
+#define NAMESPACE_MAXLEN 63
+
+struct _Ns
+{
+    int ns_id;
+    char name[NAMESPACE_MAXLEN+1];
+};
+
+Ns _nss[10];
+
 int 
 _sqlite3_ns_add (
-        const char *host,
         const char *name,
+        void *host_ptr,
         GuardianError **error)
 {
     char query[128];
@@ -73,7 +83,7 @@ _sqlite3_ns_add (
 
     sqlite3 *db = _sqlite3_db_get();
 
-    host_id = _sqlite3_get_hostid ( host, &call_error);
+    host_id = _sqlite3_host_getid ( host_ptr, &call_error);
     if (host_id == -1)
     {
         *error = call_error;
@@ -139,9 +149,9 @@ _sqlite3_ns_add (
 
 int
 _sqlite3_ns_list (
-        const char *host,
         char **nss,
-        int *len,
+        int *n_nss,
+        void *host_ptr,
         GuardianError **error)
 {
     char query[128];
@@ -153,7 +163,7 @@ _sqlite3_ns_list (
 
     sqlite3 *db = _sqlite3_db_get();
 
-    host_id = _sqlite3_get_hostid ( host, &call_error);
+    host_id = _sqlite3_host_getid ( host_ptr, &call_error);
     if (host_id == -1)
     {
         return -1;
@@ -218,8 +228,23 @@ _sqlite3_ns_list (
 }
 
 int
+_sqlite3_ns_get (
+        const char *name,
+        void *host_ptr,
+        void **ns_ptr,
+        GuardianError **error)
+{
+    strncpy(_nss[0].name, name, NAMESPACE_MAXLEN);
+    _nss[0].ns_id = 1;
+    (*ns_ptr) = &_nss[0];
+
+    return 0;
+}
+
+
+int
 _sqlite3_get_nsid (
-        const char *host,
+        void *host,
         const char *ns,
         GuardianError **error)
 {
@@ -233,7 +258,7 @@ _sqlite3_get_nsid (
 
     sqlite3 *db = _sqlite3_db_get();
 
-    host_id = _sqlite3_get_hostid ( host, &call_error);
+    host_id = _sqlite3_host_getid ((Host *)host, &call_error);
     if (host_id == -1)
     {
         *error = call_error;
@@ -322,3 +347,10 @@ _sqlite3_get_nsid (
     return ns_id;
 }
 
+int
+_sqlite3_ns_getid (
+        Ns *ns,
+        GuardianError **error)
+{
+    return ns->ns_id;
+}

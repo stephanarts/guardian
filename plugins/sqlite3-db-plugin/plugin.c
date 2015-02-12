@@ -54,6 +54,7 @@
 #include <libguardian/libguardian.h>
 
 #include "plugin.h"
+#include "host.h"
 #include "ns.h"
 #include "db.h"
 #include "metric.h"
@@ -82,16 +83,18 @@ guardian_plugin_init ()
 
     /* Host */
     /*plugin->host.add = _sqlite3_add_role;*/
+    plugin->host.get = _sqlite3_host_get;
 
     /* Namespace */
     plugin->ns.add = _sqlite3_ns_add;
+    plugin->ns.get = _sqlite3_ns_get;
     plugin->ns.list = _sqlite3_ns_list;
 
     /* Metrics */
-    plugin->metric.add = _sqlite3_metric_add;
+    //plugin->metric.add = _sqlite3_metric_add;
 
     /* Values */
-    plugin->value.publish = _sqlite3_value_publish;
+    //plugin->value.publish = _sqlite3_value_publish;
 
     return (GuardianPlugin *)plugin;
 }

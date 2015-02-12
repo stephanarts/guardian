@@ -58,19 +58,34 @@ struct _GuardianPluginDB
                 const char *host,
                 const char *name,
                 GuardianError **);
+        int (*get)(
+                const char *host,
+                void **host_ptr,
+                GuardianError **);
+        int (*free)(
+                const void *host_ptr,
+                GuardianError **);
     } host;
 
     /* Namespace */
     struct
     {
         int (*add)(
-                const char *host,
                 const char *ns,
+                void *host_ptr,
+                GuardianError **);
+        int (*get)(
+                const char *ns,
+                void *host_ptr,
+                void **ns_ptr,
                 GuardianError **);
         int (*list)(
-                const char *host,
-                char **,
-                int *,
+                char **nss,
+                int *n_nss,
+                void *host_ptr,
+                GuardianError **);
+        int (*free)(
+                const void *ns_ptr,
                 GuardianError **);
     } ns;
 
@@ -78,18 +93,23 @@ struct _GuardianPluginDB
     struct
     {
         int (*add)(
-                const char *host,
-                const char *ns,
+                void *ns_ptr,
                 const char *name,
+                GuardianError **);
+        int (*get)(
+                const void *ns_ptr,
+                const char *name,
+                void **metric_ptr,
+                GuardianError **);
+        int (*free)(
+                const void *metric_ptr,
                 GuardianError **);
     } metric;
 
     struct
     {
         int (*publish)(
-                const char *host,
-                const char *ns,
-                const char *metric,
+                void *metric_ptr,
                 const char *value,
                 const time_t ts,
                 GuardianError **);

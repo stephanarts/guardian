@@ -27,21 +27,34 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+typedef struct _Ns Ns;
+
 int
 _sqlite3_ns_add (
-        const char *host,
         const char *name,
+        void *host_ptr,
+        GuardianError **error);
+
+int
+_sqlite3_ns_get (
+        const char *ns,
+        void *host_ptr,
+        void **ns_ptr,
         GuardianError **error);
 
 int 
 _sqlite3_ns_list (
-        const char *host,
         char **nss,
         int *len,
+        void *host_ptr,
         GuardianError **error);
 
 int
+_sqlite3_ns_getid (
+        Ns *ns,
+        GuardianError **error);
+int
 _sqlite3_get_nsid (
-        const char *host,
+        void *host_ptr,
         const char *ns,
         GuardianError **error);

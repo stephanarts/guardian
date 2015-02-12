@@ -14,6 +14,9 @@ libguardian_1_0_la_SOURCES = \
     error.c \
     plugin.c \
     plugin-db.c \
+    ns.c \
+    host.c \
+    metric.c \
     libguardian.c
 
 libguardian_include_HEADERS = \
@@ -27,6 +30,9 @@ libguardian_include_HEADERS = \
     itemtype.h \
     plugin.h \
     plugin-db.h \
+    ns.h \
+    host.h \
+    metric.h \
     libguardian.h
 
 libguardian_1_0_la_CFLAGS =               \

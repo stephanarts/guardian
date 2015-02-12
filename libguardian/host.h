@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2015 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,9 +27,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
-int
-_sqlite3_metric_add (
-        void *ns_ptr,
-        GuardianError **error);
-*/
+#if !defined (LIBGUARDIAN_INSIDE_LIBGUARDIAN_H) && !defined(LIBGUARDIAN_COMPILATION)
+#error "Only <libguardian/libguardian.h> can be included directly, this file may disappear or change contents"
+#endif
+
+#ifndef __GUARDIAN_HOST_H__
+#define __GUARDIAN_HOST_H__
+
+typedef struct _GuardianHost GuardianHost;
+
+#endif                          /* __GUARDIAN_NS_H__ */
