@@ -361,6 +361,13 @@ main (int argc, char **argv)
                         &host_ptr,
                         &error);
 
+                host_ptr = NULL;
+
+                ((GuardianPluginDB *)_plugins[i])->host.get(
+                        "aa",
+                        &host_ptr,
+                        &error);
+
                 ((GuardianPluginDB *)_plugins[i])->ns.add(
                         "sys",
                         host_ptr,

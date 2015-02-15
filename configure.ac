@@ -247,7 +247,7 @@ tests/Makefile
 tests/libguardian/Makefile
 tests/guardian/Makefile
 tests/guardiand/Makefile
-tests/plugins/Makefile
+tests/db-plugins/Makefile
 docs/Makefile
 docs/man/Makefile
 docs/man/guardian.1

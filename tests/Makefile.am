@@ -2,7 +2,7 @@ SUBDIRS = \
     libguardian \
     guardian \
     guardiand \
-    plugins
+    db-plugins
 
 #
 #EXTRA_DIST = defs $(TESTS)

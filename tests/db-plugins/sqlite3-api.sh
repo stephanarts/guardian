@@ -1,0 +1,3 @@
+
+
+./plugin-loader sqlite3

@@ -59,6 +59,7 @@
 #include "ns.h"
 
 #define HOSTNAME_MAXLEN 255
+#define HOSTS_CACHESIZE 10
 
 struct _Host
 {
@@ -66,7 +67,9 @@ struct _Host
     char name[HOSTNAME_MAXLEN+1];
 };
 
-Host _hosts[10];
+Host _hosts_cache[HOSTS_CACHESIZE];
+Host *_i_hosts_cache_name[HOSTS_CACHESIZE];
+int  _n_hosts_cache = 0;
 
 int
 _sqlite3_get_hostid (
@@ -167,9 +170,147 @@ _sqlite3_host_get (
         void **host_ptr,
         GuardianError **error)
 {
-    strncpy(_hosts[0].name, name, HOSTNAME_MAXLEN);
-    _hosts[0].host_id = 2;
-    (*host_ptr) = &_hosts[0];
+    sqlite3 *db = _sqlite3_db_get();
+    char query[128];
+    sqlite3_stmt *handle = NULL;
+    int ret;
+    const char *errmsg;
+
+    int host_id = -1;
+
+    int min = 0;
+    int mid = 0;
+    int max = _n_hosts_cache-1;
+
+
+    if (_n_hosts_cache > 0)
+    {
+        /* Find the host in the cache index */
+        while(min < max)
+        {
+            mid = (max+min)/2;                
+
+            if (strcmp(_i_hosts_cache_name[mid]->name, name) < 0)
+            {
+                min = mid+1;
+            } else
+            {
+                max = mid;
+            }
+        }
+
+        mid = (max+min)/2;                
+
+        /* Check if the host is found */
+        if ((max == min) &&
+            (strcmp(_i_hosts_cache_name[mid]->name,
+                    name) == 0))
+        {
+            printf("CACHE HIT\n");
+
+            (*host_ptr) = _i_hosts_cache_name[mid];
+
+            return 0;
+        }
+    }
+
+    printf("CACHE MISS\n");
+
+    sqlite3_snprintf(
+            128,
+            query,
+            "SELECT id FROM 'HOSTS' WHERE name='%q';",
+            name);
+
+    ret = sqlite3_prepare_v2 (
+            db,
+            query,
+            -1,
+            &handle,
+            NULL);
+    if (ret != SQLITE_OK)
+    {
+        errmsg = sqlite3_errmsg (db);
+        *error = guardian_error_new (
+                "%s",
+                errmsg);
+        return -1;
+    }
+
+    /* step until response != SQLITE_BUSY */
+    do
+    {
+        ret = sqlite3_step (handle);
+    } while (ret == SQLITE_BUSY);
+
+    switch (ret)
+    {
+        case SQLITE_INTERRUPT:
+        case SQLITE_SCHEMA:
+        case SQLITE_CORRUPT:
+        default: /* Error */
+            errmsg = sqlite3_errmsg (db);
+            *error = guardian_error_new (
+                    "%s",
+                    errmsg);
+            sqlite3_finalize(handle);
+            return -1;
+            break;
+        case SQLITE_DONE:
+            *error = guardian_error_new (
+                    "Host '%s' not found.",
+                    name);
+            sqlite3_finalize(handle);
+            return -1;
+            break;
+        case SQLITE_ROW: /* Found a host */
+            host_id = sqlite3_column_int (handle, 0);
+            break;
+    }
+
+    /* Next step should finalize the request */
+    ret = sqlite3_step (handle);
+    switch (ret)
+    {
+        case SQLITE_INTERRUPT:
+        case SQLITE_SCHEMA:
+        case SQLITE_CORRUPT:
+            /* Something went wrong */
+            errmsg = sqlite3_errmsg (db);
+            *error = guardian_error_new (
+                    "%s",
+                    errmsg);
+            sqlite3_finalize(handle);
+            return -1;
+            break;
+        case SQLITE_ROW:
+            /* Serious error, the UNIQUE constraint of the hosts table is not honored */
+            *error = guardian_error_new (
+                    "Multiple entries of host '%s'.\n",
+                    name);
+            sqlite3_finalize(handle);
+            return -1;
+            break;
+        case SQLITE_DONE:
+            /* Done */
+            sqlite3_finalize(handle);
+            break;
+    }
+
+
+/****/
+
+    void *buf = malloc (sizeof (void *)*_n_hosts_cache-mid);
+    memcpy (buf, &_i_hosts_cache_name[mid], _n_hosts_cache-mid);
+    _i_hosts_cache_name[mid] = &_hosts_cache[_n_hosts_cache];
+    memcpy (&_i_hosts_cache_name[mid+1], buf, _n_hosts_cache-mid);
+
+
+    (*host_ptr) = _i_hosts_cache_name[mid];
+    strncpy(_i_hosts_cache_name[mid]->name, name, HOSTNAME_MAXLEN);
+    _i_hosts_cache_name[mid]->host_id = host_id;
+
+   _n_hosts_cache++;
 
     return 0;
 }
