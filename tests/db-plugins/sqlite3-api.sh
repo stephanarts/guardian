@@ -1,3 +1,3 @@
 
 
-./plugin-loader sqlite3
+./plugin-loader sqlite3-db-plugin
