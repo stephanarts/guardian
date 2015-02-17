@@ -47,6 +47,10 @@
 
 #include <time.h>
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
 #include <libguardian/libguardian.h>
 
 #ifndef PLUGINDIR
@@ -59,15 +63,107 @@
 
 #define BUFFER_SIZE 1024
 
+enum
+{
+    OPTION_VERSION = 0,
+    OPTION_VERBOSE,
+    OPTION_HELP,
+    OPTION_API_CHECK
+};
+
+/************************
+ * Command-line options *
+ ************************/
+static struct option long_options[] = {
+    {"version", 0, 0, 'V'},     /* OPTION_VERSION */
+    {"verbose", 0, 0, 'v'},     /* OPTION_VERBOSE */
+    {"help", 0, 0, 'h'},        /* OPTION_HELP    */
+    {"api-check", 0, 0, 0},
+    {0, 0, 0, 0}
+};
+
+static void
+show_version ()
+{
+    printf ("%s %s\n", PACKAGE_NAME, PACKAGE_VERSION);
+    printf ("Copyright (c) 2012-2015 Stephan Arts\n");
+    printf ("There is NO WARRANTY, to the extent permitted by law.\n");
+    return;
+}
+
+static void
+show_usage ()
+{
+    printf ("Usage: %s [options]\n", PACKAGE_NAME);
+    printf ("\n");
+    printf ("Options:\n");
+    printf ("   --version  -V     Show version information\n");
+    printf ("   --help     -h     Show usage information (this output)\n");
+    printf ("              -v     Show verbose output\n");
+    printf ("              -vv    Show very-verbose output\n");
+    return;
+}
+
 int
 main (int argc, char **argv)
 {
+    int     option_index = 0;
+    int     c = 0;
+    int     verbosity = 0;
+    int     ch = 0;
+
     GuardianPlugin *plugin;
     GuardianPluginDB *db_plugin;
     char *plugin_path = malloc (200);
     GuardianError *error = NULL;
 
-    if (argc < 2)
+    while (1)
+    {
+        c = getopt_long (argc, argv, "vVh",
+                long_options, &option_index);
+        if (c == -1)
+            break;
+
+        switch (c)
+        {
+        case 0:
+            switch (option_index)
+            {
+            case OPTION_VERSION:
+                show_version ();
+                exit (0);
+                break;
+            case OPTION_VERBOSE:
+                verbosity = verbosity + 1;
+                break;
+            case OPTION_HELP:
+                show_usage ();
+                exit (0);
+                break;
+            case OPTION_API_CHECK:
+                ch = 1;
+                break;
+            }
+            break;
+        case 'V':
+            show_version ();
+            exit (0);
+            break;
+        case 'h':
+            show_usage ();
+            exit (0);
+            break;
+        case 'v':
+            verbosity = verbosity + 1;
+            break;
+        default:
+            fprintf (stderr, "Try '%s --help' for more information\n", PACKAGE_NAME);
+            exit (1);
+            break;
+        }
+    }
+
+    if (argc-optind > 1)
     {
         fprintf (stderr, "No plugin-name provided\n");
         return 1;
@@ -77,9 +173,9 @@ main (int argc, char **argv)
             plugin_path,
             "%s/%s/%s/%s.so",
             PLUGINDIR,
-            argv[1],
+            argv[optind],
             PLUGINSUBDIR,
-            argv[1]);
+            argv[optind]);
 
     fprintf(stderr, "Loading plugin: %s\n", plugin_path);
 
@@ -98,14 +194,34 @@ main (int argc, char **argv)
 
     if (plugin->type != GUARDIAN_PLUGIN_DB)
     {
-        fprintf(stderr, "Plugin '%s' is not a DB Plugin\n", argv[1]);
+        fprintf(stderr, "Plugin '%s' is not a DB Plugin\n", argv[optind]);
         exit(1);
     }
 
     db_plugin = plugin;
 
-    fprintf(stderr, "Plugin %s Loaded\n", argv[1]);
-    if (db_plugin->db.connect == NULL) {
+    fprintf(stderr, "[ OK ] Plugin %s Loaded\n", argv[optind]);
+
+    if (ch == 1) {
+
+        if (db_plugin->db.connect == NULL) {
+            fprintf(stderr, "[FAIL] plugin->db.connect is NULL\n");
+            exit(1);
+        }
+        fprintf(stderr, "[ OK ] plugin->db.connect is set\n");
+
+        if (db_plugin->db.disconnect == NULL) {
+            fprintf(stderr, "[FAIL] plugin->db.disconnect is NULL\n");
+            exit(1);
+        }
+        fprintf(stderr, "[ OK ] plugin->db.disconnect is set\n");
+
+        if (db_plugin->host.get == NULL) {
+            fprintf(stderr, "[FAIL] plugin->host.get is NULL\n");
+            exit(1);
+        }
+        fprintf(stderr, "[ OK ] plugin->host.get is set\n");
+
     }
 
     exit(0);

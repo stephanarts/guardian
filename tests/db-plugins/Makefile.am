@@ -2,13 +2,16 @@ EXTRA_DIST = $(TESTS)
 
 TESTS = \
     sqlite3-symbols.sh \
-    sqlite3-api.sh
+    sqlite3-api.sh     \
+    pgsql-symbols.sh   \
+    pgsql-api.sh
 
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SH)
 AM_TESTS_ENVIRONMENT = SOURCE_DIR='$(top_srcdir)'; export SOURCE_DIR;
 
-XFAIL_TESTS = style.sh
+XFAIL_TESTS = \
+    pgsql-api.sh
 
 check_PROGRAMS = plugin-loader
 

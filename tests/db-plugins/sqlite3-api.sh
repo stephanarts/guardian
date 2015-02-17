@@ -1,3 +1,6 @@
 
 
-./plugin-loader sqlite3-db-plugin
+./plugin-loader --api-check sqlite3-db-plugin
+RET=$?
+
+exit $RET

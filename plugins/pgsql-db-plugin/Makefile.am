@@ -10,6 +10,7 @@ pgsql_db_plugin_la_SOURCES = \
 
 pgsql_db_plugin_la_LDFLAGS =       \
     -avoid-version       \
+    -export-symbols-regex "^[^_].*"  \
     -module              \
     $(PLATFORM_LDFLAGS)
 
