@@ -104,7 +104,7 @@ show_shell (int silent)
     {
         fprintf (stderr, "+------------------------------------+\n");
         fprintf (stderr, "| Guardian Interactive Shell         |\n");
-        fprintf (stderr, "| Copyright 2012-2014 - Stephan Arts |\n");
+        fprintf (stderr, "| Copyright 2012-2015 - Stephan Arts |\n");
         fprintf (stderr, "| Licensed under the BSD License     |\n");
         fprintf (stderr, "+------------------------------------+\n");
     }

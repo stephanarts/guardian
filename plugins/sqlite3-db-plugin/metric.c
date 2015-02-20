@@ -65,75 +65,32 @@ _sqlite3_metric_add (
         const char *name,
         GuardianError **error)
 {
-    char query[128];
-    sqlite3_stmt *handle = NULL;
-    int ret;
-    const char *errmsg;
-    int ns_id;
-    GuardianError *call_error = NULL;
+    return 0;
+}
 
-    sqlite3 *db = _sqlite3_db_get();
+int
+_sqlite3_metric_get (
+        const void *ns_ptr,
+        const char *name,
+        void **metric_ptr,
+        GuardianError **error)
+{
+    return 0;
+}
 
-    ns_id = _sqlite3_ns_getid (ns_ptr, &call_error);
-    if (ns_id == -1)
-    {
-        *error = call_error;
-        return -1;
-    }
+int
+_sqlite3_metric_copy (
+        const void *metric_ptr,
+        void **metric_ptr_dst,
+        GuardianError **error)
+{
+    return 0;
+}
 
-    snprintf (
-            query,
-            128,
-            "INSERT INTO 'METRICS'(ns_id,name,type) "
-            "VALUES(%d,\"%s\",\"INTEGER\");",
-            ns_id,
-            name);
-
-    ret = sqlite3_prepare_v2 (
-            db,
-            query,
-            -1,
-            &handle,
-            NULL);
-    if (ret != SQLITE_OK)
-    {
-        errmsg = sqlite3_errmsg (db);
-        *error = guardian_error_new (
-                "%s",
-                errmsg);
-        return -1;
-    }
-
-    do
-    {
-        ret = sqlite3_step (handle);
-    } while (ret == SQLITE_BUSY);
-
-    switch (ret)
-    {
-        case SQLITE_INTERRUPT:
-        case SQLITE_SCHEMA:
-        case SQLITE_CORRUPT:
-            errmsg = sqlite3_errmsg (db);
-            *error = guardian_error_new (
-                    "%s",
-                    errmsg);
-            sqlite3_finalize(handle);
-            return -1;
-            break;
-        case SQLITE_DONE:
-            break;
-        default:
-            errmsg = sqlite3_errmsg (db);
-            *error = guardian_error_new (
-                    "%s",
-                    errmsg);
-            sqlite3_finalize(handle);
-            return -1;
-            break;
-    }
-
-    sqlite3_finalize(handle);
-
+int
+_sqlite3_metric_free (
+        void **metric_ptr,
+        GuardianError **error)
+{
     return 0;
 }

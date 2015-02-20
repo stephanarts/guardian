@@ -82,8 +82,8 @@ guardian_plugin_init ()
     plugin->db.disconnect = _sqlite3_db_disconnect;
 
     /* Host */
-    /*plugin->host.add = _sqlite3_add_role;*/
     plugin->host.get = _sqlite3_host_get;
+    plugin->host.add = _sqlite3_host_add;
 
     /* Namespace */
     plugin->ns.add = _sqlite3_ns_add;
@@ -91,7 +91,10 @@ guardian_plugin_init ()
     plugin->ns.list = _sqlite3_ns_list;
 
     /* Metrics */
-    //plugin->metric.add = _sqlite3_metric_add;
+    plugin->metric.add = _sqlite3_metric_add;
+    plugin->metric.get = _sqlite3_metric_get;
+    plugin->metric.copy = _sqlite3_metric_copy;
+    plugin->metric.free = _sqlite3_metric_free;
 
     /* Values */
     //plugin->value.publish = _sqlite3_value_publish;

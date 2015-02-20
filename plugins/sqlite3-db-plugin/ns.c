@@ -67,6 +67,7 @@ struct _Ns
 };
 
 Ns _nss[10];
+Ns _ns;
 
 int 
 _sqlite3_ns_add (
@@ -234,9 +235,105 @@ _sqlite3_ns_get (
         void **ns_ptr,
         GuardianError **error)
 {
-    strncpy(_nss[0].name, name, NAMESPACE_MAXLEN);
-    _nss[0].ns_id = 1;
-    (*ns_ptr) = &_nss[0];
+    char query[128];
+    sqlite3_stmt *handle = NULL;
+    int ret;
+    const char *errmsg;
+    int host_id;
+    int ns_id;
+
+    GuardianError *call_error = NULL;
+
+    sqlite3 *db = _sqlite3_db_get();
+
+    host_id = _sqlite3_host_getid ((Host *)host_ptr, &call_error);
+    if (host_id == -1)
+    {
+        *error = call_error;
+        return -1;
+    }
+
+    sqlite3_snprintf(
+            128,
+            query,
+            "SELECT id FROM 'NAMESPACE' WHERE name='%q' AND host_id=%q;",
+            name,
+            host_id);
+
+    ret = sqlite3_prepare_v2 (
+            db,
+            query,
+            -1,
+            &handle,
+            NULL);
+    if (ret != SQLITE_OK)
+    {
+        errmsg = sqlite3_errmsg (db);
+        *error = guardian_error_new (
+                "%s",
+                errmsg);
+        return -1;
+    }
+
+    do
+    {
+        ret = sqlite3_step (handle);
+    } while (ret == SQLITE_BUSY);
+
+    switch (ret)
+    {
+        case SQLITE_INTERRUPT:
+        case SQLITE_SCHEMA:
+        case SQLITE_CORRUPT:
+        default:
+            errmsg = sqlite3_errmsg (db);
+            *error = guardian_error_new (
+                    "%s",
+                    errmsg);
+            sqlite3_finalize(handle);
+            return -1;
+            break;
+        case SQLITE_ROW:
+            ns_id = sqlite3_column_int (handle, 0);
+            break;
+        case SQLITE_DONE:
+            *error = guardian_error_new (
+                    "Namespace '%s' for host '%s' not found.",
+                    name,
+                    "unknown");
+            sqlite3_finalize(handle);
+            return -1;
+            break;
+    }
+
+    ret = sqlite3_step (handle);
+    switch (ret)
+    {
+        case SQLITE_INTERRUPT:
+        case SQLITE_SCHEMA:
+        case SQLITE_CORRUPT:
+            errmsg = sqlite3_errmsg (db);
+            *error = guardian_error_new (
+                    "%s",
+                    errmsg);
+            sqlite3_finalize(handle);
+            return -1;
+            break;
+        case SQLITE_ROW:
+            *error = guardian_error_new (
+                    "Multiple entries of namespace '%s'.\n",
+                    name);
+            sqlite3_finalize(handle);
+            return -1;
+            break;
+        case SQLITE_DONE:
+            sqlite3_finalize(handle);
+            break;
+    }
+
+    strncpy(_ns.name, name, NAMESPACE_MAXLEN);
+    _ns.ns_id = 1;
+    (*ns_ptr) = &_ns;
 
     return 0;
 }

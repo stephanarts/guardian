@@ -56,7 +56,6 @@ struct _GuardianPluginDB
     {
         int (*add)(
                 const char *host,
-                const char *name,
                 GuardianError **);
         int (*get)(
                 const char *host,
@@ -101,8 +100,12 @@ struct _GuardianPluginDB
                 const char *name,
                 void **metric_ptr,
                 GuardianError **);
-        int (*free)(
+        int (*copy)(
                 const void *metric_ptr,
+                void **metric_ptr_dst,
+                GuardianError **);
+        int (*free)(
+                void **metric_ptr,
                 GuardianError **);
     } metric;
 

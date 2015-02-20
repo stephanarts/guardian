@@ -27,9 +27,26 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
 int
 _sqlite3_metric_add (
         void *ns_ptr,
-        GuardianError **error);
-*/
+        const char *name,
+        GuardianError **);
+
+int
+_sqlite3_metric_get (
+        const void *ns_ptr,
+        const char *name,
+        void **metric_ptr,
+        GuardianError **);
+
+int
+_sqlite3_metric_copy (
+        const void *metric_ptr,
+        void **metric_ptr_dst,
+        GuardianError **);
+
+int
+_sqlite3_metric_free (
+        void **metric_ptr,
+        GuardianError **);

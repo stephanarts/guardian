@@ -63,6 +63,13 @@
 
 #define BUFFER_SIZE 1024
 
+#define API_CHECK(A) \
+    if (A == NULL) { \
+        fprintf(stderr, "[FAIL] " #A " is NULL\n"); \
+        exit(1); \
+    } \
+    fprintf(stderr, "[ OK ] " #A " is set\n");
+
 enum
 {
     OPTION_VERSION = 0,
@@ -198,30 +205,28 @@ main (int argc, char **argv)
         exit(1);
     }
 
-    db_plugin = plugin;
+    db_plugin = (GuardianPluginDB *)plugin;
 
     fprintf(stderr, "[ OK ] Plugin %s Loaded\n", argv[optind]);
 
     if (ch == 1) {
 
-        if (db_plugin->db.connect == NULL) {
-            fprintf(stderr, "[FAIL] plugin->db.connect is NULL\n");
-            exit(1);
-        }
-        fprintf(stderr, "[ OK ] plugin->db.connect is set\n");
+        API_CHECK(db_plugin->db.connect);
+        API_CHECK(db_plugin->db.disconnect);
+        API_CHECK(db_plugin->db.set);
 
-        if (db_plugin->db.disconnect == NULL) {
-            fprintf(stderr, "[FAIL] plugin->db.disconnect is NULL\n");
-            exit(1);
-        }
-        fprintf(stderr, "[ OK ] plugin->db.disconnect is set\n");
+        API_CHECK(db_plugin->host.add);
+        API_CHECK(db_plugin->host.get);
 
-        if (db_plugin->host.get == NULL) {
-            fprintf(stderr, "[FAIL] plugin->host.get is NULL\n");
-            exit(1);
-        }
-        fprintf(stderr, "[ OK ] plugin->host.get is set\n");
+        API_CHECK(db_plugin->ns.add);
+        API_CHECK(db_plugin->ns.get);
 
+        API_CHECK(db_plugin->metric.add);
+        API_CHECK(db_plugin->metric.get);
+        API_CHECK(db_plugin->metric.copy);
+        API_CHECK(db_plugin->metric.free);
+
+        exit(0);
     }
 
     exit(0);

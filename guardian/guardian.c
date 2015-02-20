@@ -212,9 +212,10 @@ main (int argc, char **argv)
     zmq_connect (server, "tcp://0.0.0.0:5678");
 
     zmq_setsockopt (server, ZMQ_LINGER, &no_linger, sizeof (no_linger));
-    zmq_close (server);
 
     show_shell (silent);
+
+    zmq_close (server);
 
     exit (0);
 }

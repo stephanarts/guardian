@@ -36,6 +36,11 @@ _sqlite3_host_get (
         GuardianError **);
 
 int
+_sqlite3_host_add (
+        const char *host,
+        GuardianError **);
+
+int
 _sqlite3_host_getid (
         Host *host,
         GuardianError **error);
