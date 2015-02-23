@@ -77,7 +77,7 @@ guardian_plugin_init ()
     strncpy(plugin->db_name, "sqlite3", 20);
 
     /* DB */
-    plugin->db.set        = _sqlite3_db_set;
+    plugin->db.set_key    = _sqlite3_db_set_key;
     plugin->db.connect    = _sqlite3_db_connect;
     plugin->db.disconnect = _sqlite3_db_disconnect;
 

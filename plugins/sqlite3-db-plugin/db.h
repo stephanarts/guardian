@@ -28,7 +28,7 @@
  */
 
 void
-_sqlite3_db_set (
+_sqlite3_db_set_key (
         const char *key,
         const char *value);
 

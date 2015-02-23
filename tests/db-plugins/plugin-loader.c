@@ -38,10 +38,15 @@
 
 #include <stdio.h>
 
+#include <string.h>
+
 #include <fcntl.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
+
+#include <errno.h>
 
 #include <zmq.h>
 
@@ -70,22 +75,31 @@
     } \
     fprintf(stderr, "[ OK ] " #A " is set\n");
 
+char *config_file = NULL;
+
 enum
 {
     OPTION_VERSION = 0,
     OPTION_VERBOSE,
     OPTION_HELP,
-    OPTION_API_CHECK
+    OPTION_CONFIG,
+    OPTION_API_CHECK,
+    OPTION_DB_CONNECT
 };
 
 /************************
  * Command-line options *
  ************************/
 static struct option long_options[] = {
-    {"version", 0, 0, 'V'},     /* OPTION_VERSION */
-    {"verbose", 0, 0, 'v'},     /* OPTION_VERBOSE */
-    {"help", 0, 0, 'h'},        /* OPTION_HELP    */
-    {"api-check", 0, 0, 0},
+    {"version", 0, 0, 'V'},     /* OPTION_VERSION    */
+    {"verbose", 0, 0, 'v'},     /* OPTION_VERBOSE    */
+    {"help", 0, 0, 'h'},        /* OPTION_HELP       */
+    {"config",                  /* OPTION_CONFIG     */
+        required_argument,
+        0,
+        0},
+    {"api-check", 0, 0, 0},     /* OPTION_API_CHECK  */
+    {"db-connect", 0, 0, 0},    /* OPTION_DB_CONNECT */
     {0, 0, 0, 0}
 };
 
@@ -118,6 +132,7 @@ main (int argc, char **argv)
     int     c = 0;
     int     verbosity = 0;
     int     ch = 0;
+    int     d_ch = 0;
 
     GuardianPlugin *plugin;
     GuardianPluginDB *db_plugin;
@@ -149,6 +164,12 @@ main (int argc, char **argv)
                 break;
             case OPTION_API_CHECK:
                 ch = 1;
+                break;
+            case OPTION_DB_CONNECT:
+                d_ch = 1;
+                break;
+            case OPTION_CONFIG:
+                config_file = optarg;
                 break;
             }
             break;
@@ -211,9 +232,9 @@ main (int argc, char **argv)
 
     if (ch == 1) {
 
+        API_CHECK(db_plugin->db.set_key);
         API_CHECK(db_plugin->db.connect);
         API_CHECK(db_plugin->db.disconnect);
-        API_CHECK(db_plugin->db.set);
 
         API_CHECK(db_plugin->host.add);
         API_CHECK(db_plugin->host.get);
@@ -227,6 +248,58 @@ main (int argc, char **argv)
         API_CHECK(db_plugin->metric.free);
 
         exit(0);
+    }
+
+    if (d_ch == 1) {
+        if (config_file == NULL) {
+            fprintf(stderr, "--db-connect requires --config\n");
+            exit(1);
+        }
+        struct stat _c_stat;
+
+        if (stat(config_file, &_c_stat)) {
+            int i = errno;
+            fprintf(stderr,
+                    "Could not stat '%s' - %s\n",
+                    config_file,
+                    strerror(i));
+            exit(1);
+        }
+        if (!S_ISREG(_c_stat.st_mode)) {
+            fprintf(stderr,
+                    "'%s' is not a file\n",
+                    config_file);
+            exit(1);
+        }
+
+        FILE *f_config = fopen(
+                config_file,
+                "r");
+        if (f_config == NULL) {
+            fprintf(stderr,
+                    "'%s' could not be opened\n",
+                    config_file);
+            exit(1);
+        }
+
+        char line[128];
+
+        while( fgets (line, sizeof(line), f_config) != NULL)
+        {
+            char *key = strtok(line,"=");
+            char *value = strtok(NULL,"=");
+
+            if (value[strlen(value)-1] == '\n')
+            {
+                value[strlen(value)-1] = '\0';
+            }
+
+            db_plugin->db.set_key(key, value);
+        }
+
+        db_plugin->db.connect();
+
+        db_plugin->db.disconnect();
     }
 
     exit(0);

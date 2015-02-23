@@ -52,7 +52,7 @@
 #include <libguardian/libguardian.h>
 
 static void
-_pgsql_db_set (
+_pgsql_db_set_key (
         const char *key,
         const char *value);
 
@@ -81,7 +81,7 @@ guardian_plugin_init ()
     strncpy(plugin->db_name, "pgsql", 20);
 
     /* DB */
-    plugin->db.set        = _pgsql_db_set;
+    plugin->db.set_key    = _pgsql_db_set_key;
     plugin->db.connect    = _pgsql_db_connect;
     plugin->db.disconnect = _pgsql_db_disconnect;
 
@@ -92,7 +92,7 @@ guardian_plugin_init ()
 }
 
 static void
-_pgsql_db_set (
+_pgsql_db_set_key (
         const char *key,
         const char *value)
 {

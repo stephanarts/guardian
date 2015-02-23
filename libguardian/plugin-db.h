@@ -46,7 +46,7 @@ struct _GuardianPluginDB
 
     struct
     {
-        void (*set) (const char *key, const char *value);
+        void (*set_key) (const char *key, const char *value);
         void (*connect) (void);
         void (*disconnect) (void);
     } db;
