@@ -49,57 +49,43 @@
 
 #include <sys/stat.h>
 
-#include <sqlite3.h>
-
 #include <libguardian/libguardian.h>
 
 #include "plugin.h"
 #include "host.h"
 #include "ns.h"
-#include "db.h"
-#include "metric.h"
-#include "value.h"
 
-GuardianPlugin *
-guardian_plugin_init ()
+int
+_pgsql_db_setprop (
+        const char *key,
+        const char *value)
 {
-    const char *errors = NULL;
-    int     err_offset;
-    GuardianPluginDB *plugin;
+    return 0;
+}
 
-    guardian_log_info ("Initialise SQLite3 plugin");
+int
+_pgsql_db_getprop (
+        const char *key,
+        char **value)
+{
+    return 0;
+}
 
-    plugin = guardian_new (sizeof (GuardianPluginDB), 1);
+int
+_pgsql_db_listprop (
+        char **keys)
+{
+    return 0;
+}
 
-    plugin->schema_version = 1;
+void
+_pgsql_db_connect (
+        void)
+{
+}
 
-    /* Copy the name */
-    strncpy(plugin->db_name, "sqlite3", 20);
-
-    /* DB */
-    plugin->db.setprop    = _sqlite3_db_setprop;
-    plugin->db.getprop    = _sqlite3_db_getprop;
-    plugin->db.listprop   = _sqlite3_db_listprop;
-    plugin->db.connect    = _sqlite3_db_connect;
-    plugin->db.disconnect = _sqlite3_db_disconnect;
-
-    /* Host */
-    plugin->host.get = _sqlite3_host_get;
-    plugin->host.add = _sqlite3_host_add;
-
-    /* Namespace */
-    plugin->ns.add = _sqlite3_ns_add;
-    plugin->ns.get = _sqlite3_ns_get;
-    plugin->ns.list = _sqlite3_ns_list;
-
-    /* Metrics */
-    plugin->metric.add = _sqlite3_metric_add;
-    plugin->metric.get = _sqlite3_metric_get;
-    plugin->metric.copy = _sqlite3_metric_copy;
-    plugin->metric.free = _sqlite3_metric_free;
-
-    /* Values */
-    //plugin->value.publish = _sqlite3_value_publish;
-
-    return (GuardianPlugin *)plugin;
+void
+_pgsql_db_disconnect (
+        void)
+{
 }

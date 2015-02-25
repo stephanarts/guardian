@@ -49,8 +49,6 @@
 
 #include <sys/stat.h>
 
-#include <sqlite3.h>
-
 #include <libguardian/libguardian.h>
 
 #include "plugin.h"
@@ -58,7 +56,6 @@
 #include "ns.h"
 #include "db.h"
 #include "metric.h"
-#include "value.h"
 
 GuardianPlugin *
 guardian_plugin_init ()
@@ -67,39 +64,39 @@ guardian_plugin_init ()
     int     err_offset;
     GuardianPluginDB *plugin;
 
-    guardian_log_info ("Initialise SQLite3 plugin");
+    guardian_log_info ("Initialise PostgreSQL plugin");
 
     plugin = guardian_new (sizeof (GuardianPluginDB), 1);
 
     plugin->schema_version = 1;
 
     /* Copy the name */
-    strncpy(plugin->db_name, "sqlite3", 20);
+    strncpy(plugin->db_name, "pgsql", 20);
 
     /* DB */
-    plugin->db.setprop    = _sqlite3_db_setprop;
-    plugin->db.getprop    = _sqlite3_db_getprop;
-    plugin->db.listprop   = _sqlite3_db_listprop;
-    plugin->db.connect    = _sqlite3_db_connect;
-    plugin->db.disconnect = _sqlite3_db_disconnect;
+    plugin->db.setprop    = _pgsql_db_setprop;
+    plugin->db.getprop    = _pgsql_db_getprop;
+    plugin->db.listprop   = _pgsql_db_listprop;
+    plugin->db.connect    = _pgsql_db_connect;
+    plugin->db.disconnect = _pgsql_db_disconnect;
 
     /* Host */
-    plugin->host.get = _sqlite3_host_get;
-    plugin->host.add = _sqlite3_host_add;
+    plugin->host.get = _pgsql_host_get;
+    plugin->host.add = _pgsql_host_add;
 
     /* Namespace */
-    plugin->ns.add = _sqlite3_ns_add;
-    plugin->ns.get = _sqlite3_ns_get;
-    plugin->ns.list = _sqlite3_ns_list;
+    plugin->ns.add = _pgsql_ns_add;
+    plugin->ns.get = _pgsql_ns_get;
+    plugin->ns.list = _pgsql_ns_list;
 
     /* Metrics */
-    plugin->metric.add = _sqlite3_metric_add;
-    plugin->metric.get = _sqlite3_metric_get;
-    plugin->metric.copy = _sqlite3_metric_copy;
-    plugin->metric.free = _sqlite3_metric_free;
+    plugin->metric.add = _pgsql_metric_add;
+    plugin->metric.get = _pgsql_metric_get;
+    plugin->metric.copy = _pgsql_metric_copy;
+    plugin->metric.free = _pgsql_metric_free;
 
     /* Values */
-    //plugin->value.publish = _sqlite3_value_publish;
+    //plugin->value.publish = _pgsql_value_publish;
 
     return (GuardianPlugin *)plugin;
 }

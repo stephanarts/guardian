@@ -27,10 +27,19 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-void
-_sqlite3_db_set_key (
+int
+_sqlite3_db_setprop (
         const char *key,
         const char *value);
+
+int
+_sqlite3_db_getprop (
+        const char *key,
+        char **value);
+
+int
+_sqlite3_db_listprop (
+        char **keys);
 
 void
 _sqlite3_db_connect (

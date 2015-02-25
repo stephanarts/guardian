@@ -27,89 +27,34 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-
-#ifdef HAVE_STDIO_H
-#include <stdio.h>
-#endif
-
-#include <openssl/sha.h>
-
-#include <string.h>
-
-#include <pcre.h>
-
-#include <errno.h>
-
-#include <sys/stat.h>
-
-#include <sqlite3.h>
-
-#include <libguardian/libguardian.h>
-
-#include "plugin.h"
-#include "host.h"
-#include "ns.h"
-
-static sqlite3 *_sqlite3_db = NULL;
+typedef struct _Ns Ns;
 
 int
-_sqlite3_db_setprop (
-        const char *key,
-        const char *value)
-{
-    return 0;
-}
+_pgsql_ns_add (
+        const char *name,
+        void *host_ptr,
+        GuardianError **error);
 
 int
-_sqlite3_db_getprop (
-        const char *key,
-        char **value)
-{
-    return 0;
-}
+_pgsql_ns_get (
+        const char *ns,
+        void *host_ptr,
+        void **ns_ptr,
+        GuardianError **error);
+
+int 
+_pgsql_ns_list (
+        char **nss,
+        int *len,
+        void *host_ptr,
+        GuardianError **error);
 
 int
-_sqlite3_db_listprop (
-        char **keys)
-{
-    return 0;
-}
-
-void
-_sqlite3_db_connect (
-        void)
-{
-    int ret = 0;
-    if (_sqlite3_db == NULL)
-    {
-        fprintf(stderr, "OPEN DB\n");
-        ret = sqlite3_open (
-                "/tmp/guardian.db",
-                &_sqlite3_db);
-        if (ret != SQLITE_OK)
-        {
-            fprintf(stderr, "FAIL\n");
-            return;
-        }
-    }
-}
-
-void
-_sqlite3_db_disconnect (
-        void)
-{
-    sqlite3_close (_sqlite3_db);
-}
-
-sqlite3 *
-_sqlite3_db_get (void)
-{
-    return _sqlite3_db;
-}
+_pgsql_ns_getid (
+        Ns *ns,
+        GuardianError **error);
+int
+_pgsql_get_nsid (
+        void *host_ptr,
+        const char *ns,
+        GuardianError **error);

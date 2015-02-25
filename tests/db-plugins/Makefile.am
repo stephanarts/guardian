@@ -13,7 +13,6 @@ SH_LOG_COMPILER = $(SH)
 AM_TESTS_ENVIRONMENT = SOURCE_DIR='$(top_srcdir)'; export SOURCE_DIR;
 
 XFAIL_TESTS = \
-    pgsql-api.sh \
     pgsql-db-connect.sh
 
 check_PROGRAMS = plugin-loader

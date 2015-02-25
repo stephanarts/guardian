@@ -232,7 +232,9 @@ main (int argc, char **argv)
 
     if (ch == 1) {
 
-        API_CHECK(db_plugin->db.set_key);
+        API_CHECK(db_plugin->db.setprop);
+        API_CHECK(db_plugin->db.getprop);
+        API_CHECK(db_plugin->db.listprop);
         API_CHECK(db_plugin->db.connect);
         API_CHECK(db_plugin->db.disconnect);
 
@@ -294,7 +296,7 @@ main (int argc, char **argv)
                 value[strlen(value)-1] = '\0';
             }
 
-            db_plugin->db.set_key(key, value);
+            db_plugin->db.setprop(key, value);
         }
 
         db_plugin->db.connect();

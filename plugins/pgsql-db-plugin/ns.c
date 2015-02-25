@@ -51,62 +51,55 @@
 
 #include <libguardian/libguardian.h>
 
-static void
-_pgsql_db_set_key (
-        const char *key,
-        const char *value);
+#include "plugin.h"
+#include "db.h"
+#include "host.h"
+#include "ns.h"
 
-static void
-_pgsql_db_connect (
-        void);
+#define NAMESPACE_MAXLEN 63
 
-static void
-_pgsql_db_disconnect (
-        void);
-
-GuardianPlugin *
-guardian_plugin_init ()
+struct _Ns
 {
-    const char *errors = NULL;
-    int     err_offset;
-    GuardianPluginDB *plugin;
+    int ns_id;
+    char name[NAMESPACE_MAXLEN+1];
+};
 
-    guardian_log_info ("Initialise PostgreSQL plugin");
+Ns _nss[10];
+Ns _ns;
 
-    plugin = guardian_new (sizeof (GuardianPluginDB), 1);
-
-    plugin->schema_version = 1;
-
-    /* Copy the name */
-    strncpy(plugin->db_name, "pgsql", 20);
-
-    /* DB */
-    plugin->db.set_key    = _pgsql_db_set_key;
-    plugin->db.connect    = _pgsql_db_connect;
-    plugin->db.disconnect = _pgsql_db_disconnect;
-
-    /* Roles */
-    //plugin->roles.add = _pgsql_add_role;
-
-    return (GuardianPlugin *)plugin;
+int 
+_pgsql_ns_add (
+        const char *name,
+        void *host_ptr,
+        GuardianError **error)
+{
+    return 0;
 }
 
-static void
-_pgsql_db_set_key (
-        const char *key,
-        const char *value)
+int
+_pgsql_ns_list (
+        char **nss,
+        int *n_nss,
+        void *host_ptr,
+        GuardianError **error)
 {
-
+    return 0;
 }
 
-static void
-_pgsql_db_connect (
-        void)
+int
+_pgsql_ns_get (
+        const char *name,
+        void *host_ptr,
+        void **ns_ptr,
+        GuardianError **error)
 {
+    return 0;
 }
 
-static void
-_pgsql_db_disconnect (
-        void)
+int
+_pgsql_ns_getid (
+        Ns *ns,
+        GuardianError **error)
 {
+    return ns->ns_id;
 }

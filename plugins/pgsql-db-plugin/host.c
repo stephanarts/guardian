@@ -49,57 +49,66 @@
 
 #include <sys/stat.h>
 
-#include <sqlite3.h>
-
 #include <libguardian/libguardian.h>
 
 #include "plugin.h"
+#include "db.h"
 #include "host.h"
 #include "ns.h"
-#include "db.h"
-#include "metric.h"
-#include "value.h"
 
-GuardianPlugin *
-guardian_plugin_init ()
+#define HOSTNAME_MAXLEN 255
+#define HOSTS_CACHESIZE 10
+
+struct _Host
 {
-    const char *errors = NULL;
-    int     err_offset;
-    GuardianPluginDB *plugin;
+    int host_id;
+    char name[HOSTNAME_MAXLEN+1];
+};
 
-    guardian_log_info ("Initialise SQLite3 plugin");
+Host _hosts_cache[HOSTS_CACHESIZE];
+Host *_i_hosts_cache_name[HOSTS_CACHESIZE];
+int  _n_hosts_cache = 0;
 
-    plugin = guardian_new (sizeof (GuardianPluginDB), 1);
+/**
+ * _pgsql_host_get
+ *
+ * @param name
+ * @param host_ptr
+ * @param error
+ */
+int
+_pgsql_host_get (
+        const char *name,
+        void **host_ptr,
+        GuardianError **error)
+{
+    return 0;
+}
 
-    plugin->schema_version = 1;
+/**
+ * _pgsql_host_add
+ *
+ * @param name
+ * @param error
+ */
+int
+_pgsql_host_add (
+        const char *host,
+        GuardianError **error)
+{
+    return 0;
+}
 
-    /* Copy the name */
-    strncpy(plugin->db_name, "sqlite3", 20);
-
-    /* DB */
-    plugin->db.setprop    = _sqlite3_db_setprop;
-    plugin->db.getprop    = _sqlite3_db_getprop;
-    plugin->db.listprop   = _sqlite3_db_listprop;
-    plugin->db.connect    = _sqlite3_db_connect;
-    plugin->db.disconnect = _sqlite3_db_disconnect;
-
-    /* Host */
-    plugin->host.get = _sqlite3_host_get;
-    plugin->host.add = _sqlite3_host_add;
-
-    /* Namespace */
-    plugin->ns.add = _sqlite3_ns_add;
-    plugin->ns.get = _sqlite3_ns_get;
-    plugin->ns.list = _sqlite3_ns_list;
-
-    /* Metrics */
-    plugin->metric.add = _sqlite3_metric_add;
-    plugin->metric.get = _sqlite3_metric_get;
-    plugin->metric.copy = _sqlite3_metric_copy;
-    plugin->metric.free = _sqlite3_metric_free;
-
-    /* Values */
-    //plugin->value.publish = _sqlite3_value_publish;
-
-    return (GuardianPlugin *)plugin;
+/**
+ * _pgsql_host_getid
+ *
+ * @param host
+ * @param error
+ */
+int
+_pgsql_host_getid (
+        Host *host,
+        GuardianError **error)
+{
+    return host->host_id;
 }

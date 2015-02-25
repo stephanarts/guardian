@@ -6,7 +6,11 @@ plugin_LTLIBRARIES = \
     pgsql-db-plugin.la
 
 pgsql_db_plugin_la_SOURCES = \
-    pgsql-db-plugin.c
+    plugin.c plugin.h \
+    db.c db.h \
+    host.c host.h \
+    ns.c ns.h \
+    metric.c metric.h
 
 pgsql_db_plugin_la_LDFLAGS =       \
     -avoid-version       \
