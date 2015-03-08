@@ -75,6 +75,38 @@
     } \
     fprintf(stderr, "[ OK ] " #A " is set\n");
 
+FILE *
+open_config_file (char *path) {
+
+    FILE *f_config = NULL;
+    struct stat _c_stat;
+
+    if (stat(path, &_c_stat)) {
+        int i = errno;
+        fprintf(stderr,
+                "Could not stat '%s' - %s\n",
+                path,
+                strerror(i));
+        return NULL; 
+    }
+    if (!S_ISREG(_c_stat.st_mode)) {
+        fprintf(stderr,
+                "'%s' is not a file\n",
+                path);
+        return NULL; 
+    }
+
+    f_config = fopen(
+            path,
+            "r");
+    if (f_config == NULL) {
+        fprintf(stderr,
+                "'%s' could not be opened\n",
+                path);
+    }
+    return f_config;
+};
+
 char *config_file = NULL;
 
 enum
@@ -84,22 +116,24 @@ enum
     OPTION_HELP,
     OPTION_CONFIG,
     OPTION_API_CHECK,
-    OPTION_DB_CONNECT
+    OPTION_DB_CONNECT,
+    OPTION_DB_LISTPROP
 };
 
 /************************
  * Command-line options *
  ************************/
 static struct option long_options[] = {
-    {"version", 0, 0, 'V'},     /* OPTION_VERSION    */
-    {"verbose", 0, 0, 'v'},     /* OPTION_VERBOSE    */
-    {"help", 0, 0, 'h'},        /* OPTION_HELP       */
-    {"config",                  /* OPTION_CONFIG     */
+    {"version", 0, 0, 'V'},     /* OPTION_VERSION */
+    {"verbose", 0, 0, 'v'},     /* OPTION_VERBOSE */
+    {"help", 0, 0, 'h'},        /* OPTION_HELP */
+    {"config",                  /* OPTION_CONFIG */
         required_argument,
         0,
         0},
-    {"api-check", 0, 0, 0},     /* OPTION_API_CHECK  */
+    {"api-check", 0, 0, 0},     /* OPTION_API_CHECK */
     {"db-connect", 0, 0, 0},    /* OPTION_DB_CONNECT */
+    {"db-listprop", 0, 0, 0},   /* OPTION_DB_LISTPROP */
     {0, 0, 0, 0}
 };
 
@@ -133,6 +167,7 @@ main (int argc, char **argv)
     int     verbosity = 0;
     int     ch = 0;
     int     d_ch = 0;
+    int     l_ch = 0;
 
     GuardianPlugin *plugin;
     GuardianPluginDB *db_plugin;
@@ -168,6 +203,9 @@ main (int argc, char **argv)
             case OPTION_DB_CONNECT:
                 d_ch = 1;
                 break;
+            case OPTION_DB_LISTPROP:
+                l_ch = 1;
+                break;
             case OPTION_CONFIG:
                 config_file = optarg;
                 break;
@@ -185,7 +223,7 @@ main (int argc, char **argv)
             verbosity = verbosity + 1;
             break;
         default:
-            fprintf (stderr, "Try '%s --help' for more information\n", PACKAGE_NAME);
+            fprintf (stderr,"Try '%s --help' for more information\n", PACKAGE_NAME);
             exit (1);
             break;
         }
@@ -257,30 +295,9 @@ main (int argc, char **argv)
             fprintf(stderr, "--db-connect requires --config\n");
             exit(1);
         }
-        struct stat _c_stat;
 
-        if (stat(config_file, &_c_stat)) {
-            int i = errno;
-            fprintf(stderr,
-                    "Could not stat '%s' - %s\n",
-                    config_file,
-                    strerror(i));
-            exit(1);
-        }
-        if (!S_ISREG(_c_stat.st_mode)) {
-            fprintf(stderr,
-                    "'%s' is not a file\n",
-                    config_file);
-            exit(1);
-        }
-
-        FILE *f_config = fopen(
-                config_file,
-                "r");
+        FILE *f_config = open_config_file (config_file);
         if (f_config == NULL) {
-            fprintf(stderr,
-                    "'%s' could not be opened\n",
-                    config_file);
             exit(1);
         }
 
@@ -302,7 +319,49 @@ main (int argc, char **argv)
         db_plugin->db.connect();
 
         db_plugin->db.disconnect();
+
+        exit(0);
     }
 
-    exit(0);
+    /**
+     * properties are listed, should be compared to a file.
+     */
+    if (l_ch) {
+        char **keys;
+        int i = db_plugin->db.listprop (&keys);
+        int a;
+
+        if (config_file == NULL) {
+            fprintf(stderr, "--list-props requires --config\n");
+            exit(1);
+        }
+
+        FILE *f_config = open_config_file (config_file);
+        if (f_config == NULL) {
+            exit(1);
+        }
+
+        char line[128];
+
+        for (a = 0; a < i; ++a) {
+            if (fgets(line, sizeof(line), f_config) == NULL) {
+                exit(1);
+            }
+            if (line[strlen(line)-1] == '\n')
+            {
+                line[strlen(line)-1] = '\0';
+            }
+            if (strncmp(keys[a], line, 128)) {
+                printf("--- internal\n");
+                printf("+++ config_file\n");
+                printf("- %s\n", keys[a]);
+                printf("+ %s\n", line);
+                exit(1);
+            }
+        }
+
+        exit(0);
+    }
+
+    exit(1);
 }

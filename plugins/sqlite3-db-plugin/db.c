@@ -59,6 +59,20 @@
 
 static sqlite3 *_sqlite3_db = NULL;
 
+typedef struct {
+    char name[128];
+    char value[128];
+} prop;
+
+enum {
+    PROP_DB_PATH = 0,
+    PROP_COUNT
+};
+
+static prop props[] = {
+    {"db_path", "/tmp/guardian.db" }
+};
+
 int
 _sqlite3_db_setprop (
         const char *key,
@@ -77,9 +91,18 @@ _sqlite3_db_getprop (
 
 int
 _sqlite3_db_listprop (
-        char **keys)
+        char **keys[])
 {
-    return 0;
+    int i;
+    char **_props = malloc ((sizeof (char *)) * PROP_COUNT);
+
+    for (i = 0; i < PROP_COUNT; ++i) {
+        _props[i] = props[i].name;
+    }
+
+    *keys = _props;
+
+    return PROP_COUNT;
 }
 
 void
@@ -91,7 +114,7 @@ _sqlite3_db_connect (
     {
         fprintf(stderr, "OPEN DB\n");
         ret = sqlite3_open (
-                "/tmp/guardian.db",
+                props[PROP_DB_PATH].value,
                 &_sqlite3_db);
         if (ret != SQLITE_OK)
         {

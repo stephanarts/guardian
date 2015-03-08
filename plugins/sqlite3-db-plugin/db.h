@@ -39,7 +39,7 @@ _sqlite3_db_getprop (
 
 int
 _sqlite3_db_listprop (
-        char **keys);
+        char **keys[]);
 
 void
 _sqlite3_db_connect (

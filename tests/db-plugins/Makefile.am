@@ -1,12 +1,20 @@
 EXTRA_DIST = $(TESTS)
 
 TESTS = \
+    $(SQLITE_TESTS) \
+    $(PGSQL_TESTS)
+
+SQLITE_TESTS = \
     sqlite3-symbols.sh      \
     sqlite3-api.sh          \
-    sqlite3-db-connect.sh   \
+    sqlite3-db-listprop.sh  \
+    sqlite3-db-connect.sh
+
+PGSQL_TESTS = \
     pgsql-symbols.sh        \
     pgsql-api.sh            \
     pgsql-db-connect.sh
+
 
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SH)
