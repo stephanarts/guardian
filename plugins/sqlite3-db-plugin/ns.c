@@ -91,11 +91,11 @@ _sqlite3_ns_add (
         return -1;
     }
 
-    snprintf (
-            query,
+    sqlite3_snprintf (
             128,
+            query,
             "INSERT INTO 'NAMESPACE'(host_id,name) "
-            "VALUES(%d,\"%s\");",
+            "VALUES(%d,'%q');",
             host_id,
             name);
 
@@ -170,9 +170,9 @@ _sqlite3_ns_list (
         return -1;
     }
 
-    snprintf (
-            query,
+    sqlite3_snprintf (
             128,
+            query,
             "SELECT name FROM 'NAMESPACE' "
             "WHERE host_id = %d "
             "ORDER BY NAME DESC;",
@@ -253,10 +253,10 @@ _sqlite3_ns_get (
         return -1;
     }
 
-    sqlite3_snprintf(
+    sqlite3_snprintf (
             128,
             query,
-            "SELECT id FROM 'NAMESPACE' WHERE name='%q' AND host_id=%q;",
+            "SELECT id FROM 'NAMESPACE' WHERE name='%q' AND host_id=%d;",
             name,
             host_id);
 
@@ -362,10 +362,10 @@ _sqlite3_get_nsid (
         return -1;
     }
 
-    snprintf (
-            query,
+    sqlite3_snprintf (
             128,
-            "SELECT id FROM 'NAMESPACE' WHERE name='%s' AND host_id=%d;",
+            query,
+            "SELECT id FROM 'NAMESPACE' WHERE name='%q' AND host_id=%d;",
             ns,
             host_id);
 
