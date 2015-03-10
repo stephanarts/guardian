@@ -35,15 +35,65 @@
 #include <stdlib.h>
 #endif
 
+#include <stdio.h>
+
+#include <string.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <errno.h>
+
 #include <time.h>
 
 #include <libguardian/libguardian.h>
 
 #include "settings.h"
 
+static FILE *
+open_config_file (char *path) {
+
+    FILE *f_config = NULL;
+    struct stat _c_stat;
+
+    if (stat(path, &_c_stat)) {
+        int i = errno;
+        fprintf(stderr,
+                "Could not stat '%s' - %s\n",
+                path,
+                strerror(i));
+        return NULL; 
+    }
+    if (!S_ISREG(_c_stat.st_mode)) {
+        fprintf(stderr,
+                "'%s' is not a file\n",
+                path);
+        return NULL; 
+    }
+
+    f_config = fopen(
+            path,
+            "r");
+    if (f_config == NULL) {
+        fprintf(stderr,
+                "'%s' could not be opened\n",
+                path);
+    }
+    return f_config;
+};
+
+typedef struct {
+    char key[64];
+    char value[64];
+} Prop;
+
 struct _GuardianSettings
 {
     char   *path;
+
+    Prop    props[32];
+    int     n_props;
 };
 
 GuardianSettings *
@@ -51,7 +101,95 @@ guardian_settings_load (
         const char *path,
         GuardianError **error)
 {
-    return NULL;
+    GuardianSettings *settings = NULL;
+
+    FILE *f_config = open_config_file (path);
+    if (f_config == NULL) {
+        return NULL;
+    }
+
+    settings = guardian_new(1, sizeof(GuardianSettings));
+    settings->n_props = 0;
+
+    char line[128];
+    int i = 0;
+    int n_props = 0;
+
+    while( fgets (line, sizeof(line), f_config) != NULL)
+    {
+        if (line[0] == '#')
+        {
+            continue;
+        }
+
+        char *key = strtok(line,"=");
+        char *value = strtok(NULL,"=");
+
+        if (key && value) {
+
+            /* Sanitize KEY value */
+            {
+                /* Remove leading whitespace */
+                while (*key != '\0')
+                {
+                    if (*key == ' ' || *key == '\t')
+                    {
+                        key++;
+                    } else {
+                        break;
+                    }
+                }
+
+                /* Remove traling whitespace */
+                char *ptr = key;
+                while (*ptr != '\0' && *ptr != ' ')
+                {
+                    ptr++;
+                }
+                if (*ptr == ' ') {
+                    *ptr = '\0';
+                }
+            }
+
+            /* Remove leading whitespace */
+            while (*value != '\0' && *value != '\n')
+            {
+                if (*value == ' ' || *value == '\t')
+                {
+                    value++;
+                } else {
+                    break;
+                }
+            }
+
+            if (value[strlen(value)-1] == '\n')
+            {
+                value[strlen(value)-1] = '\0';
+            }
+
+            /* Check if the key already exists */
+            for (i = 0; i < n_props; ++i) {
+                /* Overwrite it's value with the new entry */
+                if(strcmp(settings->props[i].key, key) == 0) {
+                    strncpy(settings->props[i].value, value, 64);
+                    break;
+                }
+            }
+
+            /* If i == n_props, value is new */
+            if (i == n_props) {
+                strncpy(settings->props[n_props].value, value, 64);
+                strncpy(settings->props[n_props].key, key, 64);
+                n_props++;
+            }
+        }
+    }
+
+    settings->n_props = n_props;
+
+    printf("Props: %d\n", n_props);
+
+    return settings;
 }
 
 const char *
@@ -59,6 +197,15 @@ guardian_settings_get (
         GuardianSettings * settings,
         const char *key)
 {
+    int i;
+
+    for (i = 0; i < settings->n_props; ++i) {
+        printf("%s:%s\n", settings->props[i].key, settings->props[i].value);
+        if (strcmp(settings->props[i].key, key) == 0) {
+            return settings->props[i].value;
+        }
+    }
+
     return NULL;
 }
 

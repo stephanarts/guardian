@@ -128,6 +128,7 @@ void
 _sqlite3_db_disconnect (
         void)
 {
+    fprintf(stderr, "CLOSE DB\n");
     sqlite3_close (_sqlite3_db);
 }
 

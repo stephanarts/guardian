@@ -79,6 +79,8 @@
 static GuardianPlugin *_plugins[MAX_PLUGINS];
 static int n_plugins = 0;
 
+static GuardianPluginDB *_db_plugin = NULL;
+
 enum
 {
     OPTION_VERSION = 0,
@@ -274,7 +276,11 @@ main (int argc, char **argv)
      */
     settings = guardian_settings_load (SYSCONFDIR "/guardian.conf", NULL);
 
-    guardian_settings_get (settings, "key");
+    char *db_type = guardian_settings_get (settings, "db_type");
+    if (db_type == NULL) {
+        guardian_log_error ("DB-Type not specified in config-file");
+        exit(1);
+    }
 
     /**
      * Maximum 10 items (Development value).
@@ -349,11 +355,63 @@ main (int argc, char **argv)
     {
         if (_plugins[i]->type == GUARDIAN_PLUGIN_DB)
         {
-            printf("{%s}\n", ((GuardianPluginDB *)_plugins[i])->db_name);
             if (strcmp(
                     ((GuardianPluginDB *)_plugins[i])->db_name,
-                    "sqlite3") == 0)
+                    db_type) == 0)
             {
+                if (_db_plugin != NULL) {
+                    printf("Duplicate DB-Types\n");
+                    exit(1);
+                }
+
+                _db_plugin = (GuardianPluginDB *)_plugins[i];
+            }
+        }
+    }
+
+    if (_db_plugin == NULL)
+    {
+        printf("Failed to initialize database '%s', no such plugin\n", db_type);
+        exit(1);
+    }
+
+    char **keys;
+    int l = _db_plugin->db.listprop(&keys);
+    for (i = 0; i < l; ++i) {
+        char *val = guardian_settings_get (settings, keys[i]);
+        if (val != NULL) {
+            _db_plugin->db.setprop(keys[i], val);
+        }
+    }
+
+    _db_plugin->db.connect();
+
+    _db_plugin->host.add(
+            "aa",
+            &error);
+
+    _db_plugin->host.get(
+            "aa",
+            &host_ptr,
+            &error);
+
+    _db_plugin->ns.add(
+            "sys",
+            host_ptr,
+            &error);
+
+
+    /** Start the main loop */
+    guardian_scheduler_main (ctx, n_workers);
+
+    _db_plugin->db.disconnect();
+
+    //zmq_ctx_term (ctx);
+
+    exit (0);
+}
+
+#if 0
                 ((GuardianPluginDB *)_plugins[i])->db.connect();
     
                 ((GuardianPluginDB *)_plugins[i])->host.get(
@@ -413,18 +471,5 @@ main (int argc, char **argv)
 
                 ((GuardianPluginDB *)_plugins[i])->db.disconnect();
                 break;
-            }
-        }
-    }
 
-    guardian_db_init ();
-
-    /** Start the main loop */
-    guardian_scheduler_main (ctx, n_workers);
-
-    guardian_db_close ();
-
-    //zmq_ctx_term (ctx);
-
-    exit (0);
-}
+#endif
