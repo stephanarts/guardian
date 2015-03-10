@@ -1,4 +1,11 @@
-EXTRA_DIST = $(TESTS)
+EXTRA_DIST = \
+    $(TESTS) \
+    $(TESTSDATA)
+
+TESTSDATA = \
+    $(SQLITE_TESTDATA) \
+    $(PGSQL_TESTDATA)
+
 
 TESTS = \
     $(SQLITE_TESTS) \
@@ -10,10 +17,20 @@ SQLITE_TESTS = \
     sqlite3-db-listprop.sh  \
     sqlite3-db-connect.sh
 
+SQLITE_TESTDATA = \
+    sqlite3-db-connect.conf  \
+    sqlite3-db-listprop.conf \
+    sqlite3-db-plugin.symbols
+
 PGSQL_TESTS = \
     pgsql-symbols.sh        \
     pgsql-api.sh            \
     pgsql-db-connect.sh
+
+PGSQL_TESTDATA = \
+    pgsql-db-connect.conf  \
+    pgsql-db-listprop.conf \
+    pgsql-db-plugin.symbols
 
 
 TEST_EXTENSIONS = .sh
