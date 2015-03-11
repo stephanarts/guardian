@@ -6,4 +6,6 @@ CONFIG_FILE=sqlite3-db-connect.conf
                 sqlite3-db-plugin
 RET=$?
 
+unlink sqlite3-db-connect.db
+
 exit $RET
