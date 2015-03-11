@@ -45,6 +45,8 @@
 
 #include <signal.h>
 
+#include <pwd.h>
+
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -83,6 +85,12 @@ static GuardianPluginDB *_db_plugin = NULL;
 
 static int _init_db = 0;
 
+#define USER_BUF_LEN 1024
+
+static struct passwd _pwd;
+
+static char _user_buf[USER_BUF_LEN];
+
 enum
 {
     OPTION_VERSION = 0,
@@ -108,7 +116,7 @@ static void
 show_version ()
 {
     printf ("%s %s\n", PACKAGE_NAME, PACKAGE_VERSION);
-    printf ("Copyright (c) 2012-2014 Stephan Arts\n");
+    printf ("Copyright (c) 2012-2015 Stephan Arts\n");
     printf ("There is NO WARRANTY, to the extent permitted by law.\n");
     return;
 }
@@ -176,6 +184,8 @@ main (int argc, char **argv)
     char    plugin_path[1024];
 
     struct sigaction sa;
+
+    struct passwd *_pwd_res = NULL;
 
     void   *ctx = zmq_ctx_new ();
     void   *host_ptr = NULL;
@@ -290,6 +300,50 @@ main (int argc, char **argv)
         exit(1);
     }
 
+    char *username = guardian_settings_get (settings, "username");
+
+    int euid = geteuid();
+    if (euid == 0) {
+        if (username == NULL) {
+            guardian_log_critical (
+                "Cannot determine username of %s user.");
+
+            exit(1);
+        }
+
+        if( getpwnam_r (
+                username,
+                &_pwd,
+                _user_buf,
+                USER_BUF_LEN,
+                &_pwd_res)) {
+
+            guardian_log_critical (
+                    "cannot determine uid for user %s",
+                    username);
+            exit(1);
+        }
+        if (_pwd_res == NULL) {
+            guardian_log_critical (
+                    "cannot determine uid for user %s",
+                    username);
+            exit(1);
+        }
+
+        if (setuid(_pwd.pw_uid)) {
+            guardian_log_critical (
+                    "Failed to execute setuid(%d)",
+                    _pwd.pw_uid);
+            exit(1);
+        }
+
+        guardian_log_info (
+                "%s is started by root, dropped privileges to %s",
+                PACKAGE,
+                username);
+    }
+
+
     /**
      * Maximum 10 items (Development value).
      */
@@ -383,6 +437,9 @@ main (int argc, char **argv)
         exit(1);
     }
 
+    /**
+     * Set the properties to the plugin.
+     */
     char **keys;
     int l = _db_plugin->db.listprop(&keys);
     for (i = 0; i < l; ++i) {
@@ -392,10 +449,10 @@ main (int argc, char **argv)
         }
     }
 
+    /**
+     * Initialize a new database file.
+     */
     if (_init_db != 0) {
-        char *p;
-        _db_plugin->db.getprop("db_schema", &p);
-
         if (_db_plugin->db.init(&error) != 0)
         {
             printf("%s", guardian_error_get_msg(error));
@@ -405,90 +462,10 @@ main (int argc, char **argv)
 
     _db_plugin->db.connect(NULL);
 
-    _db_plugin->host.add(
-            "aa",
-            &error);
-
-    _db_plugin->host.get(
-            "aa",
-            &host_ptr,
-            &error);
-
-    _db_plugin->ns.add(
-            "sys",
-            host_ptr,
-            &error);
-
-
     /** Start the main loop */
     guardian_scheduler_main (ctx, n_workers);
 
     _db_plugin->db.disconnect(NULL);
 
-    //zmq_ctx_term (ctx);
-
     exit (0);
 }
-
-#if 0
-                ((GuardianPluginDB *)_plugins[i])->db.connect();
-    
-                ((GuardianPluginDB *)_plugins[i])->host.get(
-                        "aa",
-                        &host_ptr,
-                        &error);
-
-                host_ptr = NULL;
-
-                ((GuardianPluginDB *)_plugins[i])->host.get(
-                        "aa",
-                        &host_ptr,
-                        &error);
-
-                ((GuardianPluginDB *)_plugins[i])->ns.add(
-                        "sys",
-                        host_ptr,
-                        &error);
-
-                ((GuardianPluginDB *)_plugins[i])->ns.get(
-                        "sys",
-                        host_ptr,
-                        &ns_ptr,
-                        &error);
-
-                if (error != NULL)
-                {
-                    guardian_log_warning (
-                            "Add: %s\n",
-                            guardian_error_get_msg (error));
-                }
-
-                /*
-                ((GuardianPluginDB *)_plugins[i])->ns.list(
-                        "aa",
-                        NULL,
-                        NULL,
-                        &error);
-                */
-
-                /*
-                ((GuardianPluginDB *)_plugins[i])->metric.add(
-                        ns_ptr,
-                        "cpu.load.avg[1]",
-                        &error);
-
-                ((GuardianPluginDB *)_plugins[i])->metric.add(
-                        ns_ptr,
-                        "cpu.load.avg[5]",
-                        &error);
-
-                ((GuardianPluginDB *)_plugins[i])->metric.add(
-                        ns_ptr,
-                        "cpu.load.avg[15]",
-                        &error);
-                */
-
-                ((GuardianPluginDB *)_plugins[i])->db.disconnect();
-                break;
-
-#endif
