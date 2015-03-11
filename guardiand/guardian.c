@@ -215,7 +215,6 @@ main (int argc, char **argv)
                 break;
             case OPTION_INIT_DB:
                 _init_db = 1;
-                printf("_INITDB_\n");
                 break;
             }
             break;
@@ -396,7 +395,7 @@ main (int argc, char **argv)
     if (_init_db != 0) {
         char *p;
         _db_plugin->db.getprop("db_schema", &p);
-        printf(">>> %s\n", p);
+
         if (_db_plugin->db.init(&error) != 0)
         {
             printf("%s", guardian_error_get_msg(error));

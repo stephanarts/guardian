@@ -70,12 +70,14 @@ typedef struct {
 enum {
     PROP_DB_PATH = 0,
     PROP_DB_SCHEMA,
+    PROP_SQLITE3_CMD,
     PROP_COUNT
 };
 
 static prop props[] = {
     {"db_path", "/tmp/guardian.db" },
-    {"db_schema", SCHEMADIR"/sqlite3.schema" }
+    {"db_schema", SCHEMADIR"/sqlite3.schema" },
+    {"sqlite3_cmd", "sqlite3" }
 };
 
 int
@@ -101,7 +103,7 @@ _sqlite3_db_getprop (
     int i = 0;
     for (; i < PROP_COUNT; ++i) {
         if (strcmp(props[i].name, name) == 0) {
-            *value = &props[i].value;
+            (*value) = (char *)(&props[i].value);
             return 0;
         }
     }
@@ -129,15 +131,30 @@ _sqlite3_db_connect (
         GuardianError **error)
 {
     int ret = 0;
+    struct stat _c_stat;
+
     if (_sqlite3_db == NULL)
     {
-        fprintf(stderr, "OPEN DB\n");
+        ret = stat(props[PROP_DB_PATH].value, &_c_stat);
+        if (ret != 0) {
+            /* File does not exists... we don't want sqlite3_open to create an empty one. */
+            if (error != NULL) {
+                *error = guardian_error_new (
+                        "Cannot open sqlite-database at '%s', file missing.\n",
+                        props[PROP_DB_PATH].value);
+            }
+            return 1;
+        }
+
         ret = sqlite3_open (
                 props[PROP_DB_PATH].value,
                 &_sqlite3_db);
         if (ret != SQLITE_OK)
         {
-            fprintf(stderr, "FAIL\n");
+            if (error != NULL) {
+                *error = guardian_error_new (
+                        "Open Failed\n");
+            }
             return 1;
         }
     }
@@ -149,7 +166,6 @@ int
 _sqlite3_db_disconnect (
         GuardianError **error)
 {
-    fprintf(stderr, "CLOSE DB\n");
     sqlite3_close (_sqlite3_db);
     return 0;
 }
@@ -158,12 +174,16 @@ int
 _sqlite3_db_init (
         GuardianError **error)
 {
-    char *path = NULL;
+    char *path        = NULL;
+    char *schema      = NULL;
+    char *sqlite3_cmd = NULL;
+
+    char command[256];
     struct stat _c_stat;
 
-    _sqlite3_db_getprop("db_path", &path);
-
-    printf("-- %s --\n", path);
+    _sqlite3_db_getprop("db_path",   &path);
+    _sqlite3_db_getprop("db_schema", &schema);
+    _sqlite3_db_getprop("sqlite3_cmd", &sqlite3_cmd);
 
     int ret = stat(path, &_c_stat);
     if (ret == 0) {
@@ -191,6 +211,31 @@ _sqlite3_db_init (
             *error = guardian_error_new (
                     "Directory '%s' does not exist. Cannot create sqlite-database.\n",
                     dirname(path));
+        }
+        return 1;
+    }
+
+    ret = stat(schema, &_c_stat);
+    if (ret != 0) {
+        /* Schema is missing... we can't create the file. */
+        if (error != NULL) {
+            *error = guardian_error_new (
+                    "Schema '%s' does not exist. Cannot create sqlite-database.\n",
+                    schema);
+        }
+        return 1;
+    }
+
+    sprintf(command, "cat %s | %s %s",
+            schema,
+            sqlite3_cmd,
+            path);
+
+    ret = system(command);
+    if (ret != 0) {
+        if (error != NULL) {
+            *error = guardian_error_new (
+                    "Creating database failed.\n");
         }
         return 1;
     }

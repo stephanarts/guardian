@@ -52,7 +52,7 @@
 #include "settings.h"
 
 static FILE *
-open_config_file (char *path) {
+open_config_file (const char *path) {
 
     FILE *f_config = NULL;
     struct stat _c_stat;
@@ -187,8 +187,6 @@ guardian_settings_load (
 
     settings->n_props = n_props;
 
-    printf("Props: %d\n", n_props);
-
     return settings;
 }
 
@@ -200,7 +198,6 @@ guardian_settings_get (
     int i;
 
     for (i = 0; i < settings->n_props; ++i) {
-        printf("%s:%s\n", settings->props[i].key, settings->props[i].value);
         if (strcmp(settings->props[i].key, key) == 0) {
             return settings->props[i].value;
         }
