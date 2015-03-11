@@ -49,6 +49,10 @@ int
 _sqlite3_db_disconnect (
         GuardianError **);
 
+int
+_sqlite3_db_init (
+        GuardianError **);
+
 sqlite3 *
 _sqlite3_db_get (
         void);

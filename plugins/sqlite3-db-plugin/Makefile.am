@@ -25,6 +25,7 @@ sqlite3_db_plugin_la_LIBADD = \
 sqlite3_db_plugin_la_CFLAGS =   \
     $(PCRE_CFLAGS) \
     $(SQLITE3_CFLAGS) \
+    -DSCHEMADIR=\"$(datadir)/guardian/schema\" \
     -std=c99
 
 AM_CPPFLAGS = \

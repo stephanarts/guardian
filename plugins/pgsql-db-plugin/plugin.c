@@ -79,6 +79,7 @@ guardian_plugin_init ()
     plugin->db.listprop   = _pgsql_db_listprop;
     plugin->db.connect    = _pgsql_db_connect;
     plugin->db.disconnect = _pgsql_db_disconnect;
+    plugin->db.init       = _pgsql_db_init;
 
     /* Host */
     plugin->host.get = _pgsql_host_get;

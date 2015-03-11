@@ -91,3 +91,10 @@ _pgsql_db_disconnect (
 {
     return 1;
 }
+
+int
+_pgsql_db_init (
+        GuardianError **error)
+{
+    return 1;
+}

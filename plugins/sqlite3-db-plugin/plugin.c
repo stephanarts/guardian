@@ -82,6 +82,7 @@ guardian_plugin_init ()
     plugin->db.listprop   = _sqlite3_db_listprop;
     plugin->db.connect    = _sqlite3_db_connect;
     plugin->db.disconnect = _sqlite3_db_disconnect;
+    plugin->db.init       = _sqlite3_db_init;
 
     /* Host */
     plugin->host.get = _sqlite3_host_get;

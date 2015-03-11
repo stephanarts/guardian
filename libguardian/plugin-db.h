@@ -51,6 +51,7 @@ struct _GuardianPluginDB
         int  (*listprop)(char **keys[]);
         int  (*connect) (GuardianError **);
         int  (*disconnect) (GuardianError **);
+        int  (*init) (GuardianError **);
     } db;
 
     /* Host */

@@ -41,6 +41,8 @@
 
 #include <openssl/sha.h>
 
+#include <libgen.h>
+
 #include <string.h>
 
 #include <pcre.h>
@@ -56,6 +58,7 @@
 #include "plugin.h"
 #include "host.h"
 #include "ns.h"
+#include "db.h"
 
 static sqlite3 *_sqlite3_db = NULL;
 
@@ -66,27 +69,43 @@ typedef struct {
 
 enum {
     PROP_DB_PATH = 0,
+    PROP_DB_SCHEMA,
     PROP_COUNT
 };
 
 static prop props[] = {
-    {"db_path", "/tmp/guardian.db" }
+    {"db_path", "/tmp/guardian.db" },
+    {"db_schema", SCHEMADIR"/sqlite3.schema" }
 };
 
 int
 _sqlite3_db_setprop (
-        const char *key,
+        const char *name,
         const char *value)
 {
-    return 0;
+    int i = 0;
+    for (; i < PROP_COUNT; ++i) {
+        if (strcmp(props[i].name, name) == 0) {
+            strncpy(props[i].value, value, 128);
+            return 0;
+        }
+    }
+    return 1;
 }
 
 int
 _sqlite3_db_getprop (
-        const char *key,
+        const char *name,
         char **value)
 {
-    return 0;
+    int i = 0;
+    for (; i < PROP_COUNT; ++i) {
+        if (strcmp(props[i].name, name) == 0) {
+            *value = &props[i].value;
+            return 0;
+        }
+    }
+    return 1;
 }
 
 int
@@ -132,6 +151,50 @@ _sqlite3_db_disconnect (
 {
     fprintf(stderr, "CLOSE DB\n");
     sqlite3_close (_sqlite3_db);
+    return 0;
+}
+
+int
+_sqlite3_db_init (
+        GuardianError **error)
+{
+    char *path = NULL;
+    struct stat _c_stat;
+
+    _sqlite3_db_getprop("db_path", &path);
+
+    printf("-- %s --\n", path);
+
+    int ret = stat(path, &_c_stat);
+    if (ret == 0) {
+        /* File exists... we are creating it... E_OOPS */
+        if (error != NULL) {
+            *error = guardian_error_new (
+                    "Cannot initialize sqlite-database at '%s', file exists.\n",
+                    path);
+        }
+        return 1;
+    }
+    if (errno != ENOENT) {
+        if (error != NULL) {
+            *error = guardian_error_new (
+                    "Cannot initialize sqlite-database at '%s'.\n",
+                    path);
+        }
+        return 1;
+    }
+
+    ret = stat(dirname(path), &_c_stat);
+    if (ret != 0) {
+        /* Directory is missing... we can't create the file. */
+        if (error != NULL) {
+            *error = guardian_error_new (
+                    "Directory '%s' does not exist. Cannot create sqlite-database.\n",
+                    dirname(path));
+        }
+        return 1;
+    }
+
     return 0;
 }
 

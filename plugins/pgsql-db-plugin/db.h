@@ -48,3 +48,7 @@ _pgsql_db_connect (
 int
 _pgsql_db_disconnect (
         GuardianError **);
+
+int
+_pgsql_db_init (
+        GuardianError **);

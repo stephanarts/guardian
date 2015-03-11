@@ -275,6 +275,7 @@ main (int argc, char **argv)
         API_CHECK(db_plugin->db.listprop);
         API_CHECK(db_plugin->db.connect);
         API_CHECK(db_plugin->db.disconnect);
+        API_CHECK(db_plugin->db.init);
 
         API_CHECK(db_plugin->host.add);
         API_CHECK(db_plugin->host.get);

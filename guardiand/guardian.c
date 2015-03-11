@@ -81,12 +81,15 @@ static int n_plugins = 0;
 
 static GuardianPluginDB *_db_plugin = NULL;
 
+static int _init_db = 0;
+
 enum
 {
     OPTION_VERSION = 0,
     OPTION_VERBOSE,
     OPTION_HELP,
-    OPTION_FATAL_WARNINGS
+    OPTION_FATAL_WARNINGS,
+    OPTION_INIT_DB
 };
 
 /************************
@@ -94,8 +97,10 @@ enum
  ************************/
 static struct option long_options[] = {
     {"version", 0, 0, 'V'},     /* OPTION_VERSION */
+    {"verbose", 0, 0, 'v'},     /* OPTION_VERBOSE */
     {"help", 0, 0, 'h'},        /* OPTION_HELP    */
     {"fatal-warnings", 0, 0, 0},/* OPTION_FATAL_WARNINGS */
+    {"init-db", 0, 0, 0},       /* OPTION_INIT_DB */
     {0, 0, 0, 0}
 };
 
@@ -207,6 +212,10 @@ main (int argc, char **argv)
                 break;
             case OPTION_FATAL_WARNINGS:
                 guardian_set_fatal_asserts (TRUE);
+                break;
+            case OPTION_INIT_DB:
+                _init_db = 1;
+                printf("_INITDB_\n");
                 break;
             }
             break;
@@ -382,6 +391,17 @@ main (int argc, char **argv)
         if (val != NULL) {
             _db_plugin->db.setprop(keys[i], val);
         }
+    }
+
+    if (_init_db != 0) {
+        char *p;
+        _db_plugin->db.getprop("db_schema", &p);
+        printf(">>> %s\n", p);
+        if (_db_plugin->db.init(&error) != 0)
+        {
+            printf("%s", guardian_error_get_msg(error));
+        }
+        exit(0);
     }
 
     _db_plugin->db.connect(NULL);
