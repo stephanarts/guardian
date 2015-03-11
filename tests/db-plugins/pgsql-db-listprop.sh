@@ -1,5 +1,5 @@
 
-CONFIG_FILE=pgsql-db-listprop.conf
+CONFIG_FILE=$srcdir/pgsql-db-listprop.conf
 
 KEYS=`./plugin-loader --db-listprop pgsql-db-plugin`
 RET=$?

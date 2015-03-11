@@ -1,5 +1,5 @@
 
-CONFIG_FILE=sqlite3-db-listprop.conf
+CONFIG_FILE=$srcdir/sqlite3-db-listprop.conf
 
 KEYS=`./plugin-loader --db-listprop sqlite3-db-plugin`
 RET=$?
