@@ -12,4 +12,4 @@ before_install:
  - sudo apt-get install doxygen
  - sh autogen.sh
 
-script: sh autogen.sh && make && make distcheck
+script: ./configure && make && make distcheck

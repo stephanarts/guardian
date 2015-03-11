@@ -1,8 +1,8 @@
 
-CONFIG_FILE=$SOURCE_DIR/tests/db-plugins/pgsql-db-listprop.conf
+CONFIG_FILE=pgsql-db-listprop.conf
 
 ./plugin-loader --db-listprop \
-                --config=$CONFIG_FILE \
+                --config=$srcdir/$CONFIG_FILE \
                 pgsql-db-plugin
 RET=$?
 
