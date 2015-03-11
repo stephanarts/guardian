@@ -75,7 +75,7 @@ enum {
 };
 
 static prop props[] = {
-    {"db_path", "/tmp/guardian.db" },
+    {"db_path", "/var/lib/"PACKAGE"/"PACKAGE".db" },
     {"db_schema", SCHEMADIR"/sqlite3.schema" },
     {"sqlite3_cmd", "sqlite3" }
 };
