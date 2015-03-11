@@ -11,4 +11,6 @@ nm -g $PLUGINDIR/sqlite3-db-plugin/$PLUGINSUBDIR/sqlite3-db-plugin.so \
 diff -u $TEMP $SOURCE_DIR/tests/db-plugins/sqlite3-db-plugin.symbols
 RET=$?
 
+unlink $TEMP
+
 exit $RET

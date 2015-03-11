@@ -11,4 +11,6 @@ nm -g $PLUGINDIR/pgsql-db-plugin/$PLUGINSUBDIR/pgsql-db-plugin.so \
 diff -u $TEMP $SOURCE_DIR/tests/db-plugins/pgsql-db-plugin.symbols
 RET=$?
 
+unlink $TEMP
+
 exit $RET
