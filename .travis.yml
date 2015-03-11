@@ -9,6 +9,7 @@ before_install:
  - sudo apt-get install intltool
  - sudo apt-get install libzmq3-dev 
  - sudo apt-get install libedit-dev 
+ - sudo apt-get install doxygen
  - sh autogen.sh
 
 script: sh autogen.sh && make && make distcheck
