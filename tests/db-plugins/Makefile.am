@@ -25,6 +25,7 @@ SQLITE_TESTDATA = \
 PGSQL_TESTS = \
     pgsql-symbols.sh        \
     pgsql-api.sh            \
+    pgsql-db-listprop.sh  \
     pgsql-db-connect.sh
 
 PGSQL_TESTDATA = \

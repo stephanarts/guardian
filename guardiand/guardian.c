@@ -384,7 +384,7 @@ main (int argc, char **argv)
         }
     }
 
-    _db_plugin->db.connect();
+    _db_plugin->db.connect(NULL);
 
     _db_plugin->host.add(
             "aa",
@@ -404,7 +404,7 @@ main (int argc, char **argv)
     /** Start the main loop */
     guardian_scheduler_main (ctx, n_workers);
 
-    _db_plugin->db.disconnect();
+    _db_plugin->db.disconnect(NULL);
 
     //zmq_ctx_term (ctx);
 

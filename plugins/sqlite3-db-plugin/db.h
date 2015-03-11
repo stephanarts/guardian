@@ -41,13 +41,13 @@ int
 _sqlite3_db_listprop (
         char **keys[]);
 
-void
+int
 _sqlite3_db_connect (
-        void);
+        GuardianError **);
 
-void
+int
 _sqlite3_db_disconnect (
-        void);
+        GuardianError **);
 
 sqlite3 *
 _sqlite3_db_get (

@@ -316,9 +316,15 @@ main (int argc, char **argv)
             db_plugin->db.setprop(key, value);
         }
 
-        db_plugin->db.connect();
+        if (db_plugin->db.connect(NULL))
+        {
+            exit(1);
+        }
 
-        db_plugin->db.disconnect();
+        if (db_plugin->db.disconnect(NULL))
+        {
+            exit(1);
+        }
 
         exit(0);
     }

@@ -73,19 +73,21 @@ _pgsql_db_getprop (
 
 int
 _pgsql_db_listprop (
-        char **keys)
+        char **keys[])
 {
     return 0;
 }
 
-void
+int
 _pgsql_db_connect (
-        void)
+        GuardianError **error)
 {
+    return 1;
 }
 
-void
+int
 _pgsql_db_disconnect (
-        void)
+        GuardianError **error)
 {
+    return 1;
 }

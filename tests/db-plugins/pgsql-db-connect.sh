@@ -1,7 +1,8 @@
 
+CONFIG_FILE=$SOURCE_DIR/tests/db-plugins/pgsql-db-connect.conf
 
 ./plugin-loader --db-connect \
-                --config=pgsql-db-connect.conf \
+                --config=$CONFIG_FILE \
                 pgsql-db-plugin
 RET=$?
 

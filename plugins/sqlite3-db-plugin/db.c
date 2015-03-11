@@ -105,9 +105,9 @@ _sqlite3_db_listprop (
     return PROP_COUNT;
 }
 
-void
+int
 _sqlite3_db_connect (
-        void)
+        GuardianError **error)
 {
     int ret = 0;
     if (_sqlite3_db == NULL)
@@ -119,17 +119,20 @@ _sqlite3_db_connect (
         if (ret != SQLITE_OK)
         {
             fprintf(stderr, "FAIL\n");
-            return;
+            return 1;
         }
     }
+
+    return 0;
 }
 
-void
+int
 _sqlite3_db_disconnect (
-        void)
+        GuardianError **error)
 {
     fprintf(stderr, "CLOSE DB\n");
     sqlite3_close (_sqlite3_db);
+    return 0;
 }
 
 sqlite3 *

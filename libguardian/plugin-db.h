@@ -49,8 +49,8 @@ struct _GuardianPluginDB
         int  (*setprop) (const char *key, const char *value);
         int  (*getprop) (const char *key, char **value);
         int  (*listprop)(char **keys[]);
-        void (*connect) (void);
-        void (*disconnect) (void);
+        int  (*connect) (GuardianError **);
+        int  (*disconnect) (GuardianError **);
     } db;
 
     /* Host */

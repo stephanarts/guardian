@@ -39,12 +39,12 @@ _pgsql_db_getprop (
 
 int
 _pgsql_db_listprop (
-        char **keys);
+        char **keys[]);
 
-void
+int
 _pgsql_db_connect (
-        void);
+        GuardianError **);
 
-void
+int
 _pgsql_db_disconnect (
-        void);
+        GuardianError **);
