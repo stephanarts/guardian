@@ -1,9 +1,16 @@
 
 CONFIG_FILE=pgsql-db-listprop.conf
 
-./plugin-loader --db-listprop \
-                --config=$srcdir/$CONFIG_FILE \
-                pgsql-db-plugin
+KEYS=`./plugin-loader --db-listprop pgsql-db-plugin`
 RET=$?
+if [ $RET -ne 0 ]
+then
+    exit $RET
+fi
+
+DIFF=`echo "$KEYS" | diff -u $CONFIG_FILE -`
+RET=$?
+
+printf "%s\n" "$DIFF" >&2
 
 exit $RET

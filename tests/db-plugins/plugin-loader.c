@@ -338,33 +338,8 @@ main (int argc, char **argv)
         int i = db_plugin->db.listprop (&keys);
         int a;
 
-        if (config_file == NULL) {
-            fprintf(stderr, "--list-props requires --config\n");
-            exit(1);
-        }
-
-        FILE *f_config = open_config_file (config_file);
-        if (f_config == NULL) {
-            exit(1);
-        }
-
-        char line[128];
-
         for (a = 0; a < i; ++a) {
-            if (fgets(line, sizeof(line), f_config) == NULL) {
-                exit(1);
-            }
-            if (line[strlen(line)-1] == '\n')
-            {
-                line[strlen(line)-1] = '\0';
-            }
-            if (strncmp(keys[a], line, 128)) {
-                printf("--- internal\n");
-                printf("+++ config_file\n");
-                printf("- %s\n", keys[a]);
-                printf("+ %s\n", line);
-                exit(1);
-            }
+            printf("%s\n", keys[a]);
         }
 
         exit(0);

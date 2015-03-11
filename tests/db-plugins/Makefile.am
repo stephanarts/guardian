@@ -38,7 +38,8 @@ TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SH)
 
 XFAIL_TESTS = \
-    pgsql-db-connect.sh
+    pgsql-db-connect.sh \
+    pgsql-db-listprop.sh
 
 check_PROGRAMS = plugin-loader
 
