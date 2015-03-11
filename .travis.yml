@@ -11,4 +11,4 @@ before_install:
  - sudo apt-get install libedit-dev 
  - sh autogen.sh
 
-script: ./configure && make && make check
+script: sh autogen.sh && make && make distcheck
