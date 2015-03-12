@@ -209,7 +209,7 @@ main (int argc, char **argv)
     void   *ctx = zmq_ctx_new ();
     void   *server = zmq_socket (ctx, ZMQ_REQ);
 
-    zmq_connect (server, "tcp://0.0.0.0:5678");
+    zmq_connect (server, "tcp://0.0.0.0:1234");
 
     zmq_setsockopt (server, ZMQ_LINGER, &no_linger, sizeof (no_linger));
 

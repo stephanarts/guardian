@@ -53,52 +53,40 @@
 #include "shell.h"
 #include "client.h"
 
-static int silent_shell = 0;
-static int shell_open = 0;
-static int line_nr = 0;
-static char prompt[100];
+#define MAX_TOKENS 32
 
-static char *
-_print_prompt (EditLine * el)
-{
-    if (silent_shell == 1)
-    {
-        sprintf (prompt, "");
-    } else
-    {
-        if (shell_open == 1)
-        {
-            sprintf (prompt, " ");
-        } else
-        {
-            sprintf (prompt, "%d> ", line_nr);
-        }
+static void
+parse (char **tokens, int n_tokens) {
+    if (n_tokens == 0) {
+        return;
     }
-    return prompt;
+
+    /* CONNECT */
+    if (strcmp(tokens[0], "connect") == 0) {
+         
+    }
+
+    /* DISCONNECT */
+    if (strcmp(tokens[0], "disconnect") == 0) {
+         
+    }
+
+    if (strcmp(tokens[0], "help") == 0) {
+        if (n_tokens == 1) {
+            fprintf(stdout, "connect    - Connect to server\n");
+            fprintf(stdout, "help       - Show this message\n");
+        }
+        if (n_tokens == 2) {
+
+        }
+        return;
+    }
 }
 
 void
 show_shell (int silent)
 {
-    EditLine *el = NULL;
-    Tokenizer *t = NULL;
-    int     n_tokens = 0;
-    const char **tokens = NULL;
-
-    silent_shell = silent;
-
-    /*
-     * Separators: <tab> <newline> <space>
-     */
-    t = tok_init (NULL);
-
-    el = el_init (
-            "guardian",
-            stdin,
-            stdout,
-            stderr);
-
-    el_set (el, EL_PROMPT, _print_prompt);
+    char buf[256];
 
     if (silent == 0)
     {
@@ -110,97 +98,40 @@ show_shell (int silent)
     }
     while (1)
     {
-
-        el_gets (el, NULL);
-
-        shell_open = 1;
-
-        const LineInfo *li = el_line (el);
-        int     i = tok_line (
-                t,
-                li,
-                &n_tokens,
-                &tokens,
-                NULL,
-                NULL);
-
-        if (i == 0)
-        {
-
-            /*
-             * printf("---\n"); for (i = 0;  i < n_tokens; ++i) { printf(" >
-             * %s\n", tokens[i]); } printf("---\n");
-             */
-
-            tok_reset (t);
-            line_nr++;
-            shell_open = 0;
-
-            if (n_tokens == 0)
-            {
-                continue;
-            }
-
-            /* EXIT */
-            if (n_tokens == 1 && 0 == strcmp (tokens[0], "exit"))
-            {
-                break;
-            }
-            /* Search */
-            if (!strcmp (tokens[0], "Q") || !strcmp (tokens[0], "query"))
-            {
-                printf ("Search...\n");
-            }
-            /* Set */
-            if (!strcmp (tokens[0], "set"))
-            {
-                printf ("Set...\n");
-                if (n_tokens == 1)
-                {
-                    printf ("ERR: no key/value\n");
-                    continue;
-                }
-                printf ("A");
-            }
-            /* Connect */
-            if (!strcmp (tokens[0], "connect"))
-            {
-                /* Interactive Connect */
-                switch (n_tokens)
-                {
-                case 1:        /* Interactive connect */
-                    printf ("Interactive connect is not yet supported\n"
-                            "Use connect <connect-uri>\n");
-                    break;
-                case 2:        /* connect-string */
-                    if (client_connect_pass (
-                            "tcp://127.0.0.1:1234",
-                            "sys",
-                            "password") == 0)
-                    {
-                        printf ("Connected\n");
-                    } else
-                    {
-                        printf ("Connection failed\n");
-                    }
-                    break;
-                default:       /* error */
-                    printf ("Connect requires an argument.\n"
-                            "\nconnect <connect-uri>\n");
-                    break;
-                }
-                continue;
-            }
-        } else
-        {
-            if (i < 0)
-            {
-                tok_reset (t);
-                line_nr++;
-                shell_open = 0;
-            }
+        if (silent == 0) {
+            fprintf (stdout, "G> ");
         }
 
-        continue;
+        if(fgets (buf, 256, stdin) != NULL)
+        {
+            /* Remove trailing newline */
+            int l = strlen(buf);
+            if (buf[l-1] == '\n') {
+                buf[l-1] = '\0';
+            }
+
+            int i = 0;
+            char *tokens[MAX_TOKENS];
+
+            /* Split into tokens (separated by whitespace) */
+            char *key = buf;
+            char *token = strsep(&key, " \t");
+            while(token != NULL) {
+                if (*token != '\0') {
+                    //printf("'%s'\n", token); 
+                    tokens[i] = token;
+                    ++i;
+                }
+                token = strsep(&key, " \t");
+            }
+
+            parse (tokens, i);
+
+            continue;
+        }
+        if (feof(stdin))
+        {
+            break;
+        }
     }
 }

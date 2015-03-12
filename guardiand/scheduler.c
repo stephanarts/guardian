@@ -206,6 +206,7 @@ guardian_scheduler_main (void *ctx, int n_workers)
 
             zmq_send (data_processor, "0", 1, 0);
         }
+
         /* Put data in a database */
         if (items[3].revents & ZMQ_POLLIN)
         {

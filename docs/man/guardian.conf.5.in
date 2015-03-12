@@ -15,8 +15,8 @@ thread could well be enough. If it is a very busy system, processing logs
 for multiple hosts, this value can be increased to optimally use the
 available resources.
 .TP 3
-config_db
-Location of the configuration-database. (SQLite3)
+db_type
+Database type used. (Eg, sqlite3, pgsql, etc...)
 .TP 3
 listen_port
 Network port used for listing for commands specified by guardian-agent.
