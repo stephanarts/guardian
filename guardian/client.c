@@ -83,7 +83,8 @@ client_connect_pass (
                 _socket,
                 msg,
                 255,
-                100);
+                0);
+        printf("%s\n", msg);
         return 0;
     }
 

@@ -144,10 +144,12 @@ _sqlite3_host_get (
             NULL);
     if (ret != SQLITE_OK)
     {
-        errmsg = sqlite3_errmsg (db);
-        *error = guardian_error_new (
-                "%s",
-                errmsg);
+        if (error != NULL) {
+            errmsg = sqlite3_errmsg (db);
+            *error = guardian_error_new (
+                    "%s",
+                    errmsg);
+        }
         return -1;
     }
 
@@ -163,17 +165,23 @@ _sqlite3_host_get (
         case SQLITE_SCHEMA:
         case SQLITE_CORRUPT:
         default: /* Error */
-            errmsg = sqlite3_errmsg (db);
-            *error = guardian_error_new (
-                    "%s",
-                    errmsg);
+            if (error != NULL) {
+                errmsg = sqlite3_errmsg (db);
+                if (errmsg != NULL) {
+                    *error = guardian_error_new (
+                            "%s",
+                            errmsg);
+                }
+            }
             sqlite3_finalize(handle);
             return -1;
             break;
         case SQLITE_DONE:
-            *error = guardian_error_new (
-                    "Host '%s' not found.",
-                    name);
+            if (error != NULL) {
+                *error = guardian_error_new (
+                        "Host '%s' not found.",
+                        name);
+            }
             sqlite3_finalize(handle);
             return -1;
             break;
@@ -189,11 +197,13 @@ _sqlite3_host_get (
         case SQLITE_INTERRUPT:
         case SQLITE_SCHEMA:
         case SQLITE_CORRUPT:
-            /* Something went wrong */
-            errmsg = sqlite3_errmsg (db);
-            *error = guardian_error_new (
-                    "%s",
-                    errmsg);
+            if (error != NULL) {
+                /* Something went wrong */
+                errmsg = sqlite3_errmsg (db);
+                *error = guardian_error_new (
+                        "%s",
+                        errmsg);
+            }
             sqlite3_finalize(handle);
             return -1;
             break;
@@ -201,9 +211,11 @@ _sqlite3_host_get (
             /* Serious error, the UNIQUE constraint of the hosts
              * table is not honored (or missing).
              */
-            *error = guardian_error_new (
-                    "Multiple entries of host '%s'.\n",
-                    name);
+            if (error != NULL) {
+                *error = guardian_error_new (
+                        "Multiple entries of host '%s'.\n",
+                        name);
+            }
             sqlite3_finalize(handle);
             return -1;
             break;
@@ -253,9 +265,11 @@ _sqlite3_host_add (
             &host_ptr,
             NULL) == 0)
     {
-        *error = guardian_error_new (
-                "host '%s' already exists.",
-                host);
+        if (error != NULL) {
+            *error = guardian_error_new (
+                    "host '%s' already exists.",
+                    host);
+        }
         return 1;
     }
 
@@ -276,10 +290,12 @@ _sqlite3_host_add (
             NULL);
     if (ret != SQLITE_OK)
     {
-        errmsg = sqlite3_errmsg (db);
-        *error = guardian_error_new (
-                "%s",
-                errmsg);
+        if (error != NULL) {
+            errmsg = sqlite3_errmsg (db);
+            *error = guardian_error_new (
+                    "%s",
+                    errmsg);
+        }
         return -1;
     }
 
@@ -290,23 +306,18 @@ _sqlite3_host_add (
 
     switch (ret)
     {
+        case SQLITE_DONE:
+            break;
         case SQLITE_INTERRUPT:
         case SQLITE_SCHEMA:
         case SQLITE_CORRUPT:
-            errmsg = sqlite3_errmsg (db);
-            *error = guardian_error_new (
-                    "%s",
-                    errmsg);
-            sqlite3_finalize(handle);
-            return -1;
-            break;
-        case SQLITE_DONE:
-            break;
         default:
-            errmsg = sqlite3_errmsg (db);
-            *error = guardian_error_new (
-                    "%s",
-                    errmsg);
+            if (error != NULL) {
+                errmsg = sqlite3_errmsg (db);
+                *error = guardian_error_new (
+                        "%s",
+                        errmsg);
+            }
             sqlite3_finalize(handle);
             return -1;
             break;

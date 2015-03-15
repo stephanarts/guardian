@@ -126,7 +126,7 @@ guardian_scheduler_main (void *ctx, int n_workers)
         /* Scheduling of worker threads */
         if (items[0].revents & ZMQ_POLLIN)
         {
-            int     size = zmq_recv (plugins, msg, 255, 0);
+            int size = zmq_recv (plugins, msg, 255, 0);
             if (size != -1)
             {
                 /* Process task */
@@ -216,6 +216,8 @@ guardian_scheduler_main (void *ctx, int n_workers)
                 zmq_msg_t message;
                 zmq_msg_init (&message);
                 zmq_msg_recv (&message, agent, 0);
+
+                printf("%s\n", zmq_msg_data(&message));
 
                 zmq_msg_close (&message);
 

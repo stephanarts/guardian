@@ -63,7 +63,10 @@ parse (char **tokens, int n_tokens) {
 
     /* CONNECT */
     if (strcmp(tokens[0], "connect") == 0) {
-         
+        client_connect_pass(
+                "tcp://localhost:1234",
+                tokens[1],
+                tokens[2]);
     }
 
     /* DISCONNECT */

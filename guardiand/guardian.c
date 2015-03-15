@@ -460,7 +460,30 @@ main (int argc, char **argv)
         exit(0);
     }
 
+    /* Open the Database */
     _db_plugin->db.connect(NULL);
+
+    /* Check if the host should be auto-rgistered */
+    char *reg_host = guardian_settings_get (settings, "autoregister_host");
+    if (reg_host != NULL) {
+        if (strcmp(reg_host, "true") == 0) {
+            _db_plugin->host.get(
+                    "hermes",
+                    &host_ptr,
+                    &error); 
+            if (host_ptr == NULL) {
+                guardian_log_info ("autoregister_host enabled, but host '%s' not found.", "hermes");
+                _db_plugin->host.add (
+                    "hermes",
+                    &error);
+                printf("E: %s\n", guardian_error_get_msg(error));
+            }
+        } else {
+            guardian_log_error("autoregister_host = '%s'", reg_host);
+        }
+    } else {
+        guardian_log_error("autoregister_host missing");
+    }
 
     /** Start the main loop */
     guardian_scheduler_main (ctx, n_workers);

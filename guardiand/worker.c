@@ -84,7 +84,7 @@ _guardian_worker_thread (void *arg)
     {
         //printf (".");
         zmq_send (socket, "GET-COMMAND\n\0", 13, 0);
-        zmq_recv (socket, msg, 255, 100);
+        zmq_recv (socket, msg, 255, 0);
 
         //guardian_log_info ("..'%s'\n", msg);
         ret = sscanf (msg, "WAIT[%d]", &timeout);
