@@ -275,11 +275,11 @@ _sqlite3_host_add (
 
     sqlite3 *db = _sqlite3_db_get();
 
-    snprintf (
-            query,
+    sqlite3_snprintf (
             128,
+            query,
             "INSERT INTO 'HOSTS'(name) "
-            "VALUES(\"%s\");",
+            "VALUES('%q');",
             host);
 
     ret = sqlite3_prepare_v2 (
@@ -340,99 +340,4 @@ _sqlite3_host_getid (
         GuardianError **error)
 {
     return host->host_id;
-}
-
-/** DEPRECATED **/
-
-int
-_sqlite3_get_hostid (
-        const char *host,
-        GuardianError **error)
-{
-    char query[128];
-    sqlite3_stmt *handle = NULL;
-    int ret;
-    const char *errmsg;
-    int host_id;
-
-    sqlite3 *db = _sqlite3_db_get();
-
-    snprintf (
-            query,
-            128,
-            "SELECT id FROM 'HOSTS' WHERE name='%s';",
-            host);
-
-    ret = sqlite3_prepare_v2 (
-            db,
-            query,
-            -1,
-            &handle,
-            NULL);
-    if (ret != SQLITE_OK)
-    {
-        errmsg = sqlite3_errmsg (db);
-        *error = guardian_error_new (
-                "%s",
-                errmsg);
-        return -1;
-    }
-
-    do
-    {
-        ret = sqlite3_step (handle);
-    } while (ret == SQLITE_BUSY);
-
-    switch (ret)
-    {
-        case SQLITE_INTERRUPT:
-        case SQLITE_SCHEMA:
-        case SQLITE_CORRUPT:
-        default:
-            errmsg = sqlite3_errmsg (db);
-            *error = guardian_error_new (
-                    "%s",
-                    errmsg);
-            sqlite3_finalize(handle);
-            return -1;
-            break;
-        case SQLITE_ROW:
-            host_id = sqlite3_column_int (handle, 0);
-            break;
-        case SQLITE_DONE:
-            *error = guardian_error_new (
-                    "Host '%s' not found.",
-                    host);
-            sqlite3_finalize(handle);
-            return -1;
-            break;
-    }
-
-    ret = sqlite3_step (handle);
-    switch (ret)
-    {
-        case SQLITE_INTERRUPT:
-        case SQLITE_SCHEMA:
-        case SQLITE_CORRUPT:
-            errmsg = sqlite3_errmsg (db);
-            *error = guardian_error_new (
-                    "%s",
-                    errmsg);
-            sqlite3_finalize(handle);
-            return -1;
-            break;
-        case SQLITE_ROW:
-            *error = guardian_error_new (
-                    "Multiple entries of host '%s'.\n",
-                    host);
-            sqlite3_finalize(handle);
-            return -1;
-            break;
-        case SQLITE_DONE:
-            sqlite3_finalize(handle);
-            break;
-    }
-
-    printf(">>%d\n", host_id);
-    return host_id;
 }

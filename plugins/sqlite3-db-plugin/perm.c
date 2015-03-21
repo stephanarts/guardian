@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2015 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -56,52 +56,87 @@
 #include "plugin.h"
 #include "db.h"
 #include "host.h"
-#include "metric.h"
 #include "ns.h"
-#include "value.h"
+#include "perm.h"
 
 int
-_sqlite3_value_publish (
-        const char *host,
-        const char *ns,
-        const char *metric,
-        const char *value,
-        const time_t ts,
+_sqlite3_perm_set_host (
+        const char *role,
+        unsigned int perm,
+        void *object,
+        GuardianError **error);
+
+
+int
+_sqlite3_perm_set (
+        const char *role,
+        unsigned int perm,
+        ObjectType type,
+        void *object,
         GuardianError **error)
 {
-/*
+    switch (type)
+    {
+        case OBJECT_TYPE_HOST:
+            _sqlite3_perm_set_host(role, perm, object, error);
+        default:
+            return -1;
+    }
+    return 0;
+}
+
+int
+_sqlite3_perm_get (
+        const char *role,
+        unsigned int *perm,
+        ObjectType type,
+        void *object,
+        GuardianError **error)
+{
+    return 0;
+}
+
+int
+_sqlite3_perm_check(
+        const char *role,
+        unsigned int perm,
+        ObjectType type,
+        void *object,
+        GuardianError **error)
+{
+    return 0;
+}
+
+int
+_sqlite3_perm_set_host (
+        const char *role,
+        unsigned int perm,
+        void *object,
+        GuardianError **error)
+{
     char query[128];
+    sqlite3 *db = NULL;
     sqlite3_stmt *handle = NULL;
     int ret;
     const char *errmsg;
-    int ns_id;
-    int host_id;
-    int metric_id;
-    GuardianError *call_error = NULL;
+    int host_id = _sqlite3_host_getid (object,
+            error);
 
-    sqlite3 *db = _sqlite3_db_get();
-
-    host_id = _sqlite3_get_hostid (host, &call_error);
-    if (host_id == -1)
+    if (host_id < 0)
     {
-        *error = call_error;
         return -1;
     }
 
-    ns_id = _sqlite3_get_nsid (host, ns, &call_error);
-    if (ns_id == -1)
-    {
-        *error = call_error;
-        return -1;
-    }
+    db = _sqlite3_db_get();
 
-    snprintf (
-            query,
+    sqlite3_snprintf (
             128,
-            "INSERT INTO 'METRICS'(ns_id,name,type) "
-            "VALUES(%d,\"%s\",\"INTEGER\");",
-            ns_id,
-            name);
+            query,
+            "SELECT id FROM 'HOST_PERM' "
+            "WHERE host_id = %d "
+            "AND role_id = (SELECT id FROM ROLES WHERE name IS '%q')",
+            host_id,
+            role);
 
     ret = sqlite3_prepare_v2 (
             db,
@@ -111,44 +146,14 @@ _sqlite3_value_publish (
             NULL);
     if (ret != SQLITE_OK)
     {
-        errmsg = sqlite3_errmsg (db);
-        *error = guardian_error_new (
-                "%s",
-                errmsg);
+        if (error != NULL) {
+            errmsg = sqlite3_errmsg (db);
+            *error = guardian_error_new (
+                    "%s",
+                    errmsg);
+        }
         return -1;
     }
-
-    do
-    {
-        ret = sqlite3_step (handle);
-    } while (ret == SQLITE_BUSY);
-
-    switch (ret)
-    {
-        case SQLITE_INTERRUPT:
-        case SQLITE_SCHEMA:
-        case SQLITE_CORRUPT:
-            errmsg = sqlite3_errmsg (db);
-            *error = guardian_error_new (
-                    "%s",
-                    errmsg);
-            sqlite3_finalize(handle);
-            return -1;
-            break;
-        case SQLITE_DONE:
-            break;
-        default:
-            errmsg = sqlite3_errmsg (db);
-            *error = guardian_error_new (
-                    "%s",
-                    errmsg);
-            sqlite3_finalize(handle);
-            return -1;
-            break;
-    }
-
-    sqlite3_finalize(handle);
-*/
 
     return 0;
 }

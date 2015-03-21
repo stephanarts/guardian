@@ -117,7 +117,10 @@ enum
     OPTION_CONFIG,
     OPTION_API_CHECK,
     OPTION_DB_CONNECT,
-    OPTION_DB_LISTPROP
+    OPTION_DB_LISTPROP,
+    OPTION_DB_HOST,
+    OPTION_DB_NS,
+    OPTION_DB_PERM
 };
 
 /************************
@@ -134,6 +137,9 @@ static struct option long_options[] = {
     {"api-check", 0, 0, 0},     /* OPTION_API_CHECK */
     {"db-connect", 0, 0, 0},    /* OPTION_DB_CONNECT */
     {"db-listprop", 0, 0, 0},   /* OPTION_DB_LISTPROP */
+    {"db-host", 0, 0, 0},       /* OPTION_DB_HOST */
+    {"db-ns", 0, 0, 0},         /* OPTION_DB_NS */
+    {"db-perm", 0, 0, 0},       /* OPTION_DB_PERM */
     {0, 0, 0, 0}
 };
 
@@ -205,6 +211,15 @@ main (int argc, char **argv)
                 break;
             case OPTION_DB_LISTPROP:
                 l_ch = 1;
+                break;
+            case OPTION_DB_PERM:
+                d_ch = 1;
+                break;
+            case OPTION_DB_HOST:
+                d_ch = 1;
+                break;
+            case OPTION_DB_NS:
+                d_ch = 1;
                 break;
             case OPTION_CONFIG:
                 config_file = optarg;
@@ -287,6 +302,10 @@ main (int argc, char **argv)
         API_CHECK(db_plugin->metric.get);
         API_CHECK(db_plugin->metric.copy);
         API_CHECK(db_plugin->metric.free);
+
+        API_CHECK(db_plugin->perm.set);
+        API_CHECK(db_plugin->perm.get);
+        API_CHECK(db_plugin->perm.check);
 
         exit(0);
     }

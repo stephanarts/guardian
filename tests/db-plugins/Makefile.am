@@ -15,6 +15,9 @@ SQLITE_TESTS = \
     sqlite3-symbols.sh      \
     sqlite3-api.sh          \
     sqlite3-db-listprop.sh  \
+    sqlite3-db-perm.sh      \
+    sqlite3-db-host.sh      \
+    sqlite3-db-ns.sh        \
     sqlite3-db-connect.sh
 
 SQLITE_TESTDATA = \
@@ -38,6 +41,7 @@ TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SH)
 
 XFAIL_TESTS = \
+    pgsql-api.sh \
     pgsql-db-connect.sh \
     pgsql-db-listprop.sh
 

@@ -11,6 +11,7 @@ sqlite3_db_plugin_la_SOURCES = \
     host.c host.h \
     ns.c ns.h \
     metric.c metric.h \
+    perm.c perm.h \
     value.c value.h
 
 sqlite3_db_plugin_la_LDFLAGS =       \

@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2015 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,29 +27,27 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-typedef struct _Ns Ns;
 
 int
-_sqlite3_ns_add (
-        const char *name,
-        void *host_ptr,
-        GuardianError **error);
-
-int
-_sqlite3_ns_get (
-        const char *ns,
-        void *host_ptr,
-        void **ns_ptr,
-        GuardianError **error);
-
-int 
-_sqlite3_ns_list (
-        char **nss,
-        int *len,
-        void *host_ptr,
+_sqlite3_perm_set (
+        const char *role,
+        unsigned int perm,
+        ObjectType type,
+        void *object,
         GuardianError **error);
 
 int
-_sqlite3_ns_getid (
-        Ns *ns,
-        GuardianError **error);
+_sqlite3_perm_get (
+        const char *role,
+        unsigned int *perm,
+        ObjectType type,
+        void *object,
+        GuardianError **);
+
+int
+_sqlite3_perm_check(
+        const char *role,
+        unsigned int perm,
+        ObjectType type,
+        void *object,
+        GuardianError **);

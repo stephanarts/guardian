@@ -466,17 +466,26 @@ main (int argc, char **argv)
     /* Check if the host should be auto-rgistered */
     char *reg_host = guardian_settings_get (settings, "autoregister_host");
     if (reg_host != NULL) {
+
+        char *hostname = "hermes";
+
         if (strcmp(reg_host, "true") == 0) {
             _db_plugin->host.get(
-                    "hermes",
+                    hostname,
                     &host_ptr,
                     &error); 
             if (host_ptr == NULL) {
                 guardian_log_info ("autoregister_host enabled, but host '%s' not found.", "hermes");
+                if (error) {
+                    guardian_error_free(error);
+                    error = NULL;
+                }
                 _db_plugin->host.add (
-                    "hermes",
+                    hostname,
                     &error);
-                printf("E: %s\n", guardian_error_get_msg(error));
+                if (error) {
+                    guardian_log_error ("E: %s\n", guardian_error_get_msg(error));
+                }
             }
         } else {
             guardian_log_error("autoregister_host = '%s'", reg_host);

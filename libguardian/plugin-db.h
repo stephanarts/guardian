@@ -28,11 +28,18 @@
  */
 
 #if !defined (LIBGUARDIAN_INSIDE_LIBGUARDIAN_H) && !defined(LIBGUARDIAN_COMPILATION)
-#error "Only <libguardian/libguardian.h> can be included directly, this file may disappear or change contents"
+#error "Only <libguardian/libguardian.h> can be included directly, "\
+       "this file may disappear or change contents"
 #endif
 
 #ifndef __GUARDIAN_PLUGIN_DB_H__
 #define __GUARDIAN_PLUGIN_DB_H__
+
+typedef enum
+{
+    OBJECT_TYPE_HOST,
+    OBJECT_TYPE_NAMESPACE
+} ObjectType;
 
 typedef struct _GuardianPluginDB GuardianPluginDB;
 
@@ -120,6 +127,30 @@ struct _GuardianPluginDB
                 const time_t ts,
                 GuardianError **);
     } value;
+
+
+    /* Perm */
+    struct 
+    {
+        int (*set) (
+                const char *role,
+                unsigned int perm,
+                ObjectType type,
+                void *object,
+                GuardianError **);
+        int (*get) (
+                const char *role,
+                unsigned int *perm,
+                ObjectType type,
+                void *object,
+                GuardianError **);
+        int (*check) (
+                const char *role,
+                unsigned int perm,
+                ObjectType type,
+                void *object,
+                GuardianError **);
+    } perm;
 
 };
 

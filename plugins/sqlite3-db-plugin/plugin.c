@@ -58,6 +58,7 @@
 #include "ns.h"
 #include "db.h"
 #include "metric.h"
+#include "perm.h"
 #include "value.h"
 
 GuardianPlugin *
@@ -98,6 +99,11 @@ guardian_plugin_init ()
     plugin->metric.get = _sqlite3_metric_get;
     plugin->metric.copy = _sqlite3_metric_copy;
     plugin->metric.free = _sqlite3_metric_free;
+
+    /* Permissions */
+    plugin->perm.set = _sqlite3_perm_set;
+    plugin->perm.get = _sqlite3_perm_get;
+    plugin->perm.check = _sqlite3_perm_check;
 
     /* Values */
     //plugin->value.publish = _sqlite3_value_publish;
