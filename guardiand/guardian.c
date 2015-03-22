@@ -193,7 +193,6 @@ main (int argc, char **argv)
 
     void   *ctx = zmq_ctx_new ();
     void   *host_ptr = NULL;
-    void   *ns_ptr = NULL;
 
     char *config_file = NULL;
 
@@ -330,13 +329,13 @@ main (int argc, char **argv)
         exit(1);
     }
 
-    char *db_type = guardian_settings_get (settings, "db_type");
+    const char *db_type = guardian_settings_get (settings, "db_type");
     if (db_type == NULL) {
         guardian_log_error ("DB-Type not specified in config-file");
         exit(1);
     }
 
-    char *username = guardian_settings_get (settings, "username");
+    const char *username = guardian_settings_get (settings, "username");
 
     int euid = geteuid();
     if (euid == 0) {
@@ -479,7 +478,7 @@ main (int argc, char **argv)
     char **keys;
     int l = _db_plugin->db.listprop(&keys);
     for (i = 0; i < l; ++i) {
-        char *val = guardian_settings_get (settings, keys[i]);
+        const char *val = guardian_settings_get (settings, keys[i]);
         if (val != NULL) {
             _db_plugin->db.setprop(keys[i], val);
         }
@@ -503,7 +502,9 @@ main (int argc, char **argv)
     }
 
     /* Check if the host should be auto-rgistered */
-    char *reg_host = guardian_settings_get (settings, "autoregister_host");
+    const char *reg_host = guardian_settings_get (
+            settings,
+            "autoregister_host");
     if (reg_host != NULL) {
 
         char *hostname = "hermes";
@@ -514,7 +515,10 @@ main (int argc, char **argv)
                     &host_ptr,
                     &error); 
             if (host_ptr == NULL) {
-                guardian_log_info ("autoregister_host enabled, but host '%s' not found.", hostname);
+                guardian_log_info (
+                        "autoregister_host enabled, "
+                        "but host '%s' not found.",
+                        hostname);
                 if (error) {
                     guardian_error_free(error);
                     error = NULL;
@@ -523,8 +527,23 @@ main (int argc, char **argv)
                     hostname,
                     &error);
                 if (error) {
-                    guardian_log_error ("E: %s\n", guardian_error_get_msg(error));
+                    guardian_log_error (
+                            "%s",
+                            guardian_error_get_msg(error));
                     guardian_error_free (error);
+                    error = NULL;
+                }
+                _db_plugin->perm.host.set (
+                        "SYS",
+                        hostname,
+                        3,
+                        &error);
+                if (error) {
+                    guardian_log_error (
+                            "%s",
+                            guardian_error_get_msg(error));
+                    guardian_error_free (error);
+                    error = NULL;
                 }
             }
         } else {
