@@ -29,25 +29,22 @@
 
 
 int
-_sqlite3_perm_set (
+_sqlite3_perm_host_set (
         const char *role,
+        const char *host,
         unsigned int perm,
-        ObjectType type,
-        void *object,
         GuardianError **error);
 
 int
-_sqlite3_perm_get (
+_sqlite3_perm_host_get (
         const char *role,
+        const char *host,
         unsigned int *perm,
-        ObjectType type,
-        void *object,
         GuardianError **);
 
 int
-_sqlite3_perm_check(
+_sqlite3_perm_host_check(
         const char *role,
+        const char *host,
         unsigned int perm,
-        ObjectType type,
-        void *object,
         GuardianError **);

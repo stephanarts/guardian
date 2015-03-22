@@ -35,12 +35,6 @@
 #ifndef __GUARDIAN_PLUGIN_DB_H__
 #define __GUARDIAN_PLUGIN_DB_H__
 
-typedef enum
-{
-    OBJECT_TYPE_HOST,
-    OBJECT_TYPE_NAMESPACE
-} ObjectType;
-
 typedef struct _GuardianPluginDB GuardianPluginDB;
 
 struct _GuardianPluginDB
@@ -132,24 +126,24 @@ struct _GuardianPluginDB
     /* Perm */
     struct 
     {
-        int (*set) (
-                const char *role,
-                unsigned int perm,
-                ObjectType type,
-                void *object,
-                GuardianError **);
-        int (*get) (
-                const char *role,
-                unsigned int *perm,
-                ObjectType type,
-                void *object,
-                GuardianError **);
-        int (*check) (
-                const char *role,
-                unsigned int perm,
-                ObjectType type,
-                void *object,
-                GuardianError **);
+        struct
+        {
+            int (*set) (
+                    const char *role,
+                    const char *host,
+                    unsigned int perm,
+                    GuardianError **);
+            int (*get) (
+                    const char *role,
+                    const char *host,
+                    unsigned int *perm,
+                    GuardianError **);
+            int (*check) (
+                    const char *role,
+                    const char *host,
+                    unsigned int perm,
+                    GuardianError **);
+        } host;
     } perm;
 
 };

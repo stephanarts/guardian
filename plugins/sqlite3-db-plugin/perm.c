@@ -60,60 +60,13 @@
 #include "perm.h"
 
 int
-_sqlite3_perm_set_host (
+_sqlite3_perm_host_set (
         const char *role,
+        const char *host,
         unsigned int perm,
-        void *object,
-        GuardianError **error);
-
-
-int
-_sqlite3_perm_set (
-        const char *role,
-        unsigned int perm,
-        ObjectType type,
-        void *object,
         GuardianError **error)
 {
-    switch (type)
-    {
-        case OBJECT_TYPE_HOST:
-            _sqlite3_perm_set_host(role, perm, object, error);
-        default:
-            return -1;
-    }
-    return 0;
-}
-
-int
-_sqlite3_perm_get (
-        const char *role,
-        unsigned int *perm,
-        ObjectType type,
-        void *object,
-        GuardianError **error)
-{
-    return 0;
-}
-
-int
-_sqlite3_perm_check(
-        const char *role,
-        unsigned int perm,
-        ObjectType type,
-        void *object,
-        GuardianError **error)
-{
-    return 0;
-}
-
-int
-_sqlite3_perm_set_host (
-        const char *role,
-        unsigned int perm,
-        void *object,
-        GuardianError **error)
-{
+/*
     char query[128];
     sqlite3 *db = NULL;
     sqlite3_stmt *handle = NULL;
@@ -154,6 +107,26 @@ _sqlite3_perm_set_host (
         }
         return -1;
     }
+*/
+    return 0;
+}
 
+int
+_sqlite3_perm_host_get (
+        const char *role,
+        const char *host,
+        unsigned int *perm,
+        GuardianError **error)
+{
+    return 0;
+}
+
+int
+_sqlite3_perm_host_check(
+        const char *role,
+        const char *host,
+        unsigned int perm,
+        GuardianError **error)
+{
     return 0;
 }

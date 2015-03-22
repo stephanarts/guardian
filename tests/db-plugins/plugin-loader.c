@@ -173,6 +173,7 @@ main (int argc, char **argv)
     int     verbosity = 0;
     int     ch = 0;
     int     d_ch = 0;
+    int     perm_ch = 0;
     int     l_ch = 0;
 
     GuardianPlugin *plugin;
@@ -213,7 +214,7 @@ main (int argc, char **argv)
                 l_ch = 1;
                 break;
             case OPTION_DB_PERM:
-                d_ch = 1;
+                perm_ch = 1;
                 break;
             case OPTION_DB_HOST:
                 d_ch = 1;
@@ -303,9 +304,9 @@ main (int argc, char **argv)
         API_CHECK(db_plugin->metric.copy);
         API_CHECK(db_plugin->metric.free);
 
-        API_CHECK(db_plugin->perm.set);
-        API_CHECK(db_plugin->perm.get);
-        API_CHECK(db_plugin->perm.check);
+        API_CHECK(db_plugin->perm.host.set);
+        API_CHECK(db_plugin->perm.host.get);
+        API_CHECK(db_plugin->perm.host.check);
 
         exit(0);
     }
@@ -362,6 +363,51 @@ main (int argc, char **argv)
         }
 
         exit(0);
+    }
+
+    if (perm_ch) {
+        if (config_file == NULL) {
+            fprintf(stderr, "--db-perm requires --config\n");
+            exit(1);
+        }
+
+        FILE *f_config = open_config_file (config_file);
+        if (f_config == NULL) {
+            exit(1);
+        }
+
+        char line[128];
+
+        while( fgets (line, sizeof(line), f_config) != NULL)
+        {
+            char *key = strtok(line,"=");
+            char *value = strtok(NULL,"=");
+
+            if (value[strlen(value)-1] == '\n')
+            {
+                value[strlen(value)-1] = '\0';
+            }
+
+            db_plugin->db.setprop(key, value);
+        }
+
+        if (db_plugin->db.connect(NULL))
+        {
+            exit(1);
+        }
+
+        db_plugin->perm.host.set (
+                    "sys",
+                    "host1.example.com",
+                    1,
+                    NULL);
+        if (db_plugin->db.disconnect(NULL))
+        {
+            exit(1);
+        }
+
+        exit(0);
+
     }
 
     exit(1);
