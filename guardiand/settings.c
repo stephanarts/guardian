@@ -52,23 +52,29 @@
 #include "settings.h"
 
 static FILE *
-open_config_file (const char *path) {
+open_config_file (
+        const char *path,
+        GuardianError **error) {
 
     FILE *f_config = NULL;
     struct stat _c_stat;
 
     if (stat(path, &_c_stat)) {
         int i = errno;
-        fprintf(stderr,
-                "Could not stat '%s' - %s\n",
-                path,
-                strerror(i));
+        if (error) {
+            *error = guardian_error_new (
+                    "Could not stat '%s' - %s\n",
+                    path,
+                    strerror(i));
+        }
         return NULL; 
     }
     if (!S_ISREG(_c_stat.st_mode)) {
-        fprintf(stderr,
-                "'%s' is not a file\n",
-                path);
+        if (error) {
+            *error = guardian_error_new (
+                    "'%s' is not a file\n",
+                    path);
+        }
         return NULL; 
     }
 
@@ -76,9 +82,11 @@ open_config_file (const char *path) {
             path,
             "r");
     if (f_config == NULL) {
-        fprintf(stderr,
-                "'%s' could not be opened\n",
-                path);
+        if (error) {
+            *error = guardian_error_new (
+                    "'%s' could not be opened\n",
+                    path);
+        }
     }
     return f_config;
 };
@@ -102,9 +110,15 @@ guardian_settings_load (
         GuardianError **error)
 {
     GuardianSettings *settings = NULL;
+    GuardianError *call_error = NULL;
 
-    FILE *f_config = open_config_file (path);
+    FILE *f_config = open_config_file (path, &call_error);
     if (f_config == NULL) {
+        if (error) {
+            *error = call_error;
+        } else {
+            guardian_error_free (call_error);
+        }
         return NULL;
     }
 

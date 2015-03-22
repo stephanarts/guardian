@@ -97,18 +97,20 @@ enum
     OPTION_VERBOSE,
     OPTION_HELP,
     OPTION_FATAL_WARNINGS,
-    OPTION_INIT_DB
+    OPTION_INIT_DB,
+    OPTION_CONFIG
 };
 
 /************************
  * Command-line options *
  ************************/
 static struct option long_options[] = {
-    {"version", 0, 0, 'V'},     /* OPTION_VERSION */
-    {"verbose", 0, 0, 'v'},     /* OPTION_VERBOSE */
-    {"help", 0, 0, 'h'},        /* OPTION_HELP    */
-    {"fatal-warnings", 0, 0, 0},/* OPTION_FATAL_WARNINGS */
-    {"init-db", 0, 0, 0},       /* OPTION_INIT_DB */
+    {"version", no_argument, 0, 'V'},        /* OPTION_VERSION */
+    {"verbose", no_argument, 0, 'v'},        /* OPTION_VERBOSE */
+    {"help", no_argument, 0, 'h'},           /* OPTION_HELP    */
+    {"fatal-warnings", 0, 0, 0},             /* OPTION_FATAL_WARNINGS */
+    {"init-db", 0, 0, 0},                    /* OPTION_INIT_DB */
+    {"config", required_argument, 0, 'c'},   /* OPTION_CONFIG */
     {0, 0, 0, 0}
 };
 
@@ -133,6 +135,8 @@ show_usage ()
     printf ("              -vv    Show very-verbose output\n");
     printf ("\n");
     printf ("   --init-db         Initialize DB schema\n");
+    printf ("   --config=<file>   Use different config-file\n");
+    printf ("              -c <file>\n");
     printf ("\n");
     printf ("   --fatal-warnings  Make all warnings fatal\n");
     return;
@@ -191,6 +195,8 @@ main (int argc, char **argv)
     void   *host_ptr = NULL;
     void   *ns_ptr = NULL;
 
+    char *config_file = NULL;
+
     sa.sa_handler = process_signal;
     sa.sa_flags = SA_RESTART;
     sigemptyset (&sa.sa_mask);
@@ -202,7 +208,7 @@ main (int argc, char **argv)
 
     while (1)
     {
-        c = getopt_long (argc, argv, "vVh",
+        c = getopt_long (argc, argv, "vVhc:",
                 long_options, &option_index);
         if (c == -1)
             break;
@@ -226,6 +232,12 @@ main (int argc, char **argv)
             case OPTION_INIT_DB:
                 _init_db = 1;
                 break;
+            case OPTION_CONFIG:
+                if (config_file == NULL) {
+                    config_file = malloc (strlen(optarg)+1);
+                    strcpy(config_file, optarg);
+                }
+                break;
             }
             break;
         case 'V':
@@ -238,6 +250,12 @@ main (int argc, char **argv)
             break;
         case 'v':
             verbosity = verbosity + 1;
+            break;
+        case 'c':
+            if (config_file == NULL) {
+                config_file = malloc (strlen(optarg)+1);
+                strcpy(config_file, optarg);
+            }
             break;
         default:
             fprintf (stderr, "Try '%s --help' for more information\n", PACKAGE_NAME);
@@ -292,7 +310,25 @@ main (int argc, char **argv)
     /**
      * Load settings from file
      */
-    settings = guardian_settings_load (SYSCONFDIR "/guardian.conf", NULL);
+    if (config_file == NULL) {
+        settings = guardian_settings_load (
+                SYSCONFDIR "/guardian.conf",
+                &error);
+    }
+    else {
+        settings = guardian_settings_load (
+                config_file,
+                &error);
+    }
+    if (settings == NULL) {
+        if (error) {
+            guardian_log_error (
+                    "%s",
+                    guardian_error_get_msg (error));
+            guardian_error_free (error);
+        }
+        exit(1);
+    }
 
     char *db_type = guardian_settings_get (settings, "db_type");
     if (db_type == NULL) {
@@ -461,7 +497,10 @@ main (int argc, char **argv)
     }
 
     /* Open the Database */
-    _db_plugin->db.connect(NULL);
+    if(_db_plugin->db.connect(&error)) {
+        guardian_log_error("%s", guardian_error_get_msg(error));
+        exit(1);
+    }
 
     /* Check if the host should be auto-rgistered */
     char *reg_host = guardian_settings_get (settings, "autoregister_host");
@@ -475,7 +514,7 @@ main (int argc, char **argv)
                     &host_ptr,
                     &error); 
             if (host_ptr == NULL) {
-                guardian_log_info ("autoregister_host enabled, but host '%s' not found.", "hermes");
+                guardian_log_info ("autoregister_host enabled, but host '%s' not found.", hostname);
                 if (error) {
                     guardian_error_free(error);
                     error = NULL;
@@ -485,6 +524,7 @@ main (int argc, char **argv)
                     &error);
                 if (error) {
                     guardian_log_error ("E: %s\n", guardian_error_get_msg(error));
+                    guardian_error_free (error);
                 }
             }
         } else {
