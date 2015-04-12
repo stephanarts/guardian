@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2015 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -46,108 +46,63 @@
 #include <unistd.h>
 #include <string.h>
 
-#include <zmq.h>
+#include <termios.h>
+#include <ctype.h>
+
+#include <openssl/sha.h>
 
 #include "client.h"
 
-static void *_ctx = NULL;
-static void *_socket = NULL;
-static char _uri[200];
-
-static char _token[256];
-
-#define RESPONSE_LEN 2048
-
-static char response[RESPONSE_LEN];
+static char cmd[256];
 
 int
-client_connect_pass (
-        const char *uri,
-        const char *user,
-        const char *password)
-{
-    char    msg[256];
+parse_connect (char **tokens, int n_tokens) {
 
-    if (_ctx == NULL)
-    {
-        _ctx = zmq_ctx_new ();
-    }
+    char buf[256];
+    char cmd[256];
+    struct termios saved_attributes, hide_pasword;
 
-    if (_socket == NULL)
-    {
-        bzero (_token, 256);
-        strncpy(_uri, uri, 200);
-        _socket = zmq_socket (_ctx, ZMQ_REQ);
-        zmq_connect (
-                _socket,
-                _uri);
-        printf("SEND\n");
-        zmq_send (
-                _socket,
-                "connect user/pass",
-                17,
-                0);
-        printf("RECV\n");
-        zmq_recv (
-                _socket,
-                msg,
-                255,
-                0);
-        printf("%s\n", msg);
-        sprintf(_token, "TOKEN_PLACEHOLDER");
+    /* CONNECT */
+    if (strcmp(tokens[0], "connect") == 0) {
+        switch (n_tokens) {
+            case 3:
+                client_connect_pass(
+                        "tcp://localhost:1234",
+                        tokens[1],
+                        tokens[2]);
+                break;
+            case 2:
+                tcgetattr (STDIN_FILENO, &saved_attributes);
+                hide_pasword = saved_attributes;
+                hide_pasword.c_lflag &= ~ECHO;
+
+                tcsetattr (STDIN_FILENO, TCSANOW, &hide_pasword);
+
+                fprintf (stdout, "Password: ");
+                if(fgets (buf, 256, stdin) != NULL)
+                {
+                    fprintf (stdout, "\n");
+                    int l = strlen(buf);
+                    if (buf[l-1] == '\n') {
+                        buf[l-1] = '\0';
+                    }
+
+                    tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
+
+                    client_connect_pass(
+                            "tcp://localhost:1234",
+                            tokens[1],
+                            buf);
+                } else {
+                    fprintf (stdout, "\n");
+                    tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
+                }
+                break;
+            default:
+                printf("Connect Error\n");
+        }
         return 0;
     }
 
-    return 1;
-}
-
-void
-client_disconnect (
-        void)
-{
-    zmq_disconnect(_socket, _uri);
-    zmq_close(_socket);
-    _socket = NULL;
-}
-
-int
-client_connected (
-        void)
-{
-    if (_socket == NULL) {
-        return 0;
-    }
-
-    return 1;
-}
-
-void
-client_send_cmd (
-        const char *str,
-        size_t len,
-        char **resp,
-        size_t *r_len)
-{
-    int l = 0;
-
-    if (_socket == NULL) {
-        return;
-    }
-
-    zmq_send (
-        _socket,
-        str,
-        len,
-        0);
-    printf("RECV\n");
-    l = zmq_recv (
-        _socket,
-        response,
-        RESPONSE_LEN,
-        0);
-
-    *resp = response;
-    *r_len = l;
-
-    return;
+    return -1;
 }

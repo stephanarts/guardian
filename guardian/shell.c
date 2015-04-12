@@ -52,83 +52,50 @@
 #include <openssl/sha.h>
 
 #include "shell.h"
+#include "shell/connect.h"
+#include "shell/disconnect.h"
+#include "shell/help.h"
+#include "shell/exit.h"
+#include "shell/register.h"
 #include "client.h"
 
 #define MAX_TOKENS 32
 
+struct Command {
+    char *name;
+    int (*parse)(char **tokens, int n_tokens);
+};
+
+static struct Command commands[] = {
+    {"connect",     parse_connect},
+    {"disconnect",  parse_disconnect},
+    {"help",        parse_help},
+    {"exit",        parse_exit},
+    {"register",    parse_register},
+    {NULL,NULL}
+};
+
 static void
 parse (char **tokens, int n_tokens) {
-    char buf[256];
-    struct termios saved_attributes, hide_pasword;
 
     if (n_tokens == 0) {
         return;
     }
 
-    /* CONNECT */
-    if (strcmp(tokens[0], "connect") == 0) {
-        switch (n_tokens) {
-            case 3:
-                client_connect_pass(
-                        "tcp://localhost:1234",
-                        tokens[1],
-                        tokens[2]);
-                break;
-            case 2:
-                tcgetattr (STDIN_FILENO, &saved_attributes);
-                hide_pasword = saved_attributes;
-                hide_pasword.c_lflag &= ~ECHO;
-
-                tcsetattr (STDIN_FILENO, TCSANOW, &hide_pasword);
-
-                fprintf (stdout, "Password: ");
-                if(fgets (buf, 256, stdin) != NULL)
-                {
-                    fprintf (stdout, "\n");
-                    int l = strlen(buf);
-                    if (buf[l-1] == '\n') {
-                        buf[l-1] = '\0';
-                    }
-
-                    tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
-
-                    client_connect_pass(
-                            "tcp://localhost:1234",
-                            tokens[1],
-                            buf);
-                } else {
-                    fprintf (stdout, "\n");
-                    tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
-                }
-                break;
-            default:
-                printf("Connect Error\n");
+    struct Command *command = commands;
+    while (command->name != NULL) {
+        if (strcmp(command->name, tokens[0]) == 0) {
+            command->parse(tokens, n_tokens);
+            break;
         }
+        command++;
+    }
+
+    if (command->name == NULL) {
+        fprintf(stdout, "Unknown token: %s\n", tokens[0]);
         return;
     }
 
-    /* DISCONNECT */
-    if (strcmp(tokens[0], "disconnect") == 0) {
-         
-        return;
-    }
-
-    if (strcmp(tokens[0], "help") == 0) {
-        if (n_tokens == 1) {
-            fprintf(stdout, "connect    - Connect to server\n");
-            fprintf(stdout, "help       - Show this message\n");
-        }
-        if (n_tokens == 2) {
-            if (strcmp(tokens[1], "connect") == 0) {
-                fprintf(stdout, "connect <user> [password]\n");
-            }
-
-        }
-        return;
-    }
-
-    /* ERROR */
-    fprintf(stdout, "Parse error\n");
     return;
 }
 

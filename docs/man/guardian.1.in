@@ -1,5 +1,5 @@
 .\" Guardian configuration man-page
-.TH GUARDIAN 1 "October 2014" @PACKAGE_VERSION@ "Guardian Documentation"
+.TH GUARDIAN 1 "April 2015" @PACKAGE_VERSION@ "Guardian Documentation"
 .SH NAME
 guardian \- Guardian Command-line utility
 .SH SYNOPSIS
@@ -39,22 +39,107 @@ Silent mode
 .SH QUERY LANGUAGE
 .TP 3
 .B
-set (param)=...
-Set config parameter for command-line util.
+connect user[:password][@host[:port]]
+Connect to a server, if ommitted, host defaults to localhost,
+port defaults to 1234.
+.TP 3
+.B
+disconnect
+Disconnect from a server
 .TP 3
 .B
 exit
 Close the shell.
+.\"
 .TP 3
 .B
-connect user[:password][@host[:port]]
-Connect to a server, if ommitted, host defaults to localhost,
-port defaults to 1234.
-
-.
+register <type>
+.IP
+.I
+host
+.IP
+.I
+ns
+.IP
+.I
+item
+.\"
+.TP 3
+.B
+list <type>
+.IP
+.I
+ns
+bladiebla
+.IP
+.I
+host
+bladiebla
+.IP
+.I
+items
+bladiebla
+.\"
+.TP 3
+.B
+host <host> [ns <ns>]
+bladiebla
+.\"
+.TP 3
+.B
+ns <ns>
+bladiebla
+.\"
+.TP 3
+.B
+publish <item> [ts] <value>
+bladiebla
+.\"
+.TP 3
+.B
+publish-timestamp <ts>
+bladiebla
+.\"
+.SH EXAMPLES 
+To list all the available namespaces of a host, use the
+.BR list ns
+command.
+.PP
+.nf
+.RS
+G> host example.com
+G(h:example.com)> list ns
+SYSTEM
+FILESYSTEMS
+NETWORK
+.RE
+.fi
+.PP
+.nf
+.RS
+G> connect jdoe his-password
+G> host example.com
+G(h:example.com)> ns SYSTEM
+G(h:example.com:SYSTEM)> publish cpu.load.avg[1] 2014  0.1
+G(h:example.com)> host
+G> disconnect
+.RE
+.fi
+.PP
+.nf
+.RS
+G> connect jdoe his-password
+G> host example.com
+G(h:example.com)> ns SYSTEM
+G(h:example.com:SYSTEM)> publish cpu.load.avg[1] 2014  0.1
+G(h:example.com)> host
+G> disconnect
+.RE
+.fi
+.\"
 .SH BUGS
 It doesn't work yet.
-
+.\"
 .SH SEE ALSO
 .PP
 .BR guardiand (1),

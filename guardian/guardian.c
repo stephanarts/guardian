@@ -205,17 +205,7 @@ main (int argc, char **argv)
         }
     }
 
-    int     no_linger = 0;
-    void   *ctx = zmq_ctx_new ();
-    void   *server = zmq_socket (ctx, ZMQ_REQ);
-
-    zmq_connect (server, "tcp://0.0.0.0:1234");
-
-    zmq_setsockopt (server, ZMQ_LINGER, &no_linger, sizeof (no_linger));
-
     show_shell (silent);
-
-    zmq_close (server);
 
     exit (0);
 }

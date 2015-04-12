@@ -2,8 +2,13 @@ bin_PROGRAMS = guardian
 
 guardian_SOURCES = \
     guardian.c \
-    client.c client.h \
     shell.c shell.h \
+    shell/connect.c shell/connect.h \
+    shell/disconnect.c shell/disconnect.h \
+    shell/help.c shell/help.h \
+    shell/exit.c shell/exit.h \
+    shell/register.c shell/register.h \
+    client.c client.h \
     interactive_menu.c interactive_menu.h \
     search_dialog.c search_dialog.h \
     timeframe_dialog.c timeframe_dialog.h
@@ -31,3 +36,6 @@ guardian_CFLAGS = \
 
 AM_CPPFLAGS = \
     -I$(top_srcdir)
+
+AUTOMAKE_OPTIONS = \
+    subdir-objects

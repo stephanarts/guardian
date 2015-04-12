@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2014 Stephan Arts. All Rights Reserved.
+ * Copyright (c) 2015 Stephan Arts. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,28 +27,35 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __CLIENT_H__
-#define __CLIENT_H__
-
-int
-client_connect_pass (
-        const char *uri,
-        const char *user,
-        const char *password);
-
-void
-client_disconnect (
-        void);
-
-int
-client_connected (
-        void);
-
-void
-client_send_cmd (
-        const char *str,
-        size_t len,
-        char **resp,
-        size_t *r_len);
-
+#ifdef HAVE_CONFIG_H
+#include <config.h>
 #endif
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
+#endif
+
+#include <time.h>
+
+#include <curses.h>
+
+#include <unistd.h>
+#include <string.h>
+
+#include <termios.h>
+#include <ctype.h>
+
+#include <openssl/sha.h>
+
+#include "client.h"
+
+
+int
+parse_exit (char **tokens, int n_tokens)
+{
+    exit(0);
+}

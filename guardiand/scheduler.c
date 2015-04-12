@@ -71,7 +71,6 @@ void
 guardian_scheduler_main (void *ctx, int n_workers)
 {
     int     i = 0;
-    int     n_sleeping = 0;
     int     no_linger = 0;
     int     ret = 0;
     void   *plugins;
@@ -211,6 +210,9 @@ guardian_scheduler_main (void *ctx, int n_workers)
         if (items[3].revents & ZMQ_POLLIN)
         {
             printf("GOT AGENT DATA\n");
+            zmq_msg_t message_id;
+            zmq_msg_init (&message_id);
+            zmq_msg_recv (&message_id, agent, 0);
             while (1)
             {
                 zmq_msg_t message;
@@ -229,7 +231,23 @@ guardian_scheduler_main (void *ctx, int n_workers)
             }
             /* BUG: USE ZMQ_MSG_SEND */
             printf("SEND AGENT DATA\n");
-            zmq_send (agent, "0", 1, 0);
+
+            zmq_msg_t message_reply;
+            zmq_msg_init_data (&message_reply, "OKAY", 4, NULL, NULL);
+            
+            int rc = zmq_msg_send(&message_id, agent, ZMQ_SNDMORE);
+            printf("%d\n", rc);
+            zmq_msg_close(&message_id);
+            zmq_msg_init(&message_id);
+            rc = zmq_msg_send(&message_id, agent, ZMQ_SNDMORE);
+            printf("%d\n", rc);
+
+            rc = zmq_msg_send(&message_reply, agent, 0);
+            printf("%d\n", rc);
+
+            zmq_msg_close(&message_id);
+            zmq_msg_close(&message_reply);
+
             printf("...\n");
         }
     }
